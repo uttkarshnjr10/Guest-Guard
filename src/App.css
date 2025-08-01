@@ -1,0 +1,13 @@
+/* App.css */
+
+/* Remove the old #root styles that were causing the layout gap.
+  We will keep this file minimal and let components manage their own layout.
+  You can add any truly global styles here if needed, like body font-family or background color.
+*/
+
+/* Example of a good global style: */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f7fafc; /* Set a default background for the whole app */
+}

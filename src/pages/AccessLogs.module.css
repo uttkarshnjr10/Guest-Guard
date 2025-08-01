@@ -1,0 +1,64 @@
+@import './RegionalAdminDashboard.module.css'; /* For layout sharing */
+
+.layoutWrapper {
+  display: flex;
+}
+
+.mainContent {
+  margin-left: 0px;
+  padding-top: 60px;
+  flex: 1;
+  min-height: calc(100vh - 60px);
+  background: #f7fafc;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+header h1 {
+  font-size: 2rem;
+  margin-bottom: 24px;
+  color: #2B6CB0;
+  font-weight: 700;
+}
+
+.logsTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.09);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.logsTable th, .logsTable td {
+  padding: 12px 18px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.logsTable th {
+  background: #edf2f7;
+  color: #2B6CB0;
+  font-weight: 700;
+}
+.filtersRow {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 18px;
+  align-items: center;
+}
+.filterInput {
+  padding: 8px 16px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1.5px solid #d5d9df;
+  background: #f0f4fa;
+  width: 220px;
+}
+.filterSelect {
+  padding: 8px 12px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1.5px solid #d5d9df;
+  background: #f0f4fa;
+}

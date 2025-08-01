@@ -1,0 +1,123 @@
+@import '../../styles/variables.module.css'; /* Import your color variables */
+
+/* Overall container styling (optional if you want to limit width) */
+div {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-dark);
+}
+
+/* Heading */
+h2 {
+  color: var(--primary-blue);
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+/* Search form styles */
+.searchForm {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  font-size: 1.1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(38, 83, 212, 0.15);
+}
+
+/* Search button */
+.searchBtn {
+  flex-shrink: 0;
+  background-color: var(--primary-blue);
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.8rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.searchBtn:hover {
+  background-color: var(--secondary-blue);
+}
+
+/* Error message */
+.error {
+  color: var(--danger);
+  font-weight: 600;
+  margin-top: 0.4rem;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+/* Result section container */
+.resultSection {
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(38, 83, 212, 0.1);
+  margin-top: 1.5rem;
+  overflow-x: auto; /* Responsive horizontal scrolling */
+}
+
+/* Result heading */
+.resultSection h3 {
+  color: var(--primary-blue);
+  margin-bottom: 1rem;
+  font-weight: 700;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+/* Table styles */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.table th,
+.table td {
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.table th {
+  background-color: var(--primary-blue);
+  color: white;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.table tbody tr:hover {
+  background-color: var(--bg-light);
+  cursor: pointer;
+}
+
+/* Message when no records found */
+p {
+  margin-top: 1.2rem;
+  text-align: center;
+  font-style: italic;
+  color: #555;
+  font-size: 1rem;
+}

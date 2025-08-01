@@ -1,0 +1,115 @@
+@import './RegionalAdminDashboard.module.css'; /* To share styles */
+
+.layoutWrapper {
+  display: flex;
+}
+
+.mainContent {
+  margin-left: 0px;
+  padding-top: 60px;
+  flex: 1;
+  min-height: calc(100vh - 60px);
+  background: #f7fafc;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+header h1 {
+  font-size: 2rem;
+  margin-bottom: 24px;
+  color: #2B6CB0;
+  font-weight: 700;
+}
+
+.hotelsTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.09);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.hotelsTable th, .hotelsTable td {
+  padding: 12px 18px;
+  border-bottom: 1.5px solid #e2e8f0;
+  text-align: left;
+}
+
+.hotelsTable th {
+  background: #edf2f7;
+  color: #2B6CB0;
+  font-weight: 700;
+}
+
+.statusActive {
+  color: #38A169;
+  font-weight: bold;
+}
+.statusSuspended {
+  color: #DD6B20;
+  font-weight: bold;
+}
+
+.actionBtn {
+  background: #E9D8FD;
+  color: #6B46C1;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 12px;
+  margin-right: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.actionBtnDelete {
+  background: #fed7d7;
+  color: #c53030;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.filtersRow {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 18px;
+  align-items: center;
+}
+.filterInput {
+  padding: 8px 16px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1.5px solid #d5d9df;
+  background: #f0f4fa;
+  width: 220px;
+}
+.filterSelect {
+  padding: 8px 12px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1.5px solid #d5d9df;
+  background: #f0f4fa;
+}
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.pagination button {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #3182CE;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.pagination button:disabled {
+  background: #cbd5e1;
+  cursor: default;
+}
+

@@ -1,0 +1,163 @@
+/* src/pages/Home.module.css */
+
+/* Define color variables for easy theme management */
+:root {
+  --primary-color: #2563eb; /* A strong blue */
+  --primary-hover: #1d4ed8;
+  --secondary-color: #f9fafb; /* A very light gray for backgrounds */
+  --text-dark: #1f2937;
+  --text-light: #6b7280;
+  --white-color: #ffffff;
+  --border-color: #e5e7eb;
+}
+
+.container {
+  font-family: 'Inter', sans-serif;
+  color: var(--text-dark);
+}
+
+/* Hero Section Styling */
+.hero {
+  width: 100vw; /* Full screen width */
+  margin-left: calc(-1 * ((100vw - 100%) / 2)); /* Neutralize root margin auto */
+  padding: 6rem 1.5rem;
+  background-color: var(--secondary-color);
+  border-bottom: 1px solid var(--border-color);
+  text-align: center;
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 1;
+}
+
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.5); /* inner horizontal spread */
+  z-index: -1;
+  pointer-events: none;
+}
+
+.heroContent {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.subtitle {
+  font-size: 1.125rem;
+  color: var(--text-light);
+  max-width: 600px;
+  margin: 0 auto 2rem auto;
+}
+
+.ctaButton {
+  display: inline-block;
+  background-color: var(--primary-color);
+  color: var(--white-color);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.ctaButton:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+/* Features Section Styling */
+.featuresSection {
+  padding: 4rem 1.5rem;
+  background-color: var(--white-color);
+}
+
+.sectionTitle {
+  text-align: center;
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 3rem;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Feature Card Styling */
+.featureCard {
+  background-color: var(--white-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.featureIcon {
+  width: 3rem;
+  height: 3rem;
+  color: var(--primary-color);
+  margin: 0 auto 1.5rem auto;
+}
+
+.featureCard h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.featureCard p {
+  color: var(--text-light);
+  line-height: 1.6;
+}
+
+/* Footer Styling */
+.footer {
+  width: 100%;
+  background-color: #1a1e2e; /* Elegant dark navy blue */
+  color: #e6e6e6;
+  text-align: center;
+  padding: 2rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.footer .credit {
+  font-size: 0.9rem;
+  color: #bbb;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .featuresGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .title {
+    font-size: 3.75rem;
+  }
+}

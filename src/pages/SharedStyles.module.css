@@ -1,0 +1,55 @@
+/* src/components/HotelStaff/SharedStyles.module.css */
+.pageContainer {
+  padding: 1.5rem;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.pageContainer h2 {
+  font-size: 1.75rem;
+  color: #1e40af;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.tableContainer {
+  overflow-x: auto;
+}
+
+.guestTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.guestTable th,
+.guestTable td {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.guestTable th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+}
+
+.guestTable tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.reportCard {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.reportCard h3 {
+  font-size: 1.25rem;
+  color: #111827;
+  margin-bottom: 1rem;
+}

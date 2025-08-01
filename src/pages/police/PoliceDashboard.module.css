@@ -1,0 +1,44 @@
+@import '../../styles/variables.module.css';
+
+
+.mainContent {
+  margin-left: 220px; /* Width of your sidebar */
+  padding: 80px 2rem 2rem; /* Below navbar height (assumed 60px) + spacing */
+  background-color: var(--bg-light);
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-dark);
+  box-sizing: border-box;
+}
+
+/* Heading style */
+h1 {
+  color: var(--primary-blue);
+  margin-bottom: 1.2rem;
+  letter-spacing: 1px;
+  font-weight: 700;
+  font-size: 1.8rem;
+}
+
+/* Section container to wrap content inside main area */
+.section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.8rem 2rem;
+  box-shadow: 0 3px 12px rgba(38, 83, 212, 0.10);
+  margin-bottom: 1.7rem;
+  max-width: 900px;
+  min-width: 320px;
+}
+
+/* Add responsiveness */
+@media (max-width: 768px) {
+  .mainContent {
+    margin-left: 0;
+    padding: 80px 1rem 1rem;
+  }
+  .section {
+    margin: 1rem 0;
+    padding: 1rem;
+  }
+}

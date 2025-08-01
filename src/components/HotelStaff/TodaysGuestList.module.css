@@ -1,0 +1,27 @@
+@import '../../styles/variables.module.css';
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 10px rgba(38,83,212,0.1);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+th,
+td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+tr:hover {
+  background-color: var(--bg-light);
+}
+
+th {
+  background-color: var(--primary-blue);
+  color: white;
+  font-weight: 600;
+}

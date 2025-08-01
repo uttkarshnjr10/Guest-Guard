@@ -1,0 +1,20 @@
+.mainContent {
+  margin-left: 220px;
+  padding: 80px 2.5rem 2rem;
+  background-color: #f7f9fc;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #18202b;
+}
+
+h1 {
+  color: #2653d4;
+  margin-bottom: 1.5rem;
+}
+
+.section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.8rem 2rem;
+  box-shadow: 0 3px 12px rgba(38, 83, 212, 0.1);
+}

@@ -1,0 +1,44 @@
+.sidebar {
+  position: fixed;
+  top: 60px; /* below navbar */
+  bottom: 0;
+  left: 0;
+  width: 220px;
+  background: #f7f9fc;
+  border-right: 1px solid #d5d9df;
+  padding-top: 1.5rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.sidebar nav ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.sidebar nav ul li {
+  margin-bottom: 1rem;
+}
+
+.sidebar nav ul li a {
+  display: block;
+  padding: 0.8rem 1.5rem;
+  text-decoration: none;
+  color: #4b4b4b;
+  font-weight: 600;
+  border-left: 4px solid transparent;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  border-radius: 0 6px 6px 0;
+}
+
+.sidebar nav ul li a:hover {
+  background-color: #e9eefb;
+  color: #2653d4;
+}
+
+.sidebar nav ul li a.active {
+  background-color: #2653d4;
+  color: white;
+  border-left-color: #0e2cb1;
+}
