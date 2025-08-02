@@ -1,0 +1,87 @@
+/* src/pages/ProfilePage.module.css */
+.profileContainer {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.title {
+  text-align: center;
+  font-size: 2rem;
+  color: #1e40af;
+  margin-bottom: 2rem;
+}
+
+.profileCard {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.profileHeader {
+  background-color: #f3f4f6;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.profileHeader h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #111827;
+}
+
+.role {
+  margin: 0.25rem 0 0;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.profileDetails {
+  padding: 1.5rem;
+}
+
+.detailItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.detailItem:last-child {
+  border-bottom: none;
+}
+
+.detailItem strong {
+  color: #374151;
+}
+
+.detailItem span {
+  color: #4b5563;
+}
+
+.profileActions {
+  padding: 1.5rem;
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.actionButton {
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: #d1d5db;
+  color: #1f2937;
+  transition: background-color 0.2s;
+}
+
+.actionButton:hover {
+  background-color: #9ca3af;
+}

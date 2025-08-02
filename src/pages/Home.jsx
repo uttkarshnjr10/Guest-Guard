@@ -66,7 +66,7 @@ export default function Home() {
       {/* Footer */}
     <footer className={styles.footer}>
   <p>© {new Date().getFullYear()} Centralized Hotel Management. All rights reserved.</p>
-  <p className={styles.credit}>Designed & Developed by Satya Dev</p>
+  
 </footer>
     </div>
   );

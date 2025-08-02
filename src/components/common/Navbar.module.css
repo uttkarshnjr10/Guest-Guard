@@ -42,3 +42,18 @@
   font-weight: 700;
   color: #f5f5f7;
 }
+/* Add this to your Navbar.module.css */
+.logoutBtn {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logoutBtn:hover {
+  background-color: #dc2626;
+}

@@ -1,108 +1,77 @@
-.layoutWrapper {
-  display: flex;
+/* src/pages/RegisterNewUser.module.css */
+
+.container {
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    max-width: 700px;
+    margin: 2rem auto;
 }
 
-.mainContent {
-  margin-left: 0px;
-  padding-top: 60px;
-  flex: 1;
-  min-height: calc(100vh - 60px);
-  background: #f7fafc;
-  padding: 32px;
-  box-sizing: border-box;
+.title {
+    font-size: 1.75rem;
+    color: #1e40af;
+    margin-bottom: 1.5rem;
+    text-align: center;
 }
 
-header h1 {
-  font-size: 2rem;
-  margin-bottom: 22px;
-  color: #2B6CB0;
-  font-weight: 700;
+.form {
+    display: flex;
+    flex-direction: column;
+    /* The 'gap' property is removed from here to fix spacing */
 }
 
-.typeSwitchRow {
-  display: flex;
-  gap: 2rem;
-  margin-bottom: 28px;
-  font-weight: 600;
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.25rem; /* Use margin for consistent spacing */
 }
 
-.typeSwitchRow label {
-  cursor: pointer;
+.inputGroup label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #4b5563;
+    margin-bottom: 0.5rem;
 }
 
-.formBox {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.09);
-  padding: 32px 26px;
-  max-width: 530px;
-  width: 100%;
-}
-
-.formRow {
-  margin-bottom: 14px;
-  display: flex;
-  flex-direction: column;
-}
-
-.formRow label {
-  color: #2B6CB0;
-  font-weight: 600;
-  margin-bottom: 0.3rem; /* Tighter space between label and input */
-  font-size: 0.95rem;
-}
-
-.formRow input {
-  padding: 0.55rem 0.9rem; /* Reduced vertical padding for input */
-  border-radius: 6px;
-  border: 1.5px solid #d5d9df;
-  font-size: 1rem;
-  background: #f0f4fa;
-  box-sizing: border-box;
-}
-
-.formActions {
-  margin-top: 19px;
-  display: flex;
-  justify-content: flex-end;
+.inputGroup input,
+.inputGroup select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    box-sizing: border-box;
 }
 
 .submitBtn {
-  background: #2B6CB0;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 30px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.18s;
+    background-color: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.85rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background-color 0.3s ease;
 }
 
 .submitBtn:hover {
-  background: #225489;
+    background-color: #1d4ed8;
 }
 
-.credentialBox {
-  margin-top: 32px;
-  background: #f0fff4;
-  border-left: 6px solid #2B6CB0;
-  border-radius: 5px;
-  padding: 18px 24px;
-  max-width: 420px;
-  color: #225489;
+.message {
+    text-align: center;
+    margin-top: 1rem;
+    font-weight: 600;
 }
 
-.credentialData {
-  font-family: monospace;
-  background: #edf2f7;
-  padding: 2px 9px;
-  border-radius: 5px;
-  color: #225489;
+.success {
+    color: #16a34a;
 }
 
-.credentialInfo {
-  margin-top: 14px;
-  font-size: 0.98rem;
-  color: #6366f1;
+.error {
+    color: #dc2626;
 }

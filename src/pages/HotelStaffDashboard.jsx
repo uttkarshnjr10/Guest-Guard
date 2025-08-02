@@ -5,11 +5,7 @@ import GuestRegistrationForm from "../components/HotelStaff/GuestRegistrationFor
 import TodaysGuestList from "../components/HotelStaff/TodaysGuestList";
 import styles from "./HotelStaffDashboard.module.css";
 
-const sidebarLinks = [
-  { to: "/hotel", label: "Dashboard", exact: true },
-  { to: "/hotel/guests", label: "Guest List" },
-  { to: "/hotel/reports", label: "Reports" },
-];
+
 
 export default function HotelStaffDashboard() {
   const [guests, setGuests] = useState([]);
@@ -21,7 +17,6 @@ export default function HotelStaffDashboard() {
   return (
     <>
       <Navbar username="Maurya Hotel Patna" role="Hotel" />
-      <Sidebar links={sidebarLinks} />
       <main className={styles.mainContent}>
         <h1>Welcome </h1>
 
