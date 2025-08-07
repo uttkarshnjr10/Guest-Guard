@@ -42,7 +42,7 @@ export default function Login({ setAuth }) {
         setSuccessMessage("");
 
         try {
-            const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/login`;
+            const apiUrl = `${import.meta.env.VITE_API_BASE_URL}api/auth/login`;
             const response = await axios.post(apiUrl, { email, password });
 
             // >> CRITICAL FIX: Check the status code from the response directly.
