@@ -1,77 +1,147 @@
-/* src/pages/RegisterNewUser.module.css */
+/* Add these new styles to your existing RegisterNewUser.module.css file.
+  You can adjust colors and spacing to match your theme.
+*/
 
-.container {
-    padding: 2rem;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    max-width: 700px;
-    margin: 2rem auto;
+/* Styles for the success message box */
+.credentialBox {
+  background-color: #f0fdf4; /* Light green background */
+  border: 1px solid #bbf7d0; /* Green border */
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  max-width: 600px;
+  margin: 2rem auto;
+  animation: fadeIn 0.5s ease-out; /* Entrance animation */
 }
 
-.title {
-    font-size: 1.75rem;
-    color: #1e40af;
-    margin-bottom: 1.5rem;
-    text-align: center;
+/* Keyframe animation for the success box */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.form {
+.credentialBox h3 {
+  color: #166534; /* Dark green text */
+  font-size: 1.5rem;
+  margin-top: 0;
+}
+
+.credentialInfo {
+  color: #15803d;
+  margin-bottom: 2rem;
+}
+
+.credentialRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.credentialRow b {
+  color: #334155;
+}
+
+.credentialValue {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.1rem;
+  color: #0f172a;
+}
+
+.copyBtn {
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s ease; /* Smooth transition for all properties */
+}
+
+.copyBtn:hover {
+  background-color: #e2e8f0;
+  transform: translateY(-2px); /* Add a slight lift on hover */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.copyBtn:active {
+  background-color: #cbd5e1;
+  transform: translateY(0); /* Return to original position on click */
+}
+
+.registerAnotherBtn {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: all 0.2s ease-in-out; /* Smooth transition */
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+}
+
+.registerAnotherBtn:hover {
+  background-color: #1d4ed8;
+  transform: scale(1.02); /* Slightly enlarge on hover */
+  box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
+}
+
+.registerAnotherBtn:active {
+    transform: scale(0.98); /* Shrink slightly on click */
+}
+
+/* Enhanced radio button styles */
+.typeSwitchRow {
     display: flex;
-    flex-direction: column;
-    /* The 'gap' property is removed from here to fix spacing */
+    justify-content: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
 }
 
-.inputGroup {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 1.25rem; /* Use margin for consistent spacing */
-}
-
-.inputGroup label {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: #4b5563;
-    margin-bottom: 0.5rem;
-}
-
-.inputGroup input,
-.inputGroup select {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    box-sizing: border-box;
-}
-
-.submitBtn {
-    background-color: #2563eb;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 0.85rem;
-    font-size: 1.1rem;
-    font-weight: 700;
+.typeSwitchRow label {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #d1d5db;
+    border-radius: 50px; /* Pill shape */
     cursor: pointer;
-    margin-top: 1rem;
-    transition: background-color 0.3s ease;
-}
-
-.submitBtn:hover {
-    background-color: #1d4ed8;
-}
-
-.message {
-    text-align: center;
-    margin-top: 1rem;
+    transition: all 0.3s ease;
     font-weight: 600;
+    color: #4b5563;
 }
 
-.success {
-    color: #16a34a;
+.typeSwitchRow label.active {
+  background-color: #e0e7ff;
+  border-color: #4f46e5;
+  color: #4f46e5;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.error {
-    color: #dc2626;
+/* Hide the actual radio button */
+.typeSwitchRow input[type="radio"] {
+    display: none;
+}
+
+/* Add focus state to form inputs */
+.formBox input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
 }

@@ -5,14 +5,15 @@
 
 /* Updated mainContent to offset sidebar and navbar */
 .mainContent {
-  margin-left: 0px;   /* width of your fixed sidebar */
-  padding-top: 60px;    /* height of your fixed navbar */
-  flex: 1;              /* fill remaining space */
-  min-height: calc(100vh - 60px);
-  background: #f7fafc;
-  padding: 32px;
-  box-sizing: border-box;
+    margin-left: 220px;  /* This tells content to start AFTER sidebar */
+    padding-top: 60px;   /* height of your fixed navbar */
+    flex: 1;
+    min-height: calc(100vh - 60px);
+    background: #f7fafc;
+    padding: 32px;
+    box-sizing: border-box;
 }
+
 
 header h1 {
   font-size: 2rem;
