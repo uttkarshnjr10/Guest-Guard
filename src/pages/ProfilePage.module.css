@@ -1,11 +1,10 @@
 /* src/pages/ProfilePage.module.css */
+
+/* --- Main Profile Page Styles (Your Original Code) --- */
 .profileContainer {
   max-width: 800px;
   margin: 2rem auto;
   padding: 2rem;
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .title {
@@ -16,8 +15,10 @@
 }
 
 .profileCard {
+  background-color: #fff;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
 
@@ -77,11 +78,114 @@
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  background-color: #d1d5db;
-  color: #1f2937;
+  background-color: #2563eb; /* Changed for better visibility */
+  color: #ffffff;
   transition: background-color 0.2s;
 }
 
 .actionButton:hover {
-  background-color: #9ca3af;
+  background-color: #1d4ed8;
+}
+
+.actionButton:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+
+/* --- Modal Styles (Added from previous response) --- */
+
+.modalBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 450px;
+    animation: slide-down 0.3s ease-out;
+}
+
+@keyframes slide-down {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modalContent h2 {
+    margin-top: 0;
+    color: #1e40af;
+}
+
+.inputGroup {
+    margin-bottom: 1.5rem;
+}
+
+.inputGroup label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.inputGroup input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.cancelButton {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.cancelButton:hover {
+    background-color: #e2e8f0;
+}
+
+.error {
+    color: #dc2626;
+    text-align: center;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.success {
+    color: #16a34a;
+    text-align: center;
+    margin-bottom: 1rem;
+    font-weight: 600;
 }

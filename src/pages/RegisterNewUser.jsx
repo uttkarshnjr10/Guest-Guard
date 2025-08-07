@@ -1,171 +1,155 @@
 import React, { useState } from "react";
-import Navbar from "../components/common/Navbar";
-import Sidebar from "../components/common/Sidebar";
+import axios from "axios";
 import styles from "./RegisterNewUser.module.css";
-
-const sidebarLinks = [
-  { to: "/regional-admin", label: "Dashboard", exact: true },
-  { to: "/regional-admin/hotels", label: "Manage Hotels" },
-  { to: "/regional-admin/access-logs", label: "Access Logs" },
-];
 
 const USER_TYPES = {
   HOTEL: "Hotel",
-  POLICE: "Police Station",
+  POLICE: "Police",
 };
 
-function generateUsername(data, type) {
-  if (type === USER_TYPES.HOTEL) {
-    return `hotel_${data.name?.toLowerCase().replace(/\s+/g, '')}_${data.city?.toLowerCase().slice(0,3)}`;
-  } else {
-    return `police_${data.station?.toLowerCase().replace(/\s+/g, '')}_${data.city?.toLowerCase().slice(0,3)}`;
-  }
-}
-function generateTempPassword() {
-  // Simple strong random (not cryptographically secure)
-  const chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*";
-  return Array.from({length: 10}, ()=>chars[Math.floor(Math.random()*chars.length)]).join('');
-}
+const initialHotelState = { name: "", city: "", address: "", license: "", contact: "" };
+const initialPoliceState = { station: "", jurisdiction: "", city: "", contact: "" };
 
 export default function RegisterNewUser() {
   const [userType, setUserType] = useState(USER_TYPES.HOTEL);
-  const [hotelData, setHotelData] = useState({
-    name: "", city: "", address: "", license: "", contact: ""
-  });
-  const [policeData, setPoliceData] = useState({
-    station: "", jurisdiction: "", city: "", contact: ""
-  });
-  const [submitted, setSubmitted] = useState(false);
-  const [credentials, setCredentials] = useState(null);
+  const [formData, setFormData] = useState(initialHotelState);
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [successData, setSuccessData] = useState(null);
 
-  const handleChange = (e, type) => {
+  const handleTypeChange = (newUserType) => {
+    setUserType(newUserType);
+    setFormData(newUserType === USER_TYPES.HOTEL ? initialHotelState : initialPoliceState);
+    setError("");
+    setSuccessData(null);
+  };
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    if(type === USER_TYPES.HOTEL){
-      setHotelData({...hotelData, [name]: value });
-    } else {
-      setPoliceData({...policeData, [name]: value });
+    setFormData(prevData => ({ ...prevData, [name]: value }));
+    setError("");
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  const handleResetForm = () => {
+    setSuccessData(null);
+    setError("");
+    setFormData(userType === USER_TYPES.HOTEL ? initialHotelState : initialPoliceState);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+    setSuccessData(null);
+
+    const payload = {
+      role: userType,
+      email: formData.contact,
+      username: (formData.name || formData.station).toLowerCase().replace(/\s+/g, ''),
+      details: { ...formData }
+    };
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error("Admin not authenticated. Please log in again.");
+
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/users/register`;
+      const response = await axios.post(apiUrl, payload, config);
+
+      // >> FIX: Use the success message from the API response
+      setSuccessData({
+        message: response.data.message, // "User created successfully. Credentials have been emailed."
+        username: response.data.username,
+        password: response.data.temporaryPassword
+      });
+      
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || "An error occurred.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleSubmit = e => {
-    e.preventDefault();
-    // Simulate creation and temp credential generation
-    const data = userType === USER_TYPES.HOTEL ? hotelData : policeData;
-    const username = generateUsername(data, userType);
-    const password = generateTempPassword();
-    setCredentials({ username, password });
-    setSubmitted(true);
-  };
+  if (successData) {
+    return (
+      <main className={styles.mainContent}>
+        <div className={styles.credentialBox}>
+          {/* >> Display the dynamic success message from the backend */}
+          <h3>{successData.message}</h3>
+          <p className={styles.credentialInfo}>
+            The credentials are also displayed below as a backup.
+          </p>
+          <div className={styles.credentialRow}>
+            <b>Username:</b>
+            <div className={styles.credentialValue}>
+              <span>{successData.username}</span>
+              <button onClick={() => copyToClipboard(successData.username)} className={styles.copyBtn}>Copy</button>
+            </div>
+          </div>
+          <div className={styles.credentialRow}>
+            <b>Temp Password:</b>
+            <div className={styles.credentialValue}>
+              <span>{successData.password}</span>
+              <button onClick={() => copyToClipboard(successData.password)} className={styles.copyBtn}>Copy</button>
+            </div>
+          </div>
+          <button onClick={handleResetForm} className={styles.registerAnotherBtn}>
+            Register Another User
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <>
-      <Navbar username="Meera" role="Regional Admin" />
-      <div className={styles.layoutWrapper}>
-        <Sidebar links={sidebarLinks} />
-        <main className={styles.mainContent}>
-          <header>
-            <h1>Register New User</h1>
-          </header>
+    <main className={styles.mainContent}>
+      <header>
+        <h1>Register New User</h1>
+      </header>
 
-          <div className={styles.typeSwitchRow}>
-            <label>
-              <input
-                type="radio"
-                value={USER_TYPES.HOTEL}
-                checked={userType === USER_TYPES.HOTEL}
-                onChange={() => setUserType(USER_TYPES.HOTEL)}
-              />{" "}
-              Hotel
-            </label>
-            <label>
-              <input
-                type="radio"
-                value={USER_TYPES.POLICE}
-                checked={userType === USER_TYPES.POLICE}
-                onChange={() => setUserType(USER_TYPES.POLICE)}
-              />{" "}
-              Police Station
-            </label>
-          </div>
-
-          <form onSubmit={handleSubmit} className={styles.formBox}>
-            {userType === USER_TYPES.HOTEL ? (
-              <>
-                <div className={styles.formRow}>
-                  <label>Hotel Name *</label>
-                  <input name="name" required value={hotelData.name}
-                    onChange={e => handleChange(e, USER_TYPES.HOTEL)} />
-                </div>
-                <div className={styles.formRow}>
-                  <label>Official Address *</label>
-                  <input name="address" required value={hotelData.address}
-                    onChange={e => handleChange(e, USER_TYPES.HOTEL)} />
-                </div>
-                <div className={styles.formRow}>
-                  <label>City *</label>
-                  <input name="city" required value={hotelData.city}
-                    onChange={e => handleChange(e, USER_TYPES.HOTEL)} />
-                </div>
-                <div className={styles.formRow}>
-                  <label>License Number *</label>
-                  <input name="license" required value={hotelData.license}
-                    onChange={e => handleChange(e, USER_TYPES.HOTEL)} />
-                </div>
-                <div className={styles.formRow}>
-                  <label>Contact (email/phone) *</label>
-                  <input name="contact" required value={hotelData.contact}
-                    onChange={e => handleChange(e, USER_TYPES.HOTEL)} />
-                </div>
-              </>
-            ) : (
-              <>
-                <div className={styles.formRow}>
-                  <label>Station Name *</label>
-                  <input name="station" required value={policeData.station}
-                    onChange={e => handleChange(e, USER_TYPES.POLICE)} />
-                </div>
-                <div className={styles.formRow}>
-                  <label>Jurisdiction *</label>
-                  <input name="jurisdiction" required value={policeData.jurisdiction}
-                    onChange={e => handleChange(e, USER_TYPES.POLICE)} />
-                </div>
-                <div className={styles.formRow}>
-                  <label>City *</label>
-                  <input name="city" required value={policeData.city}
-                    onChange={e => handleChange(e, USER_TYPES.POLICE)} />
-                </div>
-                <div className={styles.formRow}>
-                  <label>Contact (email/phone) *</label>
-                  <input name="contact" required value={policeData.contact}
-                    onChange={e => handleChange(e, USER_TYPES.POLICE)} />
-                </div>
-              </>
-            )}
-
-            <div className={styles.formActions}>
-              <button className={styles.submitBtn} type="submit">
-                Register
-              </button>
-            </div>
-          </form>
-
-          {submitted && credentials && (
-            <div className={styles.credentialBox}>
-              <h3>Credentials Generated</h3>
-              <p>
-                <b>Username:</b> <span className={styles.credentialData}>{credentials.username}</span>
-              </p>
-              <p>
-                <b>Temporary Password:</b> <span className={styles.credentialData}>{credentials.password}</span>
-              </p>
-              <p className={styles.credentialInfo}>
-                Please copy these credentials and deliver securely to the verified entity. <br />
-                This password will only work for first login and must be changed.
-              </p>
-            </div>
-          )}
-        </main>
+      <div className={styles.typeSwitchRow}>
+        <label className={userType === USER_TYPES.HOTEL ? styles.active : ''}>
+          <input type="radio" value={USER_TYPES.HOTEL} checked={userType === USER_TYPES.HOTEL} onChange={() => handleTypeChange(USER_TYPES.HOTEL)} />
+          Hotel
+        </label>
+        <label className={userType === USER_TYPES.POLICE ? styles.active : ''}>
+          <input type="radio" value={USER_TYPES.POLICE} checked={userType === USER_TYPES.POLICE} onChange={() => handleTypeChange(USER_TYPES.POLICE)} />
+          Police Station
+        </label>
       </div>
-    </>
+
+      <form onSubmit={handleSubmit} className={styles.formBox}>
+        {userType === USER_TYPES.HOTEL ? (
+          <>
+            <div className={styles.formRow}><label>Hotel Name *</label><input name="name" required value={formData.name} onChange={handleChange} /></div>
+            <div className={styles.formRow}><label>Official Address *</label><input name="address" required value={formData.address} onChange={handleChange} /></div>
+            <div className={styles.formRow}><label>City *</label><input name="city" required value={formData.city} onChange={handleChange} /></div>
+            <div className={styles.formRow}><label>License Number *</label><input name="license" required value={formData.license} onChange={handleChange} /></div>
+            <div className={styles.formRow}><label>Contact Email *</label><input name="contact" type="email" required value={formData.contact} onChange={handleChange} /></div>
+          </>
+        ) : (
+          <>
+            <div className={styles.formRow}><label>Station Name *</label><input name="station" required value={formData.station} onChange={handleChange} /></div>
+            <div className={styles.formRow}><label>Jurisdiction *</label><input name="jurisdiction" required value={formData.jurisdiction} onChange={handleChange} /></div>
+            <div className={styles.formRow}><label>City *</label><input name="city" required value={formData.city} onChange={handleChange} /></div>
+            <div className={styles.formRow}><label>Contact Email *</label><input name="contact" type="email" required value={formData.contact} onChange={handleChange} /></div>
+          </>
+        )}
+
+        {error && <p className={styles.error}>{error}</p>}
+
+        <div className={styles.formActions}>
+          <button className={styles.submitBtn} type="submit" disabled={isLoading}>
+            {isLoading ? 'Registering...' : 'Register User'}
+          </button>
+        </div>
+      </form>
+    </main>
   );
 }
