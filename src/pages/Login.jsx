@@ -35,56 +35,55 @@ export default function Login({ setAuth }) {
         }
     }, [location]);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError("");
-        setSuccessMessage("");
+   const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+    setSuccessMessage("");
 
-        try {
-            const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/login`;
-            const response = await axios.post(apiUrl, { email, password });
+    try {
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/login`;
+        const response = await axios.post(apiUrl, { email, password });
 
-            // >> CRITICAL FIX: Check the status code from the response directly.
-            if (response.status === 202) {
-                // This is the "Password Change Required" scenario.
-                navigate('/reset-password', { 
-                    state: { userId: response.data.userId } 
-                });
-                return; // Stop execution here.
-            }
-
-            // If we reach here, it means the status was 200 (or another success code)
-            // and we can proceed with a normal login.
-            const { token } = response.data;
-            
-            if (!token) {
-                // Safety check in case the server sends a 200 without a token.
-                throw new Error("Login successful, but no token was provided.");
-            }
-
-            localStorage.setItem('authToken', token);
-            const decoded = decodeToken(token);
-            
-            if (decoded) {
-                setAuth({ token, username: decoded.username, role: decoded.role });
-                switch (decoded.role) {
-                    case 'Hotel': navigate('/hotel'); break;
-                    case 'Police': navigate('/police'); break;
-                    case 'Regional Admin': navigate('/regional-admin'); break;
-                    default: navigate('/');
-                }
-            } else {
-                setError("Invalid token received. Please try again.");
-            }
-
-        } catch (err) {
-            // The catch block now handles actual network/server errors (e.g., 401, 500).
-            setError(err.response?.data?.message || err.message || "An error occurred.");
-        } finally {
-            setIsLoading(false);
+        if (response.status === 202) {
+            navigate('/reset-password', { 
+                state: { userId: response.data.userId } 
+            });
+            return;
         }
-    };
+
+        const { token } = response.data;
+        if (!token) {
+            throw new Error("Login successful, but no token was provided.");
+        }
+
+        localStorage.setItem('authToken', token);
+        const decoded = decodeToken(token);
+
+        if (decoded) {
+            setAuth({ token, username: decoded.username, role: decoded.role });
+            switch (decoded.role) {
+                case 'Hotel': navigate('/hotel'); break;
+                case 'Police': navigate('/police'); break;
+                case 'Regional Admin': navigate('/regional-admin'); break;
+                default: navigate('/');
+            }
+        } else {
+            setError("Invalid token received. Please try again.");
+        }
+
+    } catch (err) {
+        if (err.response?.status === 403) {
+            // Specific handling for suspended accounts
+            setError("Your account has been suspended. Please contact the administrator.");
+        } else {
+            setError(err.response?.data?.message || err.message || "An error occurred.");
+        }
+    } finally {
+        setIsLoading(false);
+    }
+};
+
 
     return (
         <div className={styles.container}>

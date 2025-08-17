@@ -2,7 +2,20 @@ import React, { useState, useRef, useCallback } from "react";
 import Webcam from "react-webcam";
 import styles from "./GuestRegistrationForm.module.css";
 import { differenceInYears, parseISO, format } from "date-fns";
-import { jsPDF } from "jspdf";
+//import { jsPDF } from "jspdf";
+
+// ADD THIS HELPER FUNCTION
+function dataURLtoFile(dataurl, filename) {
+  let arr = dataurl.split(','),
+    mime = arr[0].match(/:(.*?);/)[1],
+    bstr = atob(arr[1]),
+    n = bstr.length,
+    u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+}
 
 // Webcam Modal for live photo capture
 const WebcamModal = ({ onCapture, onCancel }) => {
@@ -244,7 +257,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
-
+  /*
   // --- Generate PDF E-Receipt ---
   const generatePdfAndSend = () => {
     if (!onAddGuest) return;
@@ -297,7 +310,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     // Simulate sending receipt or SMS by alert
     alert(`E-receipt generated and downloaded.\nSend this receipt to phone: ${form.phone} (Demo).`);
   };
-
+  */
   // --- Form submit ---
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -306,17 +319,45 @@ export default function GuestRegistrationForm({ onAddGuest }) {
       return;
     }
 
-    const timestamp = new Date();
-    const guestPayload = { ...form, registrationTimestamp: timestamp.toISOString() };
+    // Convert the webcam photo from a string to a file FIRST
+    const livePhotoFile = dataURLtoFile(form.livePhoto, 'livePhoto.jpg');
 
+    const guestPayload = {
+      primaryGuest: {
+        name: form.name,
+        dob: form.dob,
+        gender: form.gender,
+        phone: form.phone,
+        email: form.email,
+        address: `${form.address.city}, ${form.address.district}, ${form.address.state} - ${form.address.pincode}`,
+      },
+      idType: form.idType,
+      idNumber: form.idNumber,
+      
+      // MODIFIED: Pass the File objects
+      idImage: form.idImage,
+      livePhoto: livePhotoFile, // Pass the converted file
+
+      stayDetails: {
+        purposeOfVisit: form.purpose,
+        checkIn: form.checkIn,
+        expectedCheckout: form.expectedCheckout,
+        roomNumber: form.roomNumber,
+      },
+      accompanyingGuests: {
+        adults: form.guests.adults.map(adult => ({ name: adult.name, gender: adult.gender })),
+        children: form.guests.children.map(child => ({ name: child.name, gender: child.gender })),
+      },
+      registrationTimestamp: new Date().toISOString(),
+    };
+    
+    // This now sends a payload where BOTH images are proper files
     onAddGuest && onAddGuest(guestPayload);
 
-    generatePdfAndSend();
-
+    //generatePdfAndSend();
     setForm(getInitialFormState());
     setErrors({});
   };
-
   // --- Render ---
   return (
     <>

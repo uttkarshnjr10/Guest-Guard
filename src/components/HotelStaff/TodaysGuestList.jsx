@@ -2,44 +2,74 @@ import React from "react";
 import styles from "./TodaysGuestList.module.css";
 import { format } from "date-fns";
 
-export default function TodaysGuestList({ guests }) {
-  if (!guests || guests.length === 0) return <p>No guests registered yet.</p>;
+// MODIFIED: We now accept an 'onCheckout' function as a prop
+export default function TodaysGuestList({ guests, onCheckout }) {
+  console.log("TodaysGuestList rendered with:", { guests, onCheckout });
+  
+  if (!guests || guests.length === 0) {
+    return <p>No checked-in guests found.</p>;
+  }
+
+  const handleCheckoutClick = (guestId) => {
+    console.log("Checkout button clicked for guest ID:", guestId);
+    if (!guestId) {
+      console.error("No guest ID provided");
+      alert("Error: Could not identify guest for checkout");
+      return;
+    }
+    
+    // Test function to verify button is working
+    alert(`Checkout button clicked for guest: ${guestId}`);
+    
+    if (onCheckout && typeof onCheckout === 'function') {
+      onCheckout(guestId);
+    } else {
+      console.error("onCheckout is not a function:", onCheckout);
+      alert("Error: Checkout function not available");
+    }
+  };
 
   return (
     <table className={styles.table}>
       <thead>
         <tr>
           <th>Name</th>
-          <th>Age</th>
-          <th>Gender</th>
+          <th>Room</th>
           <th>Phone</th>
-          <th>Address</th>
           <th>Check-In</th>
           <th>Checkout (Expected)</th>
-          <th>Room</th>
-          <th>Adults</th>
-          <th>Children</th>
-          <th>Purpose</th>
-          <th>Registered At</th>
+          {/* NEW: Add a header for actions */}
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        {guests.map((g, i) => (
-          <tr key={i}>
-            <td>{g.name}</td>
-            <td>{g.age}</td>
-            <td>{g.gender}</td>
-            <td>{g.phone}</td>
-            <td>{`${g.address.city}, ${g.address.district}, ${g.address.state} - ${g.address.pincode}`}</td>
-            <td>{g.checkIn.replace("T", " ")}</td>
-            <td>{g.expectedCheckout.replace("T", " ")}</td>
-            <td>{g.roomNumber}</td>
-            <td>{g.guests.adults}</td>
-            <td>{g.guests.children}</td>
-            <td>{g.purpose}</td>
-            <td>{format(new Date(g.registrationTimestamp), "dd MMM yyyy, HH:mm")}</td>
-          </tr>
-        ))}
+        {guests.map((g) => {
+          // Only render guests that are still Checked-In
+          if (g.status !== 'Checked-In') return null;
+          
+          const guestId = g._id || g.customerId || g.id;
+          console.log("Rendering guest row:", { guestId, status: g.status, name: g.primaryGuest?.name });
+          
+          return (
+            <tr key={guestId}>
+              <td>{g.primaryGuest?.name || 'N/A'}</td>
+              <td>{g.stayDetails?.roomNumber || 'N/A'}</td>
+              <td>{g.primaryGuest?.phone || 'N/A'}</td>
+              <td>{g.stayDetails?.checkIn ? format(new Date(g.stayDetails.checkIn), "dd MMM, HH:mm") : 'N/A'}</td>
+              <td>{g.stayDetails?.expectedCheckout ? format(new Date(g.stayDetails.expectedCheckout), "dd MMM, HH:mm") : 'N/A'}</td>
+              {/* NEW: Add a cell with the checkout button */}
+              <td>
+                <button
+                  className={styles.checkoutBtn}
+                  onClick={() => handleCheckoutClick(guestId)}
+                  disabled={!guestId}
+                >
+                  Checkout
+                </button>
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );
