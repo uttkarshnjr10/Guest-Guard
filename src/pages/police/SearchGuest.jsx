@@ -1,84 +1,196 @@
-import React, { useState } from "react";
-import styles from "./SearchGuest.module.css";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom'; 
+// ✅ Use apiClient instead of axios
+import apiClient from '../../api/apiClient'; 
+import { format } from 'date-fns';
+import toast from 'react-hot-toast'; // ✅ Import toast
+import styles from './SearchGuest.module.css';
 
-const DUMMY_HISTORY = [
-  {
-    id: "AADHAARXXXX1",
-    name: "Rakesh Kumar",
-    phone: "9812345678",
-    checkIns: [
-      { hotel: "Blue Orchid Residency", city: "Delhi", from: "2025-07-20T15:00", to: "2025-07-21T12:00" },
-      { hotel: "Royal Park", city: "Jaipur", from: "2025-06-16T19:20", to: "2025-06-18T10:00" },
-    ],
-  },
-  // Add more mock data as needed
-];
+// Modal Component for Flagging a Guest
+const FlagGuestModal = ({ guest, onClose, onAlertCreated }) => {
+  const [reason, setReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-export default function SearchGuest() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
-
-  const handleSearch = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!searchTerm.trim()) {
-      setError("Please enter a search term.");
-      setResult(null);
+    if (!reason.trim()) {
+      setError('A reason is required to flag a guest.');
       return;
     }
-    setError("");
-    const found = DUMMY_HISTORY.find(
-      (g) =>
-        g.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        g.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        g.phone.includes(searchTerm)
-    );
-    if (found) setResult(found);
-    else setResult(null);
+    setSubmitting(true);
+    setError('');
+
+    try {
+      // ✅ No need for token/config, interceptor handles it
+      const payload = { guestId: guest._id, reason };
+      await apiClient.post('/police/alerts', payload);
+      onAlertCreated(); 
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to create alert.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <div>
-      <h2>Search Guest</h2>
-      <form onSubmit={handleSearch} className={styles.searchForm}>
-        <input
-          type="text"
-          placeholder="Name, Aadhaar ID, or Phone"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className={styles.searchInput}
-          autoFocus
-        />
-        <button type="submit" className={styles.searchBtn}>Search</button>
-      </form>
-      {error && <div className={styles.error}>{error}</div>}
-      {result ? (
-        <div className={styles.resultSection}>
-          <h3>{result.name} - Stay History</h3>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Hotel</th>
-                <th>City</th>
-                <th>Check-In</th>
-                <th>Check-Out</th>
-              </tr>
-            </thead>
-            <tbody>
-              {result.checkIns.map((stay, idx) => (
-                <tr key={idx}>
-                  <td>{stay.hotel}</td>
-                  <td>{stay.city}</td>
-                  <td>{new Date(stay.from).toLocaleString()}</td>
-                  <td>{new Date(stay.to).toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        searchTerm.trim() !== "" && <p>No records found for '{searchTerm}'.</p>
-      )}
+    <div className={styles.modalBackdrop}>
+      <div className={styles.modalContent}>
+        <h3>Flag Guest: {guest.primaryGuest.name}</h3>
+        <p>Please provide a clear reason for flagging this individual. This action will be logged for auditing.</p>
+        <form onSubmit={handleSubmit}>
+          <textarea
+            placeholder="Reason for flagging..."
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            className={styles.reasonInput}
+            required
+          />
+          {error && <p className={styles.error}>{error}</p>}
+          <div className={styles.modalActions}>
+            <button type="button" onClick={onClose} className={styles.cancelBtn}>Cancel</button>
+            <button type="submit" className={styles.submitBtn} disabled={submitting}>
+              {submitting ? 'Submitting...' : 'Submit Alert'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
+  );
+};
+
+
+export default function SearchGuest() {
+  const [query, setQuery] = useState('');
+  const [searchBy, setSearchBy] = useState('name');
+  const [reason, setReason] = useState('');
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [searched, setSearched] = useState(false);
+  
+  const [flaggingGuest, setFlaggingGuest] = useState(null);
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!query.trim() || !reason.trim()) {
+      setError('Search term and reason for search are mandatory.');
+      return;
+    }
+    
+    setLoading(true);
+    setError('');
+    setSearched(true);
+    setResults([]);
+
+    try {
+      // ✅ No need for token/config, interceptor handles it
+      const payload = { query, searchBy, reason };
+      const { data } = await apiClient.post('/police/search', payload);
+      setResults(data);
+    } catch (err) {
+      setError(err.response?.data?.message || 'An error occurred during search.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ Changed from alert() → toast.success()
+  const onAlertCreated = () => {
+    setFlaggingGuest(null);
+    toast.success('Guest has been successfully flagged.');
+  };
+
+  return (
+    <>
+      {flaggingGuest && (
+        <FlagGuestModal
+          guest={flaggingGuest}
+          onClose={() => setFlaggingGuest(null)}
+          onAlertCreated={onAlertCreated}
+        />
+      )}
+
+      <div className={styles.pageContainer}>
+        <h2>Secure Guest Search</h2>
+        <form onSubmit={handleSearch} className={styles.searchForm}>
+          <div className={styles.inputRow}>
+            <select 
+              value={searchBy} 
+              onChange={(e) => setSearchBy(e.target.value)}
+              className={styles.searchSelect}
+            >
+              <option value="name">Name</option>
+              <option value="phone">Phone</option>
+              <option value="id">ID Number</option>
+            </select>
+            <input
+              type="text"
+              placeholder={`Enter guest ${searchBy}...`}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className={styles.searchInput}
+              autoFocus
+            />
+          </div>
+          <textarea
+            placeholder="Reason for search (e.g., 'Active investigation case #123')..."
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            className={styles.reasonInput}
+          />
+          <button type="submit" className={styles.searchBtn} disabled={loading}>
+            {loading ? 'Searching...' : 'Search'}
+          </button>
+        </form>
+
+        {error && <p className={styles.error}>{error}</p>}
+        
+        {searched && !loading && (
+          <div className={styles.resultSection}>
+            <h3>Search Results</h3>
+            {results.length > 0 ? (
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>ID Number</th>
+                    <th>Hotel</th>
+                    <th>Check-In</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {results.map((guest) => (
+                    <tr key={guest._id}>
+                      <td>{guest.primaryGuest.name}</td>
+                      <td>{guest.idNumber}</td>
+                      <td>{guest.hotel.username}</td>
+                      <td>{format(new Date(guest.stayDetails.checkIn), 'dd MMM yyyy')}</td>
+                      <td className={styles.actionsCell}>
+                        <button 
+                          onClick={() => setFlaggingGuest(guest)} 
+                          className={styles.flagBtn}
+                        >
+                          Flag
+                        </button>
+                        <Link 
+                          to={`/police/guest/${guest._id}`} 
+                          className={styles.historyBtn}
+                        >
+                          History
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No records found for the given query.</p>
+            )}
+          </div>
+        )}
+      </div>
+    </>
   );
 }

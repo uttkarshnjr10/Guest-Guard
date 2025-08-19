@@ -1,123 +1,221 @@
-@import '../../styles/variables.module.css'; /* Import your color variables */
-
-/* Overall container styling (optional if you want to limit width) */
-div {
+/* Using a more generic container name for consistency */
+.pageContainer {
   max-width: 900px;
   margin: 0 auto;
-  padding: 1rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--text-dark);
+  padding: 1.5rem;
 }
 
-/* Heading */
 h2 {
-  color: var(--primary-blue);
+  color: #1e40af;
   margin-bottom: 1.5rem;
   font-weight: 700;
-  font-size: 1.8rem;
   text-align: center;
 }
 
-/* Search form styles */
 .searchForm {
   display: flex;
-  gap: 0.8rem;
-  margin-bottom: 1rem;
-  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.inputRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.searchSelect {
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background-color: #f9fafb;
+  font-weight: 600;
 }
 
 .searchInput {
   flex: 1;
-  padding: 0.6rem 1rem;
-  font-size: 1.1rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
   border-radius: 6px;
-  border: 1px solid var(--border);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #d1d5db;
 }
 
-.searchInput:focus {
+.reasonInput {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.searchInput:focus, .reasonInput:focus, .searchSelect:focus {
   outline: none;
-  border-color: var(--primary-blue);
-  box-shadow: 0 0 0 3px rgba(38, 83, 212, 0.15);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
 }
 
-/* Search button */
 .searchBtn {
-  flex-shrink: 0;
-  background-color: var(--primary-blue);
+  background-color: #1e40af;
   color: white;
-  font-weight: 700;
-  font-size: 1.1rem;
+  font-weight: 600;
+  font-size: 1rem;
   border: none;
   border-radius: 6px;
-  padding: 0.6rem 1.8rem;
+  padding: 0.75rem;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s;
 }
 
 .searchBtn:hover {
-  background-color: var(--secondary-blue);
+  background-color: #1d4ed8;
 }
 
-/* Error message */
+.searchBtn:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
 .error {
-  color: var(--danger);
-  font-weight: 600;
-  margin-top: 0.4rem;
+  color: #dc2626;
+  font-weight: 500;
   text-align: center;
-  font-size: 0.95rem;
-}
-
-/* Result section container */
-.resultSection {
-  background: white;
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(38, 83, 212, 0.1);
-  margin-top: 1.5rem;
-  overflow-x: auto; /* Responsive horizontal scrolling */
-}
-
-/* Result heading */
-.resultSection h3 {
-  color: var(--primary-blue);
+  margin-top: -1rem;
   margin-bottom: 1rem;
-  font-weight: 700;
-  font-size: 1.3rem;
-  text-align: center;
 }
 
-/* Table styles */
+.resultSection {
+  margin-top: 2rem;
+  overflow-x: auto;
+}
+
+.resultSection h3 {
+  margin-bottom: 1rem;
+  color: #111827;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .table th,
 .table td {
-  border-bottom: 1px solid var(--border);
-  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.75rem 1rem;
   text-align: left;
+  vertical-align: middle;
 }
 
 .table th {
-  background-color: var(--primary-blue);
-  color: white;
+  background-color: #f3f4f6;
   font-weight: 600;
-  font-size: 1.05rem;
 }
 
 .table tbody tr:hover {
-  background-color: var(--bg-light);
+  background-color: #f9fafb;
+}
+
+.flagBtn {
+  background-color: #f59e0b; /* Amber */
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.flagBtn:hover {
+  background-color: #d97706;
+}
+
+/* Modal Styles */
+.modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 500px;
+}
+
+.modalContent h3 {
+  margin-top: 0;
+  color: #1e40af;
+}
+
+.modalContent p {
+  color: #4a5568;
+  margin-bottom: 1.5rem;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cancelBtn {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
 }
 
-/* Message when no records found */
-p {
-  margin-top: 1.2rem;
-  text-align: center;
-  font-style: italic;
-  color: #555;
-  font-size: 1rem;
+.submitBtn {
+  background-color: #dc2626;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+/* --- AI Suggested Additions --- */
+.actionsCell {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.historyBtn {
+  background-color: #2563eb;
+  color: white;
+  text-decoration: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.875rem; /* Match button size */
+  transition: background-color 0.2s;
+  display: inline-flex;
+  align-items: center;
+}
+
+.historyBtn:hover {
+  background-color: #1d4ed8;
 }

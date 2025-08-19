@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import apiClient from '../../api/apiClient'; // ✅ centralized axios client
 import styles from './GuestListPage.module.css';
 import { format } from 'date-fns';
 
@@ -11,11 +11,8 @@ export default function GuestListPage() {
   const fetchGuests = useCallback(async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      // This new endpoint will fetch ALL guests for the hotel
-      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/guests/all`; 
-      const { data } = await axios.get(apiUrl, config);
+      // ✅ token handled by apiClient interceptors
+      const { data } = await apiClient.get('/guests/all');
       setGuests(data);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch guest list.');
@@ -32,12 +29,8 @@ export default function GuestListPage() {
     if (!window.confirm('Are you sure you want to check out this guest?')) return;
 
     try {
-      const token = localStorage.getItem('authToken');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/guests/${guestId}/checkout`;
-      
-      // The backend will send back a PDF file
-      const response = await axios.put(apiUrl, {}, { ...config, responseType: 'blob' });
+      // ✅ still need to override responseType for blob downloads
+      const response = await apiClient.put(`/guests/${guestId}/checkout`, {}, { responseType: 'blob' });
 
       // Create a URL for the PDF blob and trigger a download
       const url = window.URL.createObjectURL(new Blob([response.data]));

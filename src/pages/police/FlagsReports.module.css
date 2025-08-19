@@ -1,0 +1,113 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.header h1 {
+  margin: 0;
+  color: #1e40af;
+}
+
+.filter select {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+.alertsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.alertCard {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-left: 5px solid;
+  display: flex;
+  flex-direction: column;
+}
+
+.alertCard.open {
+  border-color: #f59e0b; /* Amber */
+}
+
+.alertCard.resolved {
+  border-color: #22c55e; /* Green */
+}
+
+.cardHeader, .cardBody, .cardFooter {
+  padding: 1rem;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.status {
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+.open .status {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.resolved .status {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.date {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.cardBody p {
+  margin: 0 0 0.5rem 0;
+}
+
+.cardFooter {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.resolveBtn {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.resolveBtn:hover {
+  background-color: #059669;
+}
+
+.error {
+  color: #dc2626;
+  font-weight: 600;
+}

@@ -1,23 +1,27 @@
 // src/App.jsx
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useNavigate } from "react-router-dom";
+import { Toaster } from 'react-hot-toast'; // 1. IMPORT Toaster
+import styles from './AppLayout.module.css'; // ✅ NEW import
 
 // --- Page Imports ---
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import ForcePasswordReset from "./pages/ForcePasswordReset"; // >> Added import for the new page
-import ProfilePage from "./pages/ProfilePage";
-import HotelStaffDashboard from "./pages/HotelStaffDashboard";
-import GuestListPage from './pages/GuestListPage';
-import ReportsPage from './pages/ReportsPage';
+import Home from "./pages/public/Home";
+import Login from "./pages/public/Login";
+import ForcePasswordReset from "./pages/ForcePasswordReset";
+import ProfilePage from "./pages/shared/ProfilePage";
+import HotelStaffDashboard from "./pages/hotel/HotelStaffDashboard";
+import GuestListPage from './pages/hotel/GuestListPage';
+import ReportsPage from './pages/hotel/ReportsPage';
 import PoliceDashboard from "./pages/police/PoliceDashboard";
 import SearchGuest from "./pages/police/SearchGuest";
+import GuestHistory from "./pages/police/GuestHistory";
 import FlagsReports from "./pages/police/FlagsReports";
 import CaseReports from "./pages/police/CaseReports";
-import RegionalAdminDashboard from "./pages/RegionalAdminDashboard";
-import RegisterNewUser from "./pages/RegisterNewUser";
-import ManageHotels from './pages/ManageHotels';
-import AccessLogs from './pages/AccessLogs';
+import RegionalAdminDashboard from "./pages/admin/RegionalAdminDashboard";
+import ManagePolice from './pages/admin/ManagePolice';
+import RegisterNewUser from "./pages/admin/RegisterNewUser";
+import ManageHotels from './pages/admin/ManageHotels';
+import AccessLogs from './pages/admin/AccessLogs';
 
 // --- Common Components ---
 import Navbar from './components/common/Navbar';
@@ -28,7 +32,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 const decodeToken = (token) => {
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        return { ...payload, username: payload.username || 'User' }; 
+        return { ...payload, username: payload.username || 'User' };
     } catch {
         return null;
     }
@@ -43,14 +47,15 @@ function HotelLayout({ auth, handleLogout }) {
         { to: "/hotel/dashboard", label: "Dashboard" },
         { to: "/hotel/guests", label: "Guest List" },
         { to: "/hotel/reports", label: "Reports" },
-        { to: "/hotel/profile", label: "My Profile" }, 
+        { to: "/hotel/profile", label: "My Profile" },
     ];
     return (
         <>
             <Navbar username={auth.username} role={auth.role} handleLogout={handleLogout} />
             <div style={{ display: 'flex' }}>
                 <Sidebar links={sidebarLinks} />
-                <main style={{ flexGrow: 1, padding: '1.5rem', background: '#f7fafc' }}>
+                {/* ✅ replaced inline style with className */}
+                <main className={styles.mainContent}>
                     <Outlet context={{ guests, handleAddGuest }} />
                 </main>
             </div>
@@ -60,6 +65,7 @@ function HotelLayout({ auth, handleLogout }) {
 
 function PoliceLayout({ auth, handleLogout }) {
     const sidebarLinks = [
+        { to: "/police/dashboard", label: "Dashboard" },
         { to: "/police/search", label: "Search Guest" },
         { to: "/police/flags", label: "Flags & Reports" },
         { to: "/police/reports", label: "Case Reports" },
@@ -70,7 +76,8 @@ function PoliceLayout({ auth, handleLogout }) {
             <Navbar username={auth.username} role={auth.role} handleLogout={handleLogout} />
             <div style={{ display: 'flex' }}>
                 <Sidebar links={sidebarLinks} />
-                <main style={{ flexGrow: 1, padding: '1.5rem', background: '#f7fafc' }}>
+                {/* ✅ replaced inline style with className */}
+                <main className={styles.mainContent}>
                     <Outlet />
                 </main>
             </div>
@@ -82,6 +89,7 @@ function RegionalAdminLayout({ auth, handleLogout }) {
     const sidebarLinks = [
         { to: "/regional-admin/dashboard", label: "Dashboard" },
         { to: "/regional-admin/hotels", label: "Manage Hotels" },
+        { to: "/regional-admin/police", label: "Manage Police" },
         { to: "/regional-admin/register", label: "Register User" },
         { to: "/regional-admin/access-logs", label: "Access Logs" },
         { to: "/regional-admin/profile", label: "My Profile" },
@@ -91,7 +99,8 @@ function RegionalAdminLayout({ auth, handleLogout }) {
             <Navbar username={auth.username} role={auth.role} handleLogout={handleLogout} />
             <div style={{ display: 'flex' }}>
                 <Sidebar links={sidebarLinks} />
-                <main style={{ flexGrow: 1, padding: '1.5rem', background: '#f7fafc' }}>
+                {/* ✅ replaced inline style with className */}
+                <main className={styles.mainContent}>
                     <Outlet />
                 </main>
             </div>
@@ -121,18 +130,17 @@ function AppContent() {
         setAuth(null);
         navigate("/login");
     };
-    
+
     return (
         <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login setAuth={setAuth} />} />
-            {/* >> Added route for the password reset page */}
             <Route path="/reset-password" element={<ForcePasswordReset />} />
-            
+
             {/* Protected Routes Wrapper */}
             <Route element={<ProtectedRoute auth={auth} />}>
-                
+
                 {/* === Hotel Routes === */}
                 <Route
                     path="/hotel"
@@ -158,8 +166,10 @@ function AppContent() {
                             : <Navigate to="/" replace />
                     }
                 >
-                    <Route index element={<Navigate to="/police/search" replace />} />
+                    <Route index element={<Navigate to="/police/dashboard" replace />} />
+                    <Route path="dashboard" element={<PoliceDashboard />} />
                     <Route path="search" element={<SearchGuest />} />
+                    <Route path="guest/:guestId" element={<GuestHistory />} />
                     <Route path="flags" element={<FlagsReports />} />
                     <Route path="reports" element={<CaseReports />} />
                     <Route path="profile" element={<ProfilePage />} />
@@ -177,6 +187,7 @@ function AppContent() {
                     <Route index element={<Navigate to="/regional-admin/dashboard" replace />} />
                     <Route path="dashboard" element={<RegionalAdminDashboard />} />
                     <Route path="hotels" element={<ManageHotels />} />
+                    <Route path="police" element={<ManagePolice />} />
                     <Route path="access-logs" element={<AccessLogs />} />
                     <Route path="register" element={<RegisterNewUser />} />
                     <Route path="profile" element={<ProfilePage />} />
@@ -184,16 +195,27 @@ function AppContent() {
 
             </Route>
 
-            {/* Fallback for any other path */}
+            {/* Fallback */}
             <Route path="*" element={<Navigate replace to="/" />} />
         </Routes>
     );
 }
 
-// We need to wrap AppContent in BrowserRouter to use the useNavigate hook
+// Wrap in BrowserRouter
 export default function App() {
     return (
         <BrowserRouter>
+            {/* 2. ADD Toaster here */}
+            <Toaster
+                position="top-right"
+                toastOptions={{
+                    duration: 5000,
+                    style: {
+                        background: '#333',
+                        color: '#fff',
+                    },
+                }}
+            />
             <AppContent />
         </BrowserRouter>
     )

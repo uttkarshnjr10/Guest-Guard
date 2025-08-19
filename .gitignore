@@ -1,60 +1,30 @@
-# Logs
-logs
+# dependencies
+/node_modules
+
+# production build
+/build
+
+# misc
+.DS_Store
+*.pem
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+*.gz
+*.zip
 
-# Diagnostic reports
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+# local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
 
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
+# sensitive files
+*.key
+*.crt
+*.cert
+*.p12
 
-# Dependency directories
-node_modules/
-
-# Build output
-dist/
-build/
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Optional stylelint cache
-.stylelintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
-# TypeScript cache
-*.tsbuildinfo
-*.tsbuildinfo.*
-
-# Coverage directory (for testing tools like Jest)
-coverage/
-
-# Cypress test files
-cypress/videos/
-cypress/screenshots/
-
-# Storybook build outputs
-.out/
-.storybook-out/
-storybook-static/
-
-# VSCode / IDE settings
+# editor directories and files
 .vscode/
 .idea/
 *.suo
@@ -63,13 +33,8 @@ storybook-static/
 *.sln
 *.sw?
 
-# OS-specific files
-.DS_Store
-Thumbs.db
-
-# Local environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# cache
+.npm
+.cache
+.eslintcache
+coverage

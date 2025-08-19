@@ -1,0 +1,128 @@
+.container {
+  padding: 1rem;
+}
+
+.profileHeader {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.profilePhoto {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #e5e7eb;
+}
+
+.profileInfo h1 {
+  margin: 0 0 0.5rem 0;
+  color: #1e40af;
+}
+
+.profileInfo p {
+  margin: 0.25rem 0;
+  color: #4b5563;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.card {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+  color: #111827;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.timelineItem {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 1rem;
+  border-left: 2px solid #e5e7eb;
+}
+.timelineItem:last-child {
+  border-left: 2px solid transparent;
+}
+.timelineItem::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #2563eb;
+}
+
+.timelineContent .hotel {
+  font-weight: 600;
+}
+.timelineContent .dates {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.alertItem {
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+.alertItem.open { background-color: #fef3c7; }
+.alertItem.resolved { background-color: #dcfce7; }
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.remarkForm {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.remarkForm textarea {
+  flex-grow: 1;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem;
+}
+.remarkForm button {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.remarkItem {
+  border-bottom: 1px solid #f3f4f6;
+  padding: 0.75rem 0;
+}
+.remarkItem:last-child {
+  border-bottom: none;
+}
+.remarkItem p { margin: 0 0 0.25rem 0; }
+.remarkItem small { color: #6b7280; }
+
+.error {
+  color: #dc2626;
+  font-weight: 600;
+}

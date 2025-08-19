@@ -1,0 +1,18 @@
+.mainContent {
+  flex-grow: 1;
+  background-color: #f7fafc;
+  min-height: 100vh;
+  box-sizing: border-box;
+
+  /* This is the crucial part */
+  padding: 80px 2rem 2rem; /* 60px for navbar height + 20px top padding */
+  margin-left: 220px; /* Width of your sidebar */
+}
+
+/* Add responsiveness for smaller screens where the sidebar might be hidden */
+@media (max-width: 768px) {
+  .mainContent {
+    margin-left: 0;
+    padding: 80px 1rem 1rem;
+  }
+}
