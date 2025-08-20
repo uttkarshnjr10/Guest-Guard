@@ -30,7 +30,7 @@ export default function Navbar({ username, role, handleLogout }) {
   return (
     <header className={styles.navbar}>
       <div className={styles.logo}>
-        GuestGuard
+        Centralized Data Management
       </div>
       <div className={styles.userInfo}>
         <div className={styles.userDetails}>

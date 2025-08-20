@@ -1,8 +1,8 @@
 // src/App.jsx
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useNavigate } from "react-router-dom";
-import { Toaster } from 'react-hot-toast'; // 1. IMPORT Toaster
-import styles from './AppLayout.module.css'; // ✅ NEW import
+import { Toaster } from 'react-hot-toast'; 
+import styles from './AppLayout.module.css'; 
 
 // --- Page Imports ---
 import Home from "./pages/public/Home";
@@ -206,15 +206,16 @@ export default function App() {
     return (
         <BrowserRouter>
             {/* 2. ADD Toaster here */}
-            <Toaster
-                position="top-right"
+           <Toaster
+                  position="top-center"
+                  reverseOrder={false}
                 toastOptions={{
-                    duration: 5000,
-                    style: {
-                        background: '#333',
-                        color: '#fff',
-                    },
-                }}
+                           duration: 5000,
+                              style: {
+                         background: '#363636',
+                              color: '#fff',
+                           },
+                        }}
             />
             <AppContent />
         </BrowserRouter>

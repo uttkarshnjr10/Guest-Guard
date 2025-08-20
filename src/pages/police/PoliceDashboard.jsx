@@ -1,8 +1,9 @@
+// src/pages/police/PoliceDashboard.jsx
 import React, { useState, useEffect } from "react";
-// ✅ Use apiClient instead of axios
 import apiClient from "../../api/apiClient"; 
 import { Link } from "react-router-dom";
 import styles from "./PoliceDashboard.module.css";
+import NotificationPanel from "../../components/police/NotificationPanel"; // ✅ Import NotificationPanel
 
 // A reusable component for displaying statistics
 const StatCard = ({ title, value, icon }) => (
@@ -27,7 +28,6 @@ export default function PoliceDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // ✅ Much cleaner: apiClient handles token & baseURL automatically
         const { data } = await apiClient.get("/police/dashboard");
         setStats(data);
       } catch (err) {
@@ -44,14 +44,17 @@ export default function PoliceDashboard() {
   if (error) return <p className={styles.error}>{error}</p>;
 
   return (
-    <>
+    <div className={styles.dashboardContainer}>
       <h1>Police Dashboard</h1>
+      
+      {/* ✅ Stats Section */}
       <section className={styles.statsGrid}>
         <StatCard title="Guests Registered Today" value={stats.guestsToday} />
         <StatCard title="Total Registered Hotels" value={stats.totalHotels} />
         <StatCard title="Active Alerts" value={stats.alerts.length} />
       </section>
 
+      {/* ✅ Quick Actions */}
       <section className={styles.section}>
         <h2>Quick Actions</h2>
         <div className={styles.quickActions}>
@@ -64,20 +67,13 @@ export default function PoliceDashboard() {
         </div>
       </section>
 
+    
+
+      {/* ✅ NEW: Notification Panel */}
       <section className={styles.section}>
-        <h2>Recent Alerts</h2>
-        <div className={styles.alertList}>
-          {stats.alerts.length > 0 ? (
-            stats.alerts.map((alert) => (
-              <div key={alert.id} className={styles.alertItem}>
-                {alert.message}
-              </div>
-            ))
-          ) : (
-            <p>No new alerts.</p>
-          )}
-        </div>
+        <h2>Police Notifications</h2>
+        <NotificationPanel />
       </section>
-    </>
+    </div>
   );
 }

@@ -1,8 +1,8 @@
 import React, { useState, useRef, useCallback } from "react";
 import Webcam from "react-webcam";
 import styles from "./GuestRegistrationForm.module.css";
+import { toast } from 'react-hot-toast';
 import { differenceInYears, parseISO, format } from "date-fns";
-//import { jsPDF } from "jspdf";
 
 // ADD THIS HELPER FUNCTION
 function dataURLtoFile(dataurl, filename) {
@@ -67,7 +67,8 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     roomNumber: "",
     idType: "",
     idNumber: "",
-    idImage: null,
+    idImageFront: null,
+    idImageBack: null,
     livePhoto: null,
     guests: initialGuests,
     registrationTimestamp: new Date(),
@@ -77,7 +78,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
   const [form, setForm] = useState(getInitialFormState());
   const [errors, setErrors] = useState({});
   const [isWebcamOpen, setIsWebcamOpen] = useState(false);
-  const [captureFor, setCaptureFor] = useState(null); // {type:'main'|'adult'|'child', index}
+  const [captureFor, setCaptureFor] = useState(null); // {type:'main'|'adult'|'child'|'idFront'|'idBack', index}
 
   // --- Webcam Handlers ---
   const openWebcam = (type, index = null) => {
@@ -91,6 +92,12 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     if (type === "main") {
       setForm((prev) => ({ ...prev, livePhoto: imageSrc }));
       setErrors((prev) => ({ ...prev, livePhoto: null }));
+    } else if (type === "idFront") {
+        setForm((prev) => ({ ...prev, idImageFront: imageSrc }));
+        setErrors((prev) => ({...prev, idImageFront: null}));
+    } else if (type === "idBack") {
+        setForm((prev) => ({...prev, idImageBack: imageSrc }));
+        setErrors((prev) => ({...prev, idImageBack: null}));
     } else if (type === "adult") {
       handleOtherAdultChange(index, "livePhoto", imageSrc);
     } else if (type === "child") {
@@ -113,12 +120,6 @@ export default function GuestRegistrationForm({ onAddGuest }) {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
     setErrors((prev) => ({ ...prev, [name]: null }));
-  };
-
-  const handleFileChange = (e, fieldName) => {
-    const file = e.target.files[0];
-    setForm((prev) => ({ ...prev, [fieldName]: file }));
-    setErrors((prev) => ({ ...prev, [fieldName]: null }));
   };
 
   const handleDobChange = (e) => {
@@ -220,6 +221,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     if (!form.dob) errs.dob = "DOB is required";
     if (!form.gender) errs.gender = "Gender is required";
     if (!form.phone.trim()) errs.phone = "Phone number is required";
+    if (!form.email.trim()) errs.email = "Email is required";
 
     ["state", "district", "city", "pincode"].forEach((field) => {
       if (!form.address[field].trim())
@@ -232,7 +234,8 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     if (!form.roomNumber.trim()) errs.roomNumber = "Room number is required";
     if (!form.idType) errs.idType = "ID type is required";
     if (!form.idNumber.trim()) errs.idNumber = "ID number is required";
-    if (!form.idImage) errs.idImage = "ID image is required";
+    if (!form.idImageFront) errs.idImageFront = "Front of ID is required";
+    if (!form.idImageBack) errs.idImageBack = "Back of ID is required";
     if (!form.livePhoto) errs.livePhoto = "Live photo is required";
 
     form.guests.adults.forEach((g, idx) => {
@@ -247,7 +250,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     form.guests.children.forEach((c, idx) => {
       if (!c.name || !c.name.trim()) errs[`child_name_${idx}`] = "Name required";
       if (!c.dob) errs[`child_dob_${idx}`] = "DOB is required";
-      if (c.age >= 14) {
+      if (c.age >= 10) {
         if (!c.idType) errs[`child_idType_${idx}`] = "ID proof type is required";
         if (!c.idImage) errs[`child_idImage_${idx}`] = "ID image is required";
       }
@@ -257,70 +260,19 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
-  /*
-  // --- Generate PDF E-Receipt ---
-  const generatePdfAndSend = () => {
-    if (!onAddGuest) return;
 
-    const doc = new jsPDF();
-
-    doc.setFontSize(18);
-    doc.text("GuestGuard Hotel Receipt", 20, 20);
-
-    // Main guest details
-    doc.setFontSize(12);
-    doc.text(`Name: ${form.name}`, 20, 40);
-    doc.text(`Age: ${form.age}`, 20, 50);
-    doc.text(`Gender: ${form.gender}`, 20, 60);
-    doc.text(
-      `Address: ${form.address.city}, ${form.address.district}, ${form.address.state} - ${form.address.pincode}`,
-      20,
-      70
-    );
-    doc.text(`Purpose: ${form.purpose}`, 20, 80);
-    doc.text(`Check-in: ${form.checkIn.replace("T", " ")}`, 20, 90);
-    doc.text(`Expected Checkout: ${form.expectedCheckout.replace("T", " ")}`, 20, 100);
-    doc.text(`Room Number: ${form.roomNumber}`, 20, 110);
-    doc.text(`Phone: ${form.phone}`, 20, 120);
-    if (form.email) doc.text(`Email: ${form.email}`, 20, 130);
-
-    doc.text(
-      `Guests: Adults ${form.guests.adults.length}, Children ${form.guests.children.length}`,
-      20,
-      140
-    );
-
-    if (form.guests.adults.length) {
-      doc.text("Other Adults:", 20, 150);
-      form.guests.adults.forEach((g, i) => {
-        doc.text(`- ${g.name} (${g.age})`, 25, 160 + i * 10);
-      });
-    }
-    if (form.guests.children.length) {
-      doc.text("Children:", 20, 160 + form.guests.adults.length * 10 + 10);
-      form.guests.children.forEach((g, i) => {
-        doc.text(`- ${g.name} (${g.age})`, 25, 170 + form.guests.adults.length * 10 + i * 10);
-      });
-    }
-
-    doc.text("Thank you for choosing GuestGuard!", 20, 200);
-
-    doc.save(`GuestReceipt_${form.name.replace(/\s+/g, "_")}_${Date.now()}.pdf`);
-
-    // Simulate sending receipt or SMS by alert
-    alert(`E-receipt generated and downloaded.\nSend this receipt to phone: ${form.phone} (Demo).`);
-  };
-  */
   // --- Form submit ---
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) {
-      alert("Please fill all required fields correctly.");
+     toast.error("Please fill all required fields correctly.");
       return;
     }
 
-    // Convert the webcam photo from a string to a file FIRST
+    // Convert all captured images from dataURL to File
     const livePhotoFile = dataURLtoFile(form.livePhoto, 'livePhoto.jpg');
+    const idImageFrontFile = dataURLtoFile(form.idImageFront, 'idImageFront.jpg');
+    const idImageBackFile = dataURLtoFile(form.idImageBack, 'idImageBack.jpg');
 
     const guestPayload = {
       primaryGuest: {
@@ -333,11 +285,9 @@ export default function GuestRegistrationForm({ onAddGuest }) {
       },
       idType: form.idType,
       idNumber: form.idNumber,
-      
-      // MODIFIED: Pass the File objects
-      idImage: form.idImage,
-      livePhoto: livePhotoFile, // Pass the converted file
-
+      idImageFront: idImageFrontFile,
+      idImageBack: idImageBackFile,
+      livePhoto: livePhotoFile,
       stayDetails: {
         purposeOfVisit: form.purpose,
         checkIn: form.checkIn,
@@ -351,13 +301,12 @@ export default function GuestRegistrationForm({ onAddGuest }) {
       registrationTimestamp: new Date().toISOString(),
     };
     
-    // This now sends a payload where BOTH images are proper files
     onAddGuest && onAddGuest(guestPayload);
 
-    //generatePdfAndSend();
     setForm(getInitialFormState());
     setErrors({});
   };
+
   // --- Render ---
   return (
     <>
@@ -428,15 +377,43 @@ export default function GuestRegistrationForm({ onAddGuest }) {
             </label>
           </div>
           <div className={styles.row}>
-            <label>
-              Upload ID Image *
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileChange(e, "idImage")}
-              />
-              {errors.idImage && <span className={styles.error}>{errors.idImage}</span>}
-            </label>
+            <div className={styles.livePhotoContainer}>
+              <label>ID Proof Front *</label>
+              <button
+                type="button"
+                className={styles.addBtn}
+                onClick={() => openWebcam("idFront")}
+              >
+                Capture Front
+              </button>
+              {form.idImageFront && (
+                <img
+                  src={form.idImageFront}
+                  alt="ID Front Preview"
+                  className={styles.photoPreviewCompact}
+                />
+              )}
+              {errors.idImageFront && <span className={styles.error}>{errors.idImageFront}</span>}
+            </div>
+            
+            <div className={styles.livePhotoContainer}>
+              <label>ID Proof Back *</label>
+              <button
+                type="button"
+                className={styles.addBtn}
+                onClick={() => openWebcam("idBack")}
+              >
+                Capture Back
+              </button>
+              {form.idImageBack && (
+                <img
+                  src={form.idImageBack}
+                  alt="ID Back Preview"
+                  className={styles.photoPreviewCompact}
+                />
+              )}
+              {errors.idImageBack && <span className={styles.error}>{errors.idImageBack}</span>}
+            </div>
 
             <div className={styles.livePhotoContainer}>
               <label>Live Photo *</label>
@@ -451,7 +428,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
                 <img
                   src={form.livePhoto}
                   alt="Live Preview"
-                  className={styles.photoPreviewCompact} /* small thumbnail */
+                  className={styles.photoPreviewCompact}
                 />
               )}
               {errors.livePhoto && <span className={styles.error}>{errors.livePhoto}</span>}
@@ -528,8 +505,9 @@ export default function GuestRegistrationForm({ onAddGuest }) {
             {errors.phone && <span className={styles.error}>{errors.phone}</span>}
           </label>
           <label>
-            Email (optional)
+            Email *
             <input type="email" name="email" value={form.email} onChange={handleChange} />
+            {errors.email && <span className={styles.error}>{errors.email}</span>}
           </label>
         </div>
 

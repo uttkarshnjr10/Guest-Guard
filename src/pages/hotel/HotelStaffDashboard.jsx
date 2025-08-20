@@ -12,7 +12,7 @@ export default function HotelStaffDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Fetches all guests for the hotel
+  // Fetch guests
   const fetchGuests = useCallback(async () => {
     setLoading(true);
     try {
@@ -38,51 +38,51 @@ export default function HotelStaffDashboard() {
     fetchGuests();
   }, [fetchGuests]);
 
-  // Handles new guest registration (including file uploads)
+  // ✅ Handles new guest registration
   const handleAddGuest = async (guestPayload) => {
-    const toastId = toast.loading("Registering guest...");
+    const toastId = toast.loading("Registering new guest...");
     try {
       const formData = new FormData();
 
+      // Append files
+      formData.append("idImageFront", guestPayload.idImageFront);
+      formData.append("idImageBack", guestPayload.idImageBack);
+      formData.append("livePhoto", guestPayload.livePhoto);
+
+
+      // Append structured data
       formData.append("primaryGuest", JSON.stringify(guestPayload.primaryGuest));
-      formData.append("idType", guestPayload.idType);
-      formData.append("idNumber", guestPayload.idNumber);
       formData.append("stayDetails", JSON.stringify(guestPayload.stayDetails));
       formData.append(
         "accompanyingGuests",
         JSON.stringify(guestPayload.accompanyingGuests)
       );
-      formData.append("idImage", guestPayload.idImage);
-      formData.append("livePhoto", guestPayload.livePhoto);
+      formData.append("idType", guestPayload.idType);
+      formData.append("idNumber", guestPayload.idNumber);
 
-      const response = await apiClient.post("/guests/register", formData, {
-        // ✅ let browser set Content-Type with multipart boundary
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      // ✅ Let axios/browser set headers — no manual multipart config
+      const response = await apiClient.post("/guests/register", formData);
 
       setGuests((prevGuests) => [response.data, ...prevGuests]);
       toast.success("Guest registered successfully!", { id: toastId });
     } catch (err) {
+      console.error("Registration failed:", err);
       const errorMessage =
         err.response?.data?.message ||
         err.response?.data?.error ||
-        "Registration failed.";
-      console.error(err);
-      toast.error(`Error: ${errorMessage}`, { id: toastId });
+        "Failed to register guest.";
+      toast.error(errorMessage, { id: toastId });
     }
   };
 
-  // Handles checking out a guest
+  // ✅ Handles checkout
   const handleCheckout = async (guestId) => {
-    if (!window.confirm("Are you sure you want to check out this guest?")) {
-      return;
-    }
+    if (!window.confirm("Are you sure you want to check out this guest?")) return;
 
     const toastId = toast.loading("Checking out guest...");
     try {
       await apiClient.put(`/guests/${guestId}/checkout`);
 
-      // Update UI instantly
       setGuests((prevGuests) =>
         prevGuests.map((guest) =>
           guest._id === guestId ? { ...guest, status: "Checked-Out" } : guest

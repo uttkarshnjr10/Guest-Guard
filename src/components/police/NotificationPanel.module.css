@@ -1,0 +1,83 @@
+/* src/components/police/NotificationPanel.module.css */
+
+.panel {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 2rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.badge {
+    background-color: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.notificationList {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.notificationItem {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.notificationItem:last-child {
+    border-bottom: none;
+}
+
+.notificationItem p {
+    margin: 0 0 10px;
+    color: #444;
+    line-height: 1.5;
+}
+
+.notificationItem.unread p {
+    font-weight: 600;
+    color: #222;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer small {
+    color: #888;
+}
+
+.markReadBtn {
+    background: none;
+    border: 1px solid #007bff;
+    color: #007bff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.markReadBtn:hover {
+    background-color: #007bff;
+    color: #fff;
+}
