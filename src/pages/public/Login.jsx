@@ -120,7 +120,7 @@ export default function Login({ setAuth }) {
         animate="visible"
       >
         <motion.div className={styles.header} variants={itemVariants}>
-          <h2>Centralized Data Managmenet</h2>
+          <h2>Centralized Data Management</h2>
           <p>Secure Access for Authorized Personnel</p>
         </motion.div>
 
