@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion"; 
 import styles from "./Login.module.css";
 
@@ -119,7 +120,7 @@ export default function Login({ setAuth }) {
         animate="visible"
       >
         <motion.div className={styles.header} variants={itemVariants}>
-          <h2>C D M Login</h2>
+          <h2>Centralized Data Managmenet</h2>
           <p>Secure Access for Authorized Personnel</p>
         </motion.div>
 
@@ -164,7 +165,7 @@ export default function Login({ setAuth }) {
 
         <motion.div className={styles.demoInfo} variants={itemVariants}>
           <p>
-            <strong>Login with Valid Credential</strong>
+            <strong>Login with Provided Credential</strong>
           </p>
         </motion.div>
       </motion.div>

@@ -36,7 +36,7 @@ export default function Home() {
           {/* Note: If your app uses state-based navigation instead of routes, 
               you might need to change this Link to a button with an onClick handler. */}
           <Link to="/login" className={styles.ctaButton}>
-            Get Started
+            Get Your Acess
           </Link>
         </div>
       </header>
@@ -65,7 +65,7 @@ export default function Home() {
 
       {/* Footer */}
     <footer className={styles.footer}>
-  <p>© {new Date().getFullYear()} Centralized Hotel Management. All rights reserved.</p>
+  <p>© {new Date().getFullYear()} Centralized Data Management. All rights reserved.</p>
   
 </footer>
     </div>
