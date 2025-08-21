@@ -19,6 +19,7 @@ import FlagsReports from "./pages/police/FlagsReports";
 import CaseReports from "./pages/police/CaseReports";
 import RegionalAdminDashboard from "./pages/admin/RegionalAdminDashboard";
 import ManagePolice from './pages/admin/ManagePolice';
+import ManagePoliceStations from "./pages/admin/ManagePoliceStations";
 import RegisterNewUser from "./pages/admin/RegisterNewUser";
 import ManageHotels from './pages/admin/ManageHotels';
 import AccessLogs from './pages/admin/AccessLogs';
@@ -90,6 +91,7 @@ function RegionalAdminLayout({ auth, handleLogout }) {
         { to: "/regional-admin/dashboard", label: "Dashboard" },
         { to: "/regional-admin/hotels", label: "Manage Hotels" },
         { to: "/regional-admin/police", label: "Manage Police" },
+        { to: "/regional-admin/manage-stations", label: "Manage Stations" },
         { to: "/regional-admin/register", label: "Register User" },
         { to: "/regional-admin/access-logs", label: "Access Logs" },
         { to: "/regional-admin/profile", label: "My Profile" },
@@ -188,6 +190,7 @@ function AppContent() {
                     <Route path="dashboard" element={<RegionalAdminDashboard />} />
                     <Route path="hotels" element={<ManageHotels />} />
                     <Route path="police" element={<ManagePolice />} />
+                    <Route path="manage-stations" element={<ManagePoliceStations />} />
                     <Route path="access-logs" element={<AccessLogs />} />
                     <Route path="register" element={<RegisterNewUser />} />
                     <Route path="profile" element={<ProfilePage />} />

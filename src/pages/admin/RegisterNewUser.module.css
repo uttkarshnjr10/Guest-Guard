@@ -145,3 +145,43 @@
     border-color: #4f46e5;
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
 }
+
+/* Add this at the end of the file */
+.formBox select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 1rem;
+}
+
+.formBox select:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}    
+
+:global(.react-select__control) {
+  border: 1px solid #ccc !important;
+  box-shadow: none !important;
+  padding: 2px;
+  border-radius: 4px !important;
+}
+
+:global(.react-select__control--is-focused) {
+  border-color: #007bff !important;
+}
+
+:global(.react-select__menu) {
+  border-radius: 4px !important;
+  z-index: 2 !important; /* Ensure dropdown appears above other elements */
+}
+
+:global(.react-select__option--is-focused) {
+  background-color: #deebff !important;
+}
+
+:global(.react-select__option--is-selected) {
+  background-color: #007bff !important;
+  color: white !important;
+}

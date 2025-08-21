@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Select from 'react-select';
 import styles from "./RegisterNewUser.module.css";
+import { toast } from 'react-hot-toast';
 
 const USER_TYPES = {
   HOTEL: "Hotel",
@@ -8,21 +10,54 @@ const USER_TYPES = {
 };
 
 const initialHotelState = { name: "", city: "", address: "", license: "", contact: "" };
-const initialPoliceState = { station: "", jurisdiction: "", city: "", contact: "" };
+const initialPoliceState = { station: "", jurisdiction: "", city: "", contact: "", policeStation: "" };
 
 export default function RegisterNewUser() {
   const [userType, setUserType] = useState(USER_TYPES.HOTEL);
   const [formData, setFormData] = useState(initialHotelState);
-  
+  const [policeStations, setPoliceStations] = useState([]);
+  const [stationsLoading, setStationsLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [successData, setSuccessData] = useState(null);
 
+  useEffect(() => {
+    const fetchPoliceStations = async () => {
+      setStationsLoading(true);
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/stations`;
+        const { data } = await axios.get(apiUrl, config);
+        const formattedStations = data.map(station => ({
+          value: station._id,
+          label: station.name
+        }));
+        setPoliceStations(formattedStations);
+      } catch (err) {
+        console.error("Failed to fetch police stations", err);
+        setError("Could not load police stations. Please refresh.");
+      } finally {
+        setStationsLoading(false);
+      }
+    };
+
+    fetchPoliceStations();
+  }, []);
+
   const handleTypeChange = (newUserType) => {
     setUserType(newUserType);
-    setFormData(newUserType === USER_TYPES.HOTEL ? initialHotelState : initialPoliceState);
+    const initialState = newUserType === USER_TYPES.HOTEL ? initialHotelState : initialPoliceState;
+    setFormData(initialState);
     setError("");
     setSuccessData(null);
+  };
+
+  const handleSelectChange = (selectedOption) => {
+    setFormData(prevData => ({ ...prevData, policeStation: selectedOption.value }));
+    setError("");
   };
 
   const handleChange = (e) => {
@@ -33,6 +68,7 @@ export default function RegisterNewUser() {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
+    toast.success("Copied to clipboard!");
   };
 
   const handleResetForm = () => {
@@ -47,12 +83,26 @@ export default function RegisterNewUser() {
     setError("");
     setSuccessData(null);
 
+    const toastId = toast.loading('Registering user...');
+
+    const { policeStation, ...otherDetails } = formData;
+
     const payload = {
       role: userType,
       email: formData.contact,
       username: (formData.name || formData.station).toLowerCase().replace(/\s+/g, ''),
-      details: { ...formData }
+      details: otherDetails,
     };
+
+    if (userType === USER_TYPES.POLICE) {
+      if (!policeStation) {
+        setError("Please select a police station.");
+        setIsLoading(false);
+        toast.error("Please select a police station.", { id: toastId });
+        return;
+      }
+      payload.policeStation = policeStation;
+    }
 
     try {
       const token = localStorage.getItem('authToken');
@@ -62,15 +112,18 @@ export default function RegisterNewUser() {
       const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/users/register`;
       const response = await axios.post(apiUrl, payload, config);
 
-      // >> FIX: Use the success message from the API response
+      toast.success(response.data.message, { id: toastId });
+
       setSuccessData({
-        message: response.data.message, // "User created successfully. Credentials have been emailed."
+        message: "User Registered Successfully!",
         username: response.data.username,
         password: response.data.temporaryPassword
       });
       
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "An error occurred.");
+      const errorMessage = err.response?.data?.message || err.message || "An error occurred.";
+      setError(errorMessage);
+      toast.error(errorMessage, { id: toastId });
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +133,6 @@ export default function RegisterNewUser() {
     return (
       <main className={styles.mainContent}>
         <div className={styles.credentialBox}>
-          {/* >> Display the dynamic success message from the backend */}
           <h3>{successData.message}</h3>
           <p className={styles.credentialInfo}>
             The credentials are also displayed below as a backup.
@@ -136,6 +188,18 @@ export default function RegisterNewUser() {
         ) : (
           <>
             <div className={styles.formRow}><label>Station Name *</label><input name="station" required value={formData.station} onChange={handleChange} /></div>
+            <div className={styles.formRow}>
+              <label>Assign to Police Station *</label>
+              <Select
+                options={policeStations}
+                onChange={handleSelectChange}
+                isLoading={stationsLoading}
+                placeholder="Search and select a station..."
+                noOptionsMessage={() => 'No stations found. Add one in "Manage Stations".'}
+                classNamePrefix="react-select"
+                required
+              />
+            </div>
             <div className={styles.formRow}><label>Jurisdiction *</label><input name="jurisdiction" required value={formData.jurisdiction} onChange={handleChange} /></div>
             <div className={styles.formRow}><label>City *</label><input name="city" required value={formData.city} onChange={handleChange} /></div>
             <div className={styles.formRow}><label>Contact Email *</label><input name="contact" type="email" required value={formData.contact} onChange={handleChange} /></div>
