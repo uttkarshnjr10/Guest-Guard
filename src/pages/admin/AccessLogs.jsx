@@ -1,42 +1,41 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import apiClient from '../../api/apiClient';
+import styles from './AccessLogs.module.css';
 import { format } from 'date-fns';
-import apiClient from "../../api/apiClient";
-import styles from "./AccessLogs.module.css";
+import { toast } from 'react-hot-toast';
+import TableSkeletonLoader from '../../components/common/TableSkeletonLoader';
 
 export default function AccessLogs() {
   const [logs, setLogs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const fetchLogs = async () => {
+    setIsLoading(true);
+    try {
+      const { data } = await apiClient.get('/users/admin/logs', {
+        params: { searchTerm },
+      });
+      setLogs(data);
+    } catch  {
+      toast.error('Failed to fetch access logs.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // We'll set a timer to only fetch data after the user stops typing
-    const timer = setTimeout(() => {
-        setLoading(true);
-        const fetchLogs = async () => {
-          try {
-            // Pass the searchTerm as a query parameter
-            const { data } = await apiClient.get('/users/admin/logs', {
-                params: { searchTerm }
-            });
-            setLogs(data);
-          } catch (err) {
-            setError(err.response?.data?.message || 'Failed to fetch access logs.');
-          } finally {
-            setLoading(false);
-          }
-        };
-        fetchLogs();
-    }, 500); // 500ms delay
+    const debounceFetch = setTimeout(() => {
+      fetchLogs();
+    }, 300);
+    return () => clearTimeout(debounceFetch);
+  }, [searchTerm]);
 
-    return () => clearTimeout(timer); // Cleanup timer on unmount or re-render
-  }, [searchTerm]); // Re-run this effect whenever the searchTerm changes
+  const LOGS_TABLE_COLUMNS = 5;
 
   return (
-    <main>
-      <header>
-        <h1>System Access Logs</h1>
-      </header>
+    <div className={styles.container}>
+      <h1>Access Logs</h1>
       <div className={styles.filtersRow}>
         <input
           type="text"
@@ -47,10 +46,9 @@ export default function AccessLogs() {
         />
       </div>
 
-      {loading && <p>Loading logs...</p>}
-      {error && <p className={styles.error}>{error}</p>}
-      
-      {!loading && !error && (
+      {isLoading ? (
+        <TableSkeletonLoader columns={LOGS_TABLE_COLUMNS} />
+      ) : (
         <table className={styles.logsTable}>
           <thead>
             <tr>
@@ -62,20 +60,24 @@ export default function AccessLogs() {
             </tr>
           </thead>
           <tbody>
-            {logs.length > 0 ? logs.map((log) => (
-              <tr key={log._id}>
-                <td>{format(new Date(log.timestamp), 'dd MMM yyyy, HH:mm:ss')}</td>
-                <td>{log.user?.username || 'N/A'}</td>
-                <td>{log.user?.role || 'N/A'}</td>
-                <td>{log.action}</td>
-                <td>{log.reason || log.searchQuery || 'N/A'}</td>
+            {logs.length > 0 ? (
+              logs.map((log) => (
+                <tr key={log._id}>
+                  <td>{format(new Date(log.timestamp), 'dd MMM yyyy, HH:mm:ss')}</td>
+                  <td>{log.user?.username || 'N/A'}</td>
+                  <td>{log.user?.role || 'N/A'}</td>
+                  <td>{log.action || 'N/A'}</td>
+                  <td>{log.reason || log.searchQuery || 'N/A'}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={LOGS_TABLE_COLUMNS}>No logs found.</td>
               </tr>
-            )) : (
-              <tr><td colSpan="5">No logs found matching your criteria.</td></tr>
             )}
           </tbody>
         </table>
       )}
-    </main>
+    </div>
   );
 }

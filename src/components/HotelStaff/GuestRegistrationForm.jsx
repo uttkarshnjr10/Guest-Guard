@@ -1,10 +1,11 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react"; // 1. Imported useEffect
 import Webcam from "react-webcam";
 import styles from "./GuestRegistrationForm.module.css";
 import { toast } from 'react-hot-toast';
 import { differenceInYears, parseISO, format } from "date-fns";
+import apiClient from "../../api/apiClient"; // 2. Imported apiClient
 
-// ADD THIS HELPER FUNCTION
+// Helper Function: Converts a dataURL (from webcam) to a File object
 function dataURLtoFile(dataurl, filename) {
   let arr = dataurl.split(','),
     mime = arr[0].match(/:(.*?);/)[1],
@@ -17,8 +18,25 @@ function dataURLtoFile(dataurl, filename) {
   return new File([u8arr], filename, { type: mime });
 }
 
+// 3. ADDED: Component to display the AI verification status
+const VerificationStatus = ({ status }) => {
+  if (!status.state) return null;
+
+  if (status.state === 'verifying') {
+    return <div className={styles.statusVerifying}>🔎 Verifying ID...</div>;
+  }
+  if (status.state === 'success') {
+    return <div className={styles.statusSuccess}>✅ {status.message}</div>;
+  }
+  if (status.state === 'failed') {
+    return <div className={styles.statusFailed}>⚠️ {status.message}</div>;
+  }
+  return null;
+};
+
+
 // Webcam Modal for live photo capture
-const WebcamModal = ({ onCapture, onCancel }) => {
+const WebcamModal = ({ onCapture, onCancel, videoConstraints }) => { // Added videoConstraints prop
   const webcamRef = useRef(null);
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
@@ -33,7 +51,7 @@ const WebcamModal = ({ onCapture, onCancel }) => {
           ref={webcamRef}
           screenshotFormat="image/jpeg"
           width="100%"
-          videoConstraints={{ facingMode: "user" }}
+          videoConstraints={videoConstraints}
         />
         <div className={styles.webcamControls}>
           <button type="button" onClick={capture} className={styles.captureBtn}>
@@ -49,28 +67,14 @@ const WebcamModal = ({ onCapture, onCancel }) => {
 };
 
 export default function GuestRegistrationForm({ onAddGuest }) {
-  // Initial state for guests sub-objects
+  // Your initial state functions remain the same
   const initialGuests = { adults: [], children: [] };
-
-  // Initial form state
   const getInitialFormState = () => ({
-    name: "",
-    dob: "",
-    age: "",
-    gender: "",
-    phone: "",
-    email: "",
+    name: "", dob: "", age: "", gender: "", phone: "", email: "",
     address: { state: "", district: "", city: "", pincode: "" },
-    purpose: "",
-    checkIn: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-    expectedCheckout: "",
-    roomNumber: "",
-    idType: "",
-    idNumber: "",
-    idImageFront: null,
-    idImageBack: null,
-    livePhoto: null,
-    guests: initialGuests,
+    purpose: "", checkIn: format(new Date(), "yyyy-MM-dd'T'HH:mm"), expectedCheckout: "",
+    roomNumber: "", idType: "", idNumber: "", idImageFront: null,
+    idImageBack: null, livePhoto: null, guests: initialGuests,
     registrationTimestamp: new Date(),
   });
 
@@ -78,7 +82,10 @@ export default function GuestRegistrationForm({ onAddGuest }) {
   const [form, setForm] = useState(getInitialFormState());
   const [errors, setErrors] = useState({});
   const [isWebcamOpen, setIsWebcamOpen] = useState(false);
-  const [captureFor, setCaptureFor] = useState(null); // {type:'main'|'adult'|'child'|'idFront'|'idBack', index}
+  const [captureFor, setCaptureFor] = useState(null);
+  
+  // 4. ADDED: State to manage the AI verification process
+  const [verification, setVerification] = useState({ state: null, message: '' });
 
   // --- Webcam Handlers ---
   const openWebcam = (type, index = null) => {
@@ -89,10 +96,12 @@ export default function GuestRegistrationForm({ onAddGuest }) {
   const handleCapture = (imageSrc) => {
     if (!captureFor) return;
     const { type, index } = captureFor;
+    
     if (type === "main") {
       setForm((prev) => ({ ...prev, livePhoto: imageSrc }));
       setErrors((prev) => ({ ...prev, livePhoto: null }));
     } else if (type === "idFront") {
+        setVerification({ state: null, message: '' }); // Reset on new capture
         setForm((prev) => ({ ...prev, idImageFront: imageSrc }));
         setErrors((prev) => ({...prev, idImageFront: null}));
     } else if (type === "idBack") {
@@ -103,11 +112,62 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     } else if (type === "child") {
       handleChildChange(index, "livePhoto", imageSrc);
     }
+    
     setIsWebcamOpen(false);
     setCaptureFor(null);
   };
 
-  // --- General Handlers ---
+  // 5. ADDED: useEffect for real-time ID verification
+  useEffect(() => {
+    const verifyNameAndId = async () => {
+      // Trigger only when we have both a name and a front ID image
+      if (form.idImageFront && form.name) {
+        setVerification({ state: 'verifying', message: '' });
+        try {
+          // Step 1: Upload the captured image to get a URL
+          const imageFile = dataURLtoFile(form.idImageFront, 'id_front.jpg');
+          const formData = new FormData();
+          formData.append('image', imageFile);
+
+          const uploadRes = await apiClient.post('/upload/single-image', formData);
+          const { imageUrl } = uploadRes.data;
+
+          if (!imageUrl) {
+            throw new Error('Image URL not received from server.');
+          }
+
+          // Step 2: Call the verification endpoint with the image URL and name
+          const verifyRes = await apiClient.post('/verify/id-text', {
+            imageUrl,
+            nameEntered: form.name
+          });
+
+          const { match, message } = verifyRes.data;
+          setVerification({
+              state: match ? 'success' : 'failed',
+              message: message
+          });
+
+        } catch (error) {
+          const errorMessage = error.response?.data?.message || 'Verification failed.';
+          setVerification({ state: 'failed', message: errorMessage });
+          toast.error(errorMessage);
+        }
+      }
+    };
+    
+    // Debounce to avoid firing on every keystroke
+    const timer = setTimeout(() => {
+        verifyNameAndId();
+    }, 1000); 
+
+    return () => clearTimeout(timer); // Cleanup timer
+
+  }, [form.idImageFront, form.name]);
+
+
+  // --- All your other handler functions (handleChange, handleDobChange, adults, children, validate, handleSubmit) remain unchanged ---
+  // ...
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name.startsWith("address.")) {
@@ -133,7 +193,6 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     }
   };
 
-  // --- Other Adults Handlers ---
   const addOtherAdult = () =>
     setForm((prev) => ({
       ...prev,
@@ -174,7 +233,6 @@ export default function GuestRegistrationForm({ onAddGuest }) {
   const handleOtherAdultFileChange = (idx, e, fieldName) =>
     handleOtherAdultChange(idx, fieldName, e.target.files[0]);
 
-  // --- Children Handlers ---
   const addChild = () =>
     setForm((prev) => ({
       ...prev,
@@ -214,8 +272,8 @@ export default function GuestRegistrationForm({ onAddGuest }) {
 
   const handleChildFileChange = (idx, e, fieldName) => handleChildChange(idx, fieldName, e.target.files[0]);
 
-  // --- Validation function ---
   const validate = () => {
+    // Your existing validation logic is perfect and remains unchanged.
     const errs = {};
     if (!form.name.trim()) errs.name = "Full name is required";
     if (!form.dob) errs.dob = "DOB is required";
@@ -261,19 +319,16 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     return Object.keys(errs).length === 0;
   };
 
-  // --- Form submit ---
   const handleSubmit = (e) => {
+    // Your existing submit logic is perfect and remains unchanged.
     e.preventDefault();
     if (!validate()) {
-     toast.error("Please fill all required fields correctly.");
+      toast.error("Please fill all required fields correctly.");
       return;
     }
-
-    // Convert all captured images from dataURL to File
     const livePhotoFile = dataURLtoFile(form.livePhoto, 'livePhoto.jpg');
     const idImageFrontFile = dataURLtoFile(form.idImageFront, 'idImageFront.jpg');
     const idImageBackFile = dataURLtoFile(form.idImageBack, 'idImageBack.jpg');
-
     const guestPayload = {
       primaryGuest: {
         name: form.name,
@@ -300,11 +355,18 @@ export default function GuestRegistrationForm({ onAddGuest }) {
       },
       registrationTimestamp: new Date().toISOString(),
     };
-    
     onAddGuest && onAddGuest(guestPayload);
-
     setForm(getInitialFormState());
     setErrors({});
+  };
+  // ...
+  
+  // Determine camera facing mode based on capture type
+  const getCameraFacingMode = () => {
+    if (captureFor?.type === 'idFront' || captureFor?.type === 'idBack') {
+      return "environment"; // Use back camera for documents
+    }
+    return "user"; // Use front camera for selfies
   };
 
   // --- Render ---
@@ -314,6 +376,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
         <WebcamModal
           onCapture={handleCapture}
           onCancel={() => setIsWebcamOpen(false)}
+          videoConstraints={{ facingMode: getCameraFacingMode() }}
         />
       )}
 
@@ -321,6 +384,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
         {/* MAIN GUEST DETAILS */}
         <fieldset>
           <legend>Main Guest Details</legend>
+          {/* ...your existing name, dob, age, gender fields... */}
           <div className={styles.row}>
             <label>
               Full Name *
@@ -329,13 +393,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
             </label>
             <label>
               Date of Birth *
-              <input
-                type="date"
-                name="dob"
-                max={format(new Date(), "yyyy-MM-dd")}
-                value={form.dob}
-                onChange={handleDobChange}
-              />
+              <input type="date" name="dob" max={format(new Date(), "yyyy-MM-dd")} value={form.dob} onChange={handleDobChange}/>
               {errors.dob && <span className={styles.error}>{errors.dob}</span>}
             </label>
             <label>
@@ -359,22 +417,23 @@ export default function GuestRegistrationForm({ onAddGuest }) {
         <fieldset>
           <legend>ID & Photo Proof (Main Guest)</legend>
           <div className={styles.row}>
-            <label>
-              ID Proof Type *
-              <select name="idType" value={form.idType} onChange={handleChange}>
-                <option value="">Select</option>
-                <option>Aadhaar</option>
-                <option>Passport</option>
-                <option>Voter ID</option>
-                <option>Driving License</option>
-              </select>
-              {errors.idType && <span className={styles.error}>{errors.idType}</span>}
-            </label>
-            <label>
-              ID Number *
-              <input type="text" name="idNumber" value={form.idNumber} onChange={handleChange} />
-              {errors.idNumber && <span className={styles.error}>{errors.idNumber}</span>}
-            </label>
+              {/*...your ID type and number fields...*/}
+              <label>
+                ID Proof Type *
+                <select name="idType" value={form.idType} onChange={handleChange}>
+                  <option value="">Select</option>
+                  <option>Aadhaar</option>
+                  <option>Passport</option>
+                  <option>Voter ID</option>
+                  <option>Driving License</option>
+                </select>
+                {errors.idType && <span className={styles.error}>{errors.idType}</span>}
+              </label>
+              <label>
+                ID Number *
+                <input type="text" name="idNumber" value={form.idNumber} onChange={handleChange} />
+                {errors.idNumber && <span className={styles.error}>{errors.idNumber}</span>}
+              </label>
           </div>
           <div className={styles.row}>
             <div className={styles.livePhotoContainer}>
@@ -394,374 +453,63 @@ export default function GuestRegistrationForm({ onAddGuest }) {
                 />
               )}
               {errors.idImageFront && <span className={styles.error}>{errors.idImageFront}</span>}
+              
+              {/* 6. ADDED: Display the verification status here */}
+              <VerificationStatus status={verification} />
             </div>
             
+            {/*...your existing ID back and Live Photo sections...*/}
             <div className={styles.livePhotoContainer}>
               <label>ID Proof Back *</label>
-              <button
-                type="button"
-                className={styles.addBtn}
-                onClick={() => openWebcam("idBack")}
-              >
+              <button type="button" className={styles.addBtn} onClick={() => openWebcam("idBack")}>
                 Capture Back
               </button>
               {form.idImageBack && (
-                <img
-                  src={form.idImageBack}
-                  alt="ID Back Preview"
-                  className={styles.photoPreviewCompact}
-                />
+                <img src={form.idImageBack} alt="ID Back Preview" className={styles.photoPreviewCompact}/>
               )}
               {errors.idImageBack && <span className={styles.error}>{errors.idImageBack}</span>}
             </div>
 
             <div className={styles.livePhotoContainer}>
               <label>Live Photo *</label>
-              <button
-                type="button"
-                className={styles.addBtn}
-                onClick={() => openWebcam("main")}
-              >
+              <button type="button" className={styles.addBtn} onClick={() => openWebcam("main")}>
                 Take Live Photo
               </button>
               {form.livePhoto && (
-                <img
-                  src={form.livePhoto}
-                  alt="Live Preview"
-                  className={styles.photoPreviewCompact}
-                />
+                <img src={form.livePhoto} alt="Live Preview" className={styles.photoPreviewCompact}/>
               )}
               {errors.livePhoto && <span className={styles.error}>{errors.livePhoto}</span>}
             </div>
           </div>
         </fieldset>
 
-        {/* ADDRESS */}
+        {/* --- All other fieldsets (Address, Purpose, Adults, Children) and the submit button remain exactly the same. --- */}
+        {/* ... */}
         <fieldset>
           <legend>Address *</legend>
           <div className={styles.row}>
-            <label>
-              State *
-              <input type="text" name="address.state" value={form.address.state} onChange={handleChange} />
-              {errors["address.state"] && <span className={styles.error}>{errors["address.state"]}</span>}
-            </label>
-            <label>
-              District *
-              <input type="text" name="address.district" value={form.address.district} onChange={handleChange} />
-              {errors["address.district"] && <span className={styles.error}>{errors["address.district"]}</span>}
-            </label>
-            <label>
-              City *
-              <input type="text" name="address.city" value={form.address.city} onChange={handleChange} />
-              {errors["address.city"] && <span className={styles.error}>{errors["address.city"]}</span>}
-            </label>
-            <label>
-              Pin Code *
-              <input type="text" name="address.pincode" value={form.address.pincode} onChange={handleChange} />
-              {errors["address.pincode"] && <span className={styles.error}>{errors["address.pincode"]}</span>}
-            </label>
+            <label>State *<input type="text" name="address.state" value={form.address.state} onChange={handleChange} />{errors["address.state"] && <span className={styles.error}>{errors["address.state"]}</span>}</label>
+            <label>District *<input type="text" name="address.district" value={form.address.district} onChange={handleChange} />{errors["address.district"] && <span className={styles.error}>{errors["address.district"]}</span>}</label>
+            <label>City *<input type="text" name="address.city" value={form.address.city} onChange={handleChange} />{errors["address.city"] && <span className={styles.error}>{errors["address.city"]}</span>}</label>
+            <label>Pin Code *<input type="text" name="address.pincode" value={form.address.pincode} onChange={handleChange} />{errors["address.pincode"] && <span className={styles.error}>{errors["address.pincode"]}</span>}</label>
           </div>
         </fieldset>
-
-        {/* Purpose */}
-        <label>
-          Purpose of Visit *
-          <textarea
-            name="purpose"
-            value={form.purpose}
-            onChange={handleChange}
-            rows={2}
-            placeholder="Why did you come to this area?"
-          />
-          {errors.purpose && <span className={styles.error}>{errors.purpose}</span>}
-        </label>
-
-        {/* Check-in and Expected Checkout */}
+        <label>Purpose of Visit *<textarea name="purpose" value={form.purpose} onChange={handleChange} rows={2} placeholder="Why did you come to this area?" />{errors.purpose && <span className={styles.error}>{errors.purpose}</span>}</label>
         <div className={styles.row}>
-          <label>
-            Check-In Time *
-            <input type="datetime-local" name="checkIn" value={form.checkIn} onChange={handleChange} />
-            {errors.checkIn && <span className={styles.error}>{errors.checkIn}</span>}
-          </label>
-          <label>
-            Expected Checkout *
-            <input type="datetime-local" name="expectedCheckout" value={form.expectedCheckout} onChange={handleChange} />
-            {errors.expectedCheckout && <span className={styles.error}>{errors.expectedCheckout}</span>}
-          </label>
+          <label>Check-In Time *<input type="datetime-local" name="checkIn" value={form.checkIn} onChange={handleChange} />{errors.checkIn && <span className={styles.error}>{errors.checkIn}</span>}</label>
+          <label>Expected Checkout *<input type="datetime-local" name="expectedCheckout" value={form.expectedCheckout} onChange={handleChange} />{errors.expectedCheckout && <span className={styles.error}>{errors.expectedCheckout}</span>}</label>
         </div>
-
-        {/* Room Number */}
-        <label>
-          Allocated Hotel Room Number *
-          <input type="text" name="roomNumber" value={form.roomNumber} onChange={handleChange} />
-          {errors.roomNumber && <span className={styles.error}>{errors.roomNumber}</span>}
-        </label>
-
-        {/* Contact Phones */}
+        <label>Allocated Hotel Room Number *<input type="text" name="roomNumber" value={form.roomNumber} onChange={handleChange} />{errors.roomNumber && <span className={styles.error}>{errors.roomNumber}</span>}</label>
         <div className={styles.row}>
-          <label>
-            Phone Number *
-            <input type="tel" name="phone" value={form.phone} onChange={handleChange} />
-            {errors.phone && <span className={styles.error}>{errors.phone}</span>}
-          </label>
-          <label>
-            Email *
-            <input type="email" name="email" value={form.email} onChange={handleChange} />
-            {errors.email && <span className={styles.error}>{errors.email}</span>}
-          </label>
+          <label>Phone Number *<input type="tel" name="phone" value={form.phone} onChange={handleChange} />{errors.phone && <span className={styles.error}>{errors.phone}</span>}</label>
+          <label>Email *<input type="email" name="email" value={form.email} onChange={handleChange} />{errors.email && <span className={styles.error}>{errors.email}</span>}</label>
         </div>
+        <fieldset><legend>Other Accompanying Adults</legend>{form.guests.adults.map((guest, idx) => ( <div key={idx} className={styles.guestDetailsRow}><button type="button" className={styles.removeBtn} onClick={() => removeOtherAdult(idx)} title="Remove Adult">Remove</button><label>Name *<input type="text" value={guest.name || ""} onChange={(e) => handleOtherAdultChange(idx, "name", e.target.value)}/>{errors[`adult_name_${idx}`] && <span className={styles.error}>{errors[`adult_name_${idx}`]}</span>}</label><label>Date of Birth *<input type="date" max={format(new Date(), "yyyy-MM-dd")} value={guest.dob || ""} onChange={(e) => handleOtherAdultChange(idx, "dob", e.target.value)}/>{errors[`adult_dob_${idx}`] && <span className={styles.error}>{errors[`adult_dob_${idx}`]}</span>}</label><label>Age<input type="number" value={guest.age || ""} readOnly /></label><label>Gender *<select value={guest.gender || ""} onChange={(e) => handleOtherAdultChange(idx, "gender", e.target.value)}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>{errors[`adult_gender_${idx}`] && <span className={styles.error}>{errors[`adult_gender_${idx}`]}</span>}</label><label>ID Proof Type *<select value={guest.idType || ""} onChange={(e) => handleOtherAdultChange(idx, "idType", e.target.value)}><option value="">Select</option><option>Aadhaar</option><option>Passport</option><option>Voter ID</option><option>Driving License</option></select>{errors[`adult_idType_${idx}`] && <span className={styles.error}>{errors[`adult_idType_${idx}`]}</span>}</label><label>ID Number *<input type="text" value={guest.idNumber || ""} onChange={(e) => handleOtherAdultChange(idx, "idNumber", e.target.value)}/>{errors[`adult_idNumber_${idx}`] && <span className={styles.error}>{errors[`adult_idNumber_${idx}`]}</span>}</label><label>Upload ID Image *<input type="file" accept="image/*" onChange={(e) => handleOtherAdultFileChange(idx, e, "idImage")}/>{errors[`adult_idImage_${idx}`] && <span className={styles.error}>{errors[`adult_idImage_${idx}`]}</span>}</label><div className={styles.livePhotoContainer}><label>Live Photo *</label><button type="button" className={styles.addBtn} onClick={() => openWebcam("adult", idx)}>Take Live Photo</button>{guest.livePhoto && <img src={guest.livePhoto} alt="Adult Live" className={styles.photoPreviewCompact}/>}{errors[`adult_livePhoto_${idx}`] && <span className={styles.error}>{errors[`adult_livePhoto_${idx}`]}</span>}</div></div>))}<button type="button" className={styles.addBtn} onClick={addOtherAdult}>+ Add Adult</button></fieldset>
+        <fieldset><legend>Accompanying Children</legend>{form.guests.children.map((child, idx) => ( <div key={idx} className={styles.guestDetailsRow}><button type="button" className={styles.removeBtn} onClick={() => removeChild(idx)} title="Remove Child">Remove</button><label>Child's Name *<input type="text" value={child.name || ""} onChange={(e) => handleChildChange(idx, "name", e.target.value)}/>{errors[`child_name_${idx}`] && <span className={styles.error}>{errors[`child_name_${idx}`]}</span>}</label><label>Date of Birth *<input type="date" max={format(new Date(), "yyyy-MM-dd")} value={child.dob || ""} onChange={(e) => handleChildChange(idx, "dob", e.target.value)}/>{errors[`child_dob_${idx}`] && <span className={styles.error}>{errors[`child_dob_${idx}`]}</span>}</label><label>Age<input type="number" value={child.age || ""} readOnly /></label><label>Gender *<select value={child.gender || ""} onChange={(e) => handleChildChange(idx, "gender", e.target.value)}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>{errors[`child_gender_${idx}`] && <span className={styles.error}>{errors[`child_gender_${idx}`]}</span>}</label>{parseInt(child.age) >= 14 && <> <label>ID Type *<select value={child.idType || ""} onChange={(e) => handleChildChange(idx, "idType", e.target.value)}><option value="">Select</option><option>Aadhaar</option><option>School ID</option><option>Passport</option></select>{errors[`child_idType_${idx}`] && <span className={styles.error}>{errors[`child_idType_${idx}`]}</span>}</label><label>Upload ID Image *<input type="file" accept="image/*" onChange={(e) => handleChildFileChange(idx, e, "idImage")}/>{errors[`child_idImage_${idx}`] && <span className={styles.error}>{errors[`child_idImage_${idx}`]}</span>}</label> </>}<div className={styles.livePhotoContainer}><label>Live Photo *</label><button type="button" className={styles.addBtn} onClick={() => openWebcam("child", idx)}>Take Live Photo</button>{child.livePhoto && <img src={child.livePhoto} alt="Child Live" className={styles.photoPreviewCompact}/>}{errors[`child_livePhoto_${idx}`] && <span className={styles.error}>{errors[`child_livePhoto_${idx}`]}</span>}</div>
+        </div>))}<button type="button" className={styles.addBtn} onClick={addChild}>+ Add Child</button></fieldset>
 
-        {/* Other Adults */}
-        <fieldset>
-          <legend>Other Accompanying Adults</legend>
-          {form.guests.adults.map((guest, idx) => (
-            <div key={idx} className={styles.guestDetailsRow}>
-              <button
-                type="button"
-                className={styles.removeBtn}
-                onClick={() => removeOtherAdult(idx)}
-                title="Remove Adult"
-              >
-                Remove
-              </button>
-
-              <label>
-                Name *
-                <input
-                  type="text"
-                  value={guest.name || ""}
-                  onChange={(e) => handleOtherAdultChange(idx, "name", e.target.value)}
-                />
-                {errors[`adult_name_${idx}`] && (
-                  <span className={styles.error}>{errors[`adult_name_${idx}`]}</span>
-                )}
-              </label>
-
-              <label>
-                Date of Birth *
-                <input
-                  type="date"
-                  max={format(new Date(), "yyyy-MM-dd")}
-                  value={guest.dob || ""}
-                  onChange={(e) => handleOtherAdultChange(idx, "dob", e.target.value)}
-                />
-                {errors[`adult_dob_${idx}`] && (
-                  <span className={styles.error}>{errors[`adult_dob_${idx}`]}</span>
-                )}
-              </label>
-
-              <label>
-                Age
-                <input type="number" value={guest.age || ""} readOnly />
-              </label>
-
-              <label>
-                Gender *
-                <select
-                  value={guest.gender || ""}
-                  onChange={(e) => handleOtherAdultChange(idx, "gender", e.target.value)}
-                >
-                  <option value="">Select</option>
-                  <option>Male</option>
-                  <option>Female</option>
-                  <option>Other</option>
-                </select>
-                {errors[`adult_gender_${idx}`] && (
-                  <span className={styles.error}>{errors[`adult_gender_${idx}`]}</span>
-                )}
-              </label>
-
-              <label>
-                ID Proof Type *
-                <select
-                  value={guest.idType || ""}
-                  onChange={(e) => handleOtherAdultChange(idx, "idType", e.target.value)}
-                >
-                  <option value="">Select</option>
-                  <option>Aadhaar</option>
-                  <option>Passport</option>
-                  <option>Voter ID</option>
-                  <option>Driving License</option>
-                </select>
-                {errors[`adult_idType_${idx}`] && (
-                  <span className={styles.error}>{errors[`adult_idType_${idx}`]}</span>
-                )}
-              </label>
-
-              <label>
-                ID Number *
-                <input
-                  type="text"
-                  value={guest.idNumber || ""}
-                  onChange={(e) => handleOtherAdultChange(idx, "idNumber", e.target.value)}
-                />
-                {errors[`adult_idNumber_${idx}`] && (
-                  <span className={styles.error}>{errors[`adult_idNumber_${idx}`]}</span>
-                )}
-              </label>
-
-              <label>
-                Upload ID Image *
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleOtherAdultFileChange(idx, e, "idImage")}
-                />
-                {errors[`adult_idImage_${idx}`] && (
-                  <span className={styles.error}>{errors[`adult_idImage_${idx}`]}</span>
-                )}
-              </label>
-
-              <div className={styles.livePhotoContainer}>
-                <label>Live Photo *</label>
-                <button
-                  type="button"
-                  className={styles.addBtn}
-                  onClick={() => openWebcam("adult", idx)}
-                >
-                  Take Live Photo
-                </button>
-                {guest.livePhoto && (
-                  <img
-                    src={guest.livePhoto}
-                    alt="Adult Live"
-                    className={styles.photoPreviewCompact}
-                  />
-                )}
-                {errors[`adult_livePhoto_${idx}`] && (
-                  <span className={styles.error}>{errors[`adult_livePhoto_${idx}`]}</span>
-                )}
-              </div>
-            </div>
-          ))}
-          <button type="button" className={styles.addBtn} onClick={addOtherAdult}>
-            + Add Adult
-          </button>
-        </fieldset>
-
-        {/* Children Section */}
-        <fieldset>
-          <legend>Accompanying Children</legend>
-          {form.guests.children.map((child, idx) => (
-            <div key={idx} className={styles.guestDetailsRow}>
-              <button
-                type="button"
-                className={styles.removeBtn}
-                onClick={() => removeChild(idx)}
-                title="Remove Child"
-              >
-                Remove
-              </button>
-
-              <label>
-                Child's Name *
-                <input
-                  type="text"
-                  value={child.name || ""}
-                  onChange={(e) => handleChildChange(idx, "name", e.target.value)}
-                />
-                {errors[`child_name_${idx}`] && (
-                  <span className={styles.error}>{errors[`child_name_${idx}`]}</span>
-                )}
-              </label>
-
-              <label>
-                Date of Birth *
-                <input
-                  type="date"
-                  max={format(new Date(), "yyyy-MM-dd")}
-                  value={child.dob || ""}
-                  onChange={(e) => handleChildChange(idx, "dob", e.target.value)}
-                />
-                {errors[`child_dob_${idx}`] && (
-                  <span className={styles.error}>{errors[`child_dob_${idx}`]}</span>
-                )}
-              </label>
-
-              <label>
-                Age
-                <input type="number" value={child.age || ""} readOnly />
-              </label>
-
-              <label>
-                Gender *
-                <select
-                  value={child.gender || ""}
-                  onChange={(e) => handleChildChange(idx, "gender", e.target.value)}
-                >
-                  <option value="">Select</option>
-                  <option>Male</option>
-                  <option>Female</option>
-                  <option>Other</option>
-                </select>
-                {errors[`child_gender_${idx}`] && (
-                  <span className={styles.error}>{errors[`child_gender_${idx}`]}</span>
-                )}
-              </label>
-
-              {/* Conditional ID for age >= 14 */}
-              {parseInt(child.age) >= 14 && (
-                <>
-                  <label>
-                    ID Type *
-                    <select
-                      value={child.idType || ""}
-                      onChange={(e) => handleChildChange(idx, "idType", e.target.value)}
-                    >
-                      <option value="">Select</option>
-                      <option>Aadhaar</option>
-                      <option>School ID</option>
-                      <option>Passport</option>
-                    </select>
-                    {errors[`child_idType_${idx}`] && (
-                      <span className={styles.error}>{errors[`child_idType_${idx}`]}</span>
-                    )}
-                  </label>
-
-                  <label>
-                    Upload ID Image *
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleChildFileChange(idx, e, "idImage")}
-                    />
-                    {errors[`child_idImage_${idx}`] && (
-                      <span className={styles.error}>{errors[`child_idImage_${idx}`]}</span>
-                    )}
-                  </label>
-                </>
-              )}
-
-              <div className={styles.livePhotoContainer}>
-                <label>Live Photo *</label>
-                <button
-                  type="button"
-                  className={styles.addBtn}
-                  onClick={() => openWebcam("child", idx)}
-                >
-                  Take Live Photo
-                </button>
-                {child.livePhoto && (
-                  <img
-                    src={child.livePhoto}
-                    alt="Child Live"
-                    className={styles.photoPreviewCompact}
-                  />
-                )}
-                {errors[`child_livePhoto_${idx}`] && (
-                  <span className={styles.error}>{errors[`child_livePhoto_${idx}`]}</span>
-                )}
-              </div>
-            </div>
-          ))}
-          <button type="button" className={styles.addBtn} onClick={addChild}>
-            + Add Child
-          </button>
-        </fieldset>
-
-        <button type="submit" className={styles.submitBtn}>
-          Register Guest
-        </button>
+        <button type="submit" className={styles.submitBtn}>Register Guest</button>
+        {/* ... */}
       </form>
     </>
   );

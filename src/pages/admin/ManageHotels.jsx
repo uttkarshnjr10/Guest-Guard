@@ -1,32 +1,33 @@
 import React, { useState, useEffect, useCallback } from "react";
-import toast from "react-hot-toast";
 import apiClient from "../../api/apiClient";
 import styles from "./ManageHotels.module.css";
+import { toast } from "react-hot-toast";
+import TableSkeletonLoader from "../../components/common/TableSkeletonLoader";
 
 export default function ManageHotels() {
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
   const fetchUsers = useCallback(async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
       const params = { searchTerm, status: statusFilter };
       const { data } = await apiClient.get('/users/hotels', { params });
       setUsers(data);
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to fetch hotel data.");
+    } catch {
+      toast.error('Failed to fetch hotel data.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }, [searchTerm, statusFilter]);
 
   useEffect(() => {
-    const timer = setTimeout(() => fetchUsers(), 300);
-    return () => clearTimeout(timer);
+    const debounceFetch = setTimeout(() => {
+      fetchUsers();
+    }, 300);
+    return () => clearTimeout(debounceFetch);
   }, [fetchUsers]);
 
   const handleAction = async (action, userId) => {
@@ -41,7 +42,7 @@ export default function ManageHotels() {
       if (action === 'Delete') {
         await apiClient.delete(`/users/${userId}`);
         setUsers(currentUsers => currentUsers.filter(u => u.id !== userId));
-      } else { // Suspend or Activate
+      } else {
         const newStatus = user.status === 'Active' ? 'Suspended' : 'Active';
         await apiClient.put(`/users/${userId}/status`, { status: newStatus });
         setUsers(currentUsers => 
@@ -56,11 +57,11 @@ export default function ManageHotels() {
     }
   };
 
+  const HOTEL_TABLE_COLUMNS = 5;
+
   return (
-    <main>
-      <header>
-        <h1>Manage Hotel Users</h1>
-      </header>
+    <div className={styles.container}>
+      <h1>Manage Hotel Users</h1>
       <div className={styles.filtersRow}>
         <input
           type="text"
@@ -80,12 +81,13 @@ export default function ManageHotels() {
         </select>
       </div>
 
-      {loading ? <p>Loading users...</p> 
-      : error ? <p className={styles.error}>{error}</p> 
-      : (
+      {isLoading ? (
+        <TableSkeletonLoader columns={HOTEL_TABLE_COLUMNS} />
+      ) : (
         <table className={styles.hotelsTable}>
           <thead>
             <tr>
+              <th>#</th>
               <th>Hotel Name</th>
               <th>City</th>
               <th>Status</th>
@@ -93,36 +95,41 @@ export default function ManageHotels() {
             </tr>
           </thead>
           <tbody>
-            {users.length > 0 ? users.map((user) => (
-              <tr key={user.id}>
-                <td>{user.name}</td>
-                <td>{user.location}</td>
-                <td>
-                  <span className={user.status === "Active" ? styles.statusActive : styles.statusSuspended}>
-                    {user.status}
-                  </span>
-                </td>
-                <td>
-                  <button 
-                    onClick={() => handleAction(user.status === 'Active' ? 'Suspend' : 'Activate', user.id)} 
-                    className={styles.actionBtn}
-                  >
-                    {user.status === 'Active' ? 'Suspend' : 'Activate'}
-                  </button>
-                  <button 
-                    onClick={() => handleAction('Delete', user.id)} 
-                    className={styles.actionBtnDelete}
-                  >
-                    Delete
-                  </button>
-                </td>
+            {users.length > 0 ? (
+              users.map((user, index) => (
+                <tr key={user.id}>
+                  <td>{index + 1}</td>
+                  <td>{user.name}</td>
+                  <td>{user.location}</td>
+                  <td>
+                    <span className={user.status === "Active" ? styles.statusActive : styles.statusSuspended}>
+                      {user.status}
+                    </span>
+                  </td>
+                  <td>
+                    <button 
+                      onClick={() => handleAction(user.status === 'Active' ? 'Suspend' : 'Activate', user.id)} 
+                      className={styles.actionBtn}
+                    >
+                      {user.status === 'Active' ? 'Suspend' : 'Activate'}
+                    </button>
+                    <button 
+                      onClick={() => handleAction('Delete', user.id)} 
+                      className={styles.actionBtnDelete}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={HOTEL_TABLE_COLUMNS}>No hotels found.</td>
               </tr>
-            )) : (
-              <tr><td colSpan="4">No hotel users found.</td></tr>
             )}
           </tbody>
         </table>
       )}
-    </main>
+    </div>
   );
 }

@@ -1,0 +1,24 @@
+.skeletonTable {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.skeletonRow {
+  display: grid;
+  /* The number of columns is controlled by the component's `columns` prop */
+  gap: 1rem;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.skeletonRow:last-child {
+  border-bottom: none;
+}
+
+.skeletonCell {
+  /* This ensures all cells have equal width */
+  width: 100%;
+}
