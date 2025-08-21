@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import apiClient from "../../api/apiClient";
 import Select from 'react-select';
 import styles from "./RegisterNewUser.module.css";
 import { toast } from 'react-hot-toast';
@@ -21,31 +21,28 @@ export default function RegisterNewUser() {
   const [error, setError] = useState("");
   const [successData, setSuccessData] = useState(null);
 
-  useEffect(() => {
-    const fetchPoliceStations = async () => {
-      setStationsLoading(true);
-      try {
-        const token = localStorage.getItem('authToken');
-        if (!token) return;
+ useEffect(() => {
+   const fetchPoliceStations = async () => {
+       setStationsLoading(true);
+       try {
+        // apiClient automatically handles the token and base URL
+         const { data } = await apiClient.get('/stations');
+          const formattedStations = data.map(station => ({
+            value: station._id,
+            label: station.name
+           }));
+           setPoliceStations(formattedStations);
+        } catch (err) {
+         console.error("Failed to fetch police stations", err);
+         toast.error("Could not load police stations. Please refresh.");
+         setError("Could not load police stations. Please refresh.");
+        } finally {
+         setStationsLoading(false);
+         }
+       };
 
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/stations`;
-        const { data } = await axios.get(apiUrl, config);
-        const formattedStations = data.map(station => ({
-          value: station._id,
-          label: station.name
-        }));
-        setPoliceStations(formattedStations);
-      } catch (err) {
-        console.error("Failed to fetch police stations", err);
-        setError("Could not load police stations. Please refresh.");
-      } finally {
-        setStationsLoading(false);
-      }
-    };
-
-    fetchPoliceStations();
-  }, []);
+     fetchPoliceStations();
+    }, []);
 
   const handleTypeChange = (newUserType) => {
     setUserType(newUserType);
@@ -105,12 +102,8 @@ export default function RegisterNewUser() {
     }
 
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) throw new Error("Admin not authenticated. Please log in again.");
-
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/users/register`;
-      const response = await axios.post(apiUrl, payload, config);
+      // apiClient automatically handles the token and base URL
+      const response = await apiClient.post('/users/register', payload);
 
       toast.success(response.data.message, { id: toastId });
 
@@ -119,7 +112,7 @@ export default function RegisterNewUser() {
         username: response.data.username,
         password: response.data.temporaryPassword
       });
-      
+
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || "An error occurred.";
       setError(errorMessage);

@@ -1,8 +1,8 @@
 // src/components/common/Navbar.jsx
 import React from 'react';
-import axios from 'axios';
 import styles from './Navbar.module.css';
 import { FiLogOut } from 'react-icons/fi';
+import apiClient from '../../api/apiClient'; // Import apiClient
 
 export default function Navbar({ username, role, handleLogout }) {
   
@@ -13,13 +13,8 @@ export default function Navbar({ username, role, handleLogout }) {
         handleLogout();
         return;
       }
-      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/logout`;
-      await axios.post(apiUrl, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        withCredentials: true
-      });
+      // Use apiClient instead of axios to automatically handle the base URL and headers
+      await apiClient.post('/auth/logout', {});
     } catch (error) {
       console.error("Logout API call failed:", error);
     } finally {

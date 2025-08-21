@@ -3,7 +3,8 @@ import toast from 'react-hot-toast';
 
 // Create a new axios instance
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  // ✅ CHANGE THIS LINE: Add '/api' to the base URL
+  baseURL: `${import.meta.env.VITE_API_BASE_URL}/api`,
 });
 
 // Use an interceptor to automatically add the auth token to every request

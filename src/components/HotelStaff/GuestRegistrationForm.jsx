@@ -319,46 +319,61 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    // Your existing submit logic is perfect and remains unchanged.
-    e.preventDefault();
-    if (!validate()) {
-      toast.error("Please fill all required fields correctly.");
-      return;
-    }
-    const livePhotoFile = dataURLtoFile(form.livePhoto, 'livePhoto.jpg');
-    const idImageFrontFile = dataURLtoFile(form.idImageFront, 'idImageFront.jpg');
-    const idImageBackFile = dataURLtoFile(form.idImageBack, 'idImageBack.jpg');
-    const guestPayload = {
-      primaryGuest: {
-        name: form.name,
-        dob: form.dob,
-        gender: form.gender,
-        phone: form.phone,
-        email: form.email,
-        address: `${form.address.city}, ${form.address.district}, ${form.address.state} - ${form.address.pincode}`,
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validate()) {
+    toast.error("Please fill all required fields correctly.");
+    return;
+  }
+
+  const toastId = toast.loading("Registering guest...");
+
+  try {
+    const formData = new FormData();
+
+    // Append primary guest data
+    formData.append('primaryGuestName', form.name);
+    formData.append('primaryGuestDob', form.dob);
+    formData.append('primaryGuestGender', form.gender);
+    formData.append('primaryGuestPhone', form.phone);
+    formData.append('primaryGuestEmail', form.email);
+    formData.append('primaryGuestAddress', `${form.address.city}, ${form.address.district}, ${form.address.state} - ${form.address.pincode}`);
+    formData.append('idType', form.idType);
+    formData.append('idNumber', form.idNumber);
+
+    // Append files
+    formData.append('idImageFront', dataURLtoFile(form.idImageFront, 'idImageFront.jpg'));
+    formData.append('idImageBack', dataURLtoFile(form.idImageBack, 'idImageBack.jpg'));
+    formData.append('livePhoto', dataURLtoFile(form.livePhoto, 'livePhoto.jpg'));
+
+    // Append stay details
+    formData.append('purposeOfVisit', form.purpose);
+    formData.append('checkIn', form.checkIn);
+    formData.append('expectedCheckout', form.expectedCheckout);
+    formData.append('roomNumber', form.roomNumber);
+
+    // Append accompanying guests as a JSON string
+    formData.append('accompanyingGuests', JSON.stringify(form.guests));
+
+    const response = await apiClient.post('/guests/register', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
       },
-      idType: form.idType,
-      idNumber: form.idNumber,
-      idImageFront: idImageFrontFile,
-      idImageBack: idImageBackFile,
-      livePhoto: livePhotoFile,
-      stayDetails: {
-        purposeOfVisit: form.purpose,
-        checkIn: form.checkIn,
-        expectedCheckout: form.expectedCheckout,
-        roomNumber: form.roomNumber,
-      },
-      accompanyingGuests: {
-        adults: form.guests.adults.map(adult => ({ name: adult.name, gender: adult.gender })),
-        children: form.guests.children.map(child => ({ name: child.name, gender: child.gender })),
-      },
-      registrationTimestamp: new Date().toISOString(),
-    };
-    onAddGuest && onAddGuest(guestPayload);
+    });
+
+    toast.success(response.data.message || "Guest registered successfully!", { id: toastId });
+
+    // Reset form and call external handler
+    onAddGuest && onAddGuest(); // Assuming onAddGuest is for refreshing lists
     setForm(getInitialFormState());
     setErrors({});
-  };
+
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Failed to register guest.";
+    toast.error(errorMessage, { id: toastId });
+    console.error("Guest registration failed:", error);
+  }
+};
   // ...
   
   // Determine camera facing mode based on capture type
@@ -485,30 +500,375 @@ export default function GuestRegistrationForm({ onAddGuest }) {
 
         {/* --- All other fieldsets (Address, Purpose, Adults, Children) and the submit button remain exactly the same. --- */}
         {/* ... */}
-        <fieldset>
-          <legend>Address *</legend>
-          <div className={styles.row}>
-            <label>State *<input type="text" name="address.state" value={form.address.state} onChange={handleChange} />{errors["address.state"] && <span className={styles.error}>{errors["address.state"]}</span>}</label>
-            <label>District *<input type="text" name="address.district" value={form.address.district} onChange={handleChange} />{errors["address.district"] && <span className={styles.error}>{errors["address.district"]}</span>}</label>
-            <label>City *<input type="text" name="address.city" value={form.address.city} onChange={handleChange} />{errors["address.city"] && <span className={styles.error}>{errors["address.city"]}</span>}</label>
-            <label>Pin Code *<input type="text" name="address.pincode" value={form.address.pincode} onChange={handleChange} />{errors["address.pincode"] && <span className={styles.error}>{errors["address.pincode"]}</span>}</label>
-          </div>
-        </fieldset>
-        <label>Purpose of Visit *<textarea name="purpose" value={form.purpose} onChange={handleChange} rows={2} placeholder="Why did you come to this area?" />{errors.purpose && <span className={styles.error}>{errors.purpose}</span>}</label>
-        <div className={styles.row}>
-          <label>Check-In Time *<input type="datetime-local" name="checkIn" value={form.checkIn} onChange={handleChange} />{errors.checkIn && <span className={styles.error}>{errors.checkIn}</span>}</label>
-          <label>Expected Checkout *<input type="datetime-local" name="expectedCheckout" value={form.expectedCheckout} onChange={handleChange} />{errors.expectedCheckout && <span className={styles.error}>{errors.expectedCheckout}</span>}</label>
-        </div>
-        <label>Allocated Hotel Room Number *<input type="text" name="roomNumber" value={form.roomNumber} onChange={handleChange} />{errors.roomNumber && <span className={styles.error}>{errors.roomNumber}</span>}</label>
-        <div className={styles.row}>
-          <label>Phone Number *<input type="tel" name="phone" value={form.phone} onChange={handleChange} />{errors.phone && <span className={styles.error}>{errors.phone}</span>}</label>
-          <label>Email *<input type="email" name="email" value={form.email} onChange={handleChange} />{errors.email && <span className={styles.error}>{errors.email}</span>}</label>
-        </div>
-        <fieldset><legend>Other Accompanying Adults</legend>{form.guests.adults.map((guest, idx) => ( <div key={idx} className={styles.guestDetailsRow}><button type="button" className={styles.removeBtn} onClick={() => removeOtherAdult(idx)} title="Remove Adult">Remove</button><label>Name *<input type="text" value={guest.name || ""} onChange={(e) => handleOtherAdultChange(idx, "name", e.target.value)}/>{errors[`adult_name_${idx}`] && <span className={styles.error}>{errors[`adult_name_${idx}`]}</span>}</label><label>Date of Birth *<input type="date" max={format(new Date(), "yyyy-MM-dd")} value={guest.dob || ""} onChange={(e) => handleOtherAdultChange(idx, "dob", e.target.value)}/>{errors[`adult_dob_${idx}`] && <span className={styles.error}>{errors[`adult_dob_${idx}`]}</span>}</label><label>Age<input type="number" value={guest.age || ""} readOnly /></label><label>Gender *<select value={guest.gender || ""} onChange={(e) => handleOtherAdultChange(idx, "gender", e.target.value)}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>{errors[`adult_gender_${idx}`] && <span className={styles.error}>{errors[`adult_gender_${idx}`]}</span>}</label><label>ID Proof Type *<select value={guest.idType || ""} onChange={(e) => handleOtherAdultChange(idx, "idType", e.target.value)}><option value="">Select</option><option>Aadhaar</option><option>Passport</option><option>Voter ID</option><option>Driving License</option></select>{errors[`adult_idType_${idx}`] && <span className={styles.error}>{errors[`adult_idType_${idx}`]}</span>}</label><label>ID Number *<input type="text" value={guest.idNumber || ""} onChange={(e) => handleOtherAdultChange(idx, "idNumber", e.target.value)}/>{errors[`adult_idNumber_${idx}`] && <span className={styles.error}>{errors[`adult_idNumber_${idx}`]}</span>}</label><label>Upload ID Image *<input type="file" accept="image/*" onChange={(e) => handleOtherAdultFileChange(idx, e, "idImage")}/>{errors[`adult_idImage_${idx}`] && <span className={styles.error}>{errors[`adult_idImage_${idx}`]}</span>}</label><div className={styles.livePhotoContainer}><label>Live Photo *</label><button type="button" className={styles.addBtn} onClick={() => openWebcam("adult", idx)}>Take Live Photo</button>{guest.livePhoto && <img src={guest.livePhoto} alt="Adult Live" className={styles.photoPreviewCompact}/>}{errors[`adult_livePhoto_${idx}`] && <span className={styles.error}>{errors[`adult_livePhoto_${idx}`]}</span>}</div></div>))}<button type="button" className={styles.addBtn} onClick={addOtherAdult}>+ Add Adult</button></fieldset>
-        <fieldset><legend>Accompanying Children</legend>{form.guests.children.map((child, idx) => ( <div key={idx} className={styles.guestDetailsRow}><button type="button" className={styles.removeBtn} onClick={() => removeChild(idx)} title="Remove Child">Remove</button><label>Child's Name *<input type="text" value={child.name || ""} onChange={(e) => handleChildChange(idx, "name", e.target.value)}/>{errors[`child_name_${idx}`] && <span className={styles.error}>{errors[`child_name_${idx}`]}</span>}</label><label>Date of Birth *<input type="date" max={format(new Date(), "yyyy-MM-dd")} value={child.dob || ""} onChange={(e) => handleChildChange(idx, "dob", e.target.value)}/>{errors[`child_dob_${idx}`] && <span className={styles.error}>{errors[`child_dob_${idx}`]}</span>}</label><label>Age<input type="number" value={child.age || ""} readOnly /></label><label>Gender *<select value={child.gender || ""} onChange={(e) => handleChildChange(idx, "gender", e.target.value)}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>{errors[`child_gender_${idx}`] && <span className={styles.error}>{errors[`child_gender_${idx}`]}</span>}</label>{parseInt(child.age) >= 14 && <> <label>ID Type *<select value={child.idType || ""} onChange={(e) => handleChildChange(idx, "idType", e.target.value)}><option value="">Select</option><option>Aadhaar</option><option>School ID</option><option>Passport</option></select>{errors[`child_idType_${idx}`] && <span className={styles.error}>{errors[`child_idType_${idx}`]}</span>}</label><label>Upload ID Image *<input type="file" accept="image/*" onChange={(e) => handleChildFileChange(idx, e, "idImage")}/>{errors[`child_idImage_${idx}`] && <span className={styles.error}>{errors[`child_idImage_${idx}`]}</span>}</label> </>}<div className={styles.livePhotoContainer}><label>Live Photo *</label><button type="button" className={styles.addBtn} onClick={() => openWebcam("child", idx)}>Take Live Photo</button>{child.livePhoto && <img src={child.livePhoto} alt="Child Live" className={styles.photoPreviewCompact}/>}{errors[`child_livePhoto_${idx}`] && <span className={styles.error}>{errors[`child_livePhoto_${idx}`]}</span>}</div>
-        </div>))}<button type="button" className={styles.addBtn} onClick={addChild}>+ Add Child</button></fieldset>
+       <fieldset>
+  <legend>Address *</legend>
+  <div className={styles.row}>
+    <label>
+      State *
+      <input
+        type="text"
+        name="address.state"
+        value={form.address.state}
+        onChange={handleChange}
+      />
+      {errors["address.state"] && (
+        <span className={styles.error}>{errors["address.state"]}</span>
+      )}
+    </label>
+    <label>
+      District *
+      <input
+        type="text"
+        name="address.district"
+        value={form.address.district}
+        onChange={handleChange}
+      />
+      {errors["address.district"] && (
+        <span className={styles.error}>{errors["address.district"]}</span>
+      )}
+    </label>
+    <label>
+      City *
+      <input
+        type="text"
+        name="address.city"
+        value={form.address.city}
+        onChange={handleChange}
+      />
+      {errors["address.city"] && (
+        <span className={styles.error}>{errors["address.city"]}</span>
+      )}
+    </label>
+    <label>
+      Pin Code *
+      <input
+        type="text"
+        name="address.pincode"
+        value={form.address.pincode}
+        onChange={handleChange}
+      />
+      {errors["address.pincode"] && (
+        <span className={styles.error}>{errors["address.pincode"]}</span>
+      )}
+    </label>
+  </div>
+</fieldset>
+<label>
+  Purpose of Visit *
+  <textarea
+    name="purpose"
+    value={form.purpose}
+    onChange={handleChange}
+    rows={2}
+    placeholder="Why did you come to this area?"
+  />
+  {errors.purpose && <span className={styles.error}>{errors.purpose}</span>}
+</label>
+<div className={styles.row}>
+  <label>
+    Check-In Time *
+    <input
+      type="datetime-local"
+      name="checkIn"
+      value={form.checkIn}
+      onChange={handleChange}
+    />
+    {errors.checkIn && <span className={styles.error}>{errors.checkIn}</span>}
+  </label>
+  <label>
+    Expected Checkout *
+    <input
+      type="datetime-local"
+      name="expectedCheckout"
+      value={form.expectedCheckout}
+      onChange={handleChange}
+    />
+    {errors.expectedCheckout && (
+      <span className={styles.error}>{errors.expectedCheckout}</span>
+    )}
+  </label>
+</div>
+<label>
+  Allocated Hotel Room Number *
+  <input
+    type="text"
+    name="roomNumber"
+    value={form.roomNumber}
+    onChange={handleChange}
+  />
+  {errors.roomNumber && (
+    <span className={styles.error}>{errors.roomNumber}</span>
+  )}
+</label>
+<div className={styles.row}>
+  <label>
+    Phone Number *
+    <input
+      type="tel"
+      name="phone"
+      value={form.phone}
+      onChange={handleChange}
+    />
+    {errors.phone && <span className={styles.error}>{errors.phone}</span>}
+  </label>
+  <label>
+    Email *
+    <input
+      type="email"
+      name="email"
+      value={form.email}
+      onChange={handleChange}
+    />
+    {errors.email && <span className={styles.error}>{errors.email}</span>}
+  </label>
+</div>
+<fieldset>
+  <legend>Other Accompanying Adults</legend>
+  {form.guests.adults.map((guest, idx) => (
+    <div key={idx} className={styles.guestDetailsRow}>
+      <button
+        type="button"
+        className={styles.removeBtn}
+        onClick={() => removeOtherAdult(idx)}
+        title="Remove Adult"
+      >
+        Remove
+      </button>
+      <label>
+        Name *
+        <input
+          type="text"
+          value={guest.name || ""}
+          onChange={(e) => handleOtherAdultChange(idx, "name", e.target.value)}
+        />
+        {errors[`adult_name_${idx}`] && (
+          <span className={styles.error}>{errors[`adult_name_${idx}`]}</span>
+        )}
+      </label>
+      <label>
+        Date of Birth *
+        <input
+          type="date"
+          max={format(new Date(), "yyyy-MM-dd")}
+          value={guest.dob || ""}
+          onChange={(e) => handleOtherAdultChange(idx, "dob", e.target.value)}
+        />
+        {errors[`adult_dob_${idx}`] && (
+          <span className={styles.error}>{errors[`adult_dob_${idx}`]}</span>
+        )}
+      </label>
+      <label>
+        Age
+        <input type="number" value={guest.age || ""} readOnly />
+      </label>
+      <label>
+        Gender *
+        <select
+          value={guest.gender || ""}
+          onChange={(e) => handleOtherAdultChange(idx, "gender", e.target.value)}
+        >
+          <option value="">Select</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+        {errors[`adult_gender_${idx}`] && (
+          <span className={styles.error}>{errors[`adult_gender_${idx}`]}</span>
+        )}
+      </label>
+      <label>
+        ID Proof Type *
+        <select
+          value={guest.idType || ""}
+          onChange={(e) => handleOtherAdultChange(idx, "idType", e.target.value)}
+        >
+          <option value="">Select</option>
+          <option>Aadhaar</option>
+          <option>Passport</option>
+          <option>Voter ID</option>
+          <option>Driving License</option>
+        </select>
+        {errors[`adult_idType_${idx}`] && (
+          <span className={styles.error}>{errors[`adult_idType_${idx}`]}</span>
+        )}
+      </label>
+      <label>
+        ID Number *
+        <input
+          type="text"
+          value={guest.idNumber || ""}
+          onChange={(e) =>
+            handleOtherAdultChange(idx, "idNumber", e.target.value)
+          }
+        />
+        {errors[`adult_idNumber_${idx}`] && (
+          <span className={styles.error}>{errors[`adult_idNumber_${idx}`]}</span>
+        )}
+      </label>
+      <label>
+        Upload ID Image *
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => handleOtherAdultFileChange(idx, e, "idImage")}
+        />
+        {errors[`adult_idImage_${idx}`] && (
+          <span className={styles.error}>{errors[`adult_idImage_${idx}`]}</span>
+        )}
+      </label>
+      <div className={styles.livePhotoContainer}>
+        <label>Live Photo *</label>
+        <button
+          type="button"
+          className={styles.addBtn}
+          onClick={() => openWebcam("adult", idx)}
+        >
+          Take Live Photo
+        </button>
+        {guest.livePhoto && (
+          <img
+            src={guest.livePhoto}
+            alt="Adult Live"
+            className={styles.photoPreviewCompact}
+          />
+        )}
+        {errors[`adult_livePhoto_${idx}`] && (
+          <span className={styles.error}>
+            {errors[`adult_livePhoto_${idx}`]}
+          </span>
+        )}
+      </div>
+    </div>
+  ))}
+  <button
+    type="button"
+    className={styles.addBtn}
+    onClick={addOtherAdult}
+  >
+    + Add Adult
+  </button>
+</fieldset>
+<fieldset>
+  <legend>Accompanying Children</legend>
+  {form.guests.children.map((child, idx) => (
+    <div key={idx} className={styles.guestDetailsRow}>
+      <button
+        type="button"
+        className={styles.removeBtn}
+        onClick={() => removeChild(idx)}
+        title="Remove Child"
+      >
+        Remove
+      </button>
+      <label>
+        Child's Name *
+        <input
+          type="text"
+          value={child.name || ""}
+          onChange={(e) => handleChildChange(idx, "name", e.target.value)}
+        />
+        {errors[`child_name_${idx}`] && (
+          <span className={
 
-        <button type="submit" className={styles.submitBtn}>Register Guest</button>
+styles.error}>{errors[`child_name_${idx}`]}</span>
+        )}
+      </label>
+      <label>
+        Date of Birth *
+        <input
+          type="date"
+          max={format(new Date(), "yyyy-MM-dd")}
+          value={child.dob || ""}
+          onChange={(e) => handleChildChange(idx, "dob", e.target.value)}
+        />
+        {errors[`child_dob_${idx}`] && (
+          <span className={styles.error}>{errors[`child_dob_${idx}`]}</span>
+        )}
+      </label>
+      <label>
+        Age
+        <input type="number" value={child.age || ""} readOnly />
+      </label>
+      <label>
+        Gender *
+        <select
+          value={child.gender || ""}
+          onChange={(e) => handleChildChange(idx, "gender", e.target.value)}
+        >
+          <option value="">Select</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+        {errors[`child_gender_${idx}`] && (
+          <span className={styles.error}>{errors[`child_gender_${idx}`]}</span>
+        )}
+      </label>
+      {parseInt(child.age) >= 14 && (
+        <>
+          <label>
+            ID Type *
+            <select
+              value={child.idType || ""}
+              onChange={(e) => handleChildChange(idx, "idType", e.target.value)}
+            >
+              <option value="">Select</option>
+              <option>Aadhaar</option>
+              <option>School ID</option>
+              <option>Passport</option>
+            </select>
+            {errors[`child_idType_${idx}`] && (
+              <span className={styles.error}>{errors[`child_idType_${idx}`]}</span>
+            )}
+          </label>
+          <label>
+            Upload ID Image *
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleChildFileChange(idx, e, "idImage")}
+            />
+            {errors[`child_idImage_${idx}`] && (
+              <span className={styles.error}>{errors[`child_idImage_${idx}`]}</span>
+            )}
+          </label>
+        </>
+      )}
+      <div className={styles.livePhotoContainer}>
+        <label>Live Photo *</label>
+        <button
+          type="button"
+          className={styles.addBtn}
+          onClick={() => openWebcam("child", idx)}
+        >
+          Take Live Photo
+        </button>
+        {child.livePhoto && (
+          <img
+            src={child.livePhoto}
+            alt="Child Live"
+            className={styles.photoPreviewCompact}
+          />
+        )}
+        {errors[`child_livePhoto_${idx}`] && (
+          <span className={styles.error}>
+            {errors[`child_livePhoto_${idx}`]}
+          </span>
+        )}
+      </div>
+    </div>
+  ))}
+  <button
+    type="button"
+    className={styles.addBtn}
+    onClick={addChild}
+  >
+    + Add Child
+  </button>
+</fieldset>
+<button type="submit" className={styles.submitBtn}>
+  Register Guest
+</button>
         {/* ... */}
       </form>
     </>

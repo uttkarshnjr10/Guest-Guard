@@ -1,7 +1,7 @@
 // src/pages/Login.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import apiClient from "../../api/apiClient";
 import { toast } from "react-hot-toast";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion"; 
@@ -35,15 +35,31 @@ export default function Login({ setAuth }) {
     }
   }, [location]);
 
+  // ✅ Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, when: "beforeChildren", staggerChildren: 0.2 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0 },
+  };
+
+  // Move handleSubmit here, not inside any other function or block
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     const toastId = toast.loading("Signing in...");
 
     try {
-      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/login`;
-      const response = await axios.post(apiUrl, { email, password });
-
+      // Use apiClient instead of axios
+      const response = await apiClient.post("/auth/login", { email, password });
+      
       if (response.status === 202) {
         toast.dismiss(toastId);
         navigate("/reset-password", { state: { userId: response.data.userId } });
@@ -89,21 +105,6 @@ export default function Login({ setAuth }) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // ✅ Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, when: "beforeChildren", staggerChildren: 0.2 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: { opacity: 1, y: 0 },
   };
 
   return (

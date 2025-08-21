@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import apiClient from "../../api/apiClient";
 import styles from "./RegionalAdminDashboard.module.css";
 
 // SVG ICONS
@@ -57,11 +57,7 @@ export default function RegionalAdminDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const token = localStorage.getItem("authToken");
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/users/admin/dashboard`;
-
-        const { data } = await axios.get(apiUrl, config);
+        const { data } = await apiClient.get("/users/admin/dashboard");
         setDashboardData(data);
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load dashboard data.");
