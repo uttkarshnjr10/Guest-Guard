@@ -1,9 +1,8 @@
-// src/pages/ForcePasswordReset.jsx
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../api/apiClient';
+import { toast } from 'react-hot-toast';
 
-// >> Using inline styles as requested
 const styles = {
     container: {
         display: 'flex',
@@ -67,54 +66,56 @@ const styles = {
         cursor: 'pointer',
         transition: 'background-color 0.3s ease',
     },
-    error: {
-        color: '#e53e3e',
-        backgroundColor: '#fed7d7',
-        padding: '10px',
-        borderRadius: '6px',
-        marginBottom: '16px',
-    },
 };
 
 export default function ForcePasswordReset() {
     const [newPassword, setNewPassword] = useState('');
-    const [error, setError] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
 
-    // >> Get the userId from the state passed by the Login page
-    const userId = location.state?.userId;
+    const { userId } = location.state || {};
 
-    // >> If a user lands here directly without a userId, redirect them to login.
     useEffect(() => {
         if (!userId) {
             console.warn("No user ID found, redirecting to login.");
+            toast.error("User ID is missing. Please log in again.");
             navigate('/login');
         }
     }, [userId, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (newPassword.length < 6) {
-            setError("Password must be at least 6 characters long.");
+        if (newPassword !== confirmPassword) {
+            toast.error("Passwords do not match.");
             return;
         }
+        if (newPassword.length < 6) {
+            toast.error("Password must be at least 6 characters long.");
+            return;
+        }
+        if (!userId) {
+            toast.error("User ID is missing. Please log in again.");
+            navigate('/login');
+            return;
+        }
+
         setIsLoading(true);
-        setError('');
+        const toastId = toast.loading('Updating password...');
 
         try {
-            const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/change-password`;
-            // >> The API call does NOT require a token here.
-            await axios.post(apiUrl, { userId, newPassword });
-
-            // >> On success, navigate back to the login page with a success message.
+            const response = await apiClient.post('/auth/change-password', {
+                userId,
+                newPassword,
+            });
+            toast.success(response.data.message || "Password changed successfully!", { id: toastId });
             navigate('/login', { 
                 state: { message: "Password changed successfully! Please log in." } 
             });
-
         } catch (err) {
-            setError(err.response?.data?.message || 'An error occurred while changing the password.');
+            const errorMessage = err.response?.data?.message || "Failed to change password.";
+            toast.error(errorMessage, { id: toastId });
         } finally {
             setIsLoading(false);
         }
@@ -128,7 +129,6 @@ export default function ForcePasswordReset() {
                     <p style={styles.p}>Your account requires a new password before you can log in.</p>
                 </div>
                 <form onSubmit={handleSubmit} style={styles.form} noValidate>
-                    {error && <p style={styles.error}>{error}</p>}
                     <div style={styles.inputGroup}>
                         <label htmlFor="newPassword" style={styles.label}>New Password</label>
                         <input 
@@ -139,6 +139,17 @@ export default function ForcePasswordReset() {
                             style={styles.input}
                             required 
                             minLength={6} 
+                        />
+                    </div>
+                    <div style={styles.inputGroup}>
+                        <label htmlFor="confirmPassword" style={styles.label}>Confirm New Password</label>
+                        <input 
+                            id="confirmPassword" 
+                            type="password" 
+                            value={confirmPassword} 
+                            onChange={(e) => setConfirmPassword(e.target.value)} 
+                            style={styles.input}
+                            required 
                         />
                     </div>
                     <button type="submit" style={styles.submitBtn} disabled={isLoading}>

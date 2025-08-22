@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../api/apiClient";
 import styles from "./RegionalAdminDashboard.module.css";
+import TableSkeletonLoader from "../../components/common/TableSkeletonLoader"; // ✅ Import Skeleton Loader
 
 // SVG ICONS
 const icons = {
@@ -57,6 +58,7 @@ export default function RegionalAdminDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+        setLoading(true);
         const { data } = await apiClient.get("/users/admin/dashboard");
         setDashboardData(data);
       } catch (err) {
@@ -69,8 +71,23 @@ export default function RegionalAdminDashboard() {
     fetchDashboardData();
   }, []);
 
-  if (loading) return <main><h1>Loading Dashboard...</h1></main>;
-  if (error) return <main><h1>Error: {error}</h1></main>;
+  if (loading) {
+    // ✅ Use Skeleton Loader instead of plain text
+    return (
+      <main className={styles.dashboardContainer}>
+        <h1>Regional Admin Dashboard</h1>
+        <TableSkeletonLoader rows={5} columns={4} />
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className={styles.dashboardContainer}>
+        <h1>Error: {error}</h1>
+      </main>
+    );
+  }
 
   const metrics = dashboardData?.metrics || { hotels: 0, police: 0, guestsToday: 0, searchesToday: 0 };
   const activityFeed = dashboardData?.feed || [];

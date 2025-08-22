@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import apiClient from '../../api/apiClient';
+import ProfileSkeletonLoader from '../../components/common/ProfileSkeletonLoader'; // Import skeleton loader
 import styles from './ProfilePage.module.css';
 
-// Modal component for changing the password (DEFINED IN THE SAME FILE)
+// Modal component for changing the password
 const ChangePasswordModal = ({ setShowModal }) => {
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -15,10 +16,9 @@ const ChangePasswordModal = ({ setShowModal }) => {
         const toastId = toast.loading('Changing password...');
 
         try {
-            // Use the centralized apiClient
             await apiClient.put('/users/change-password', { oldPassword, newPassword });
             toast.success('Password changed successfully!', { id: toastId });
-            setTimeout(() => setShowModal(false), 1500); // Close modal after success
+            setTimeout(() => setShowModal(false), 1500);
         } catch (err) {
             toast.error(err.response?.data?.message || 'An error occurred.', { id: toastId });
         } finally {
@@ -51,24 +51,21 @@ const ChangePasswordModal = ({ setShowModal }) => {
     );
 };
 
-
 // Main ProfilePage Component
 export default function ProfilePage() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showModal, setShowModal] = useState(false);
-    
-    // New state for editing
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({});
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
+                setLoading(true);
                 const { data } = await apiClient.get('/users/profile');
                 setUser(data);
-                // Initialize form data for editing
                 setFormData({ email: data.email, details: data.details || {} });
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to fetch profile.');
@@ -95,7 +92,7 @@ export default function ProfilePage() {
         const toastId = toast.loading('Saving profile...');
         try {
             const { data } = await apiClient.put('/users/profile', formData);
-            setUser(data); // Update the view with the new data from the server
+            setUser(data);
             setIsEditing(false);
             toast.success('Profile updated successfully!', { id: toastId });
         } catch (err) {
@@ -105,11 +102,9 @@ export default function ProfilePage() {
 
     const handleCancel = () => {
         setIsEditing(false);
-        // Reset form data back to the original user data
         setFormData({ email: user.email, details: user.details || {} });
     };
 
-    // This function renders the appropriate input fields based on user role
     const renderRoleSpecificDetails = () => {
         if (!user || !user.details) return null;
         switch (user.role) {
@@ -122,11 +117,11 @@ export default function ProfilePage() {
                         </div>
                         <div className={styles.detailItem}>
                             <strong>City:</strong>
-                             {isEditing ? <input name="city" value={formData.details.city || ''} onChange={handleInputChange} /> : <span>{user.details.city}</span>}
+                            {isEditing ? <input name="city" value={formData.details.city || ''} onChange={handleInputChange} /> : <span>{user.details.city}</span>}
                         </div>
                         <div className={styles.detailItem}>
                             <strong>Address:</strong>
-                             {isEditing ? <input name="address" value={formData.details.address || ''} onChange={handleInputChange} /> : <span>{user.details.address}</span>}
+                            {isEditing ? <input name="address" value={formData.details.address || ''} onChange={handleInputChange} /> : <span>{user.details.address}</span>}
                         </div>
                     </>
                 );
@@ -135,11 +130,11 @@ export default function ProfilePage() {
                     <>
                         <div className={styles.detailItem}>
                             <strong>Station Name:</strong>
-                             {isEditing ? <input name="station" value={formData.details.station || ''} onChange={handleInputChange} /> : <span>{user.details.station}</span>}
+                            {isEditing ? <input name="station" value={formData.details.station || ''} onChange={handleInputChange} /> : <span>{user.details.station}</span>}
                         </div>
                         <div className={styles.detailItem}>
                             <strong>Jurisdiction:</strong>
-                             {isEditing ? <input name="jurisdiction" value={formData.details.jurisdiction || ''} onChange={handleInputChange} /> : <span>{user.details.jurisdiction}</span>}
+                            {isEditing ? <input name="jurisdiction" value={formData.details.jurisdiction || ''} onChange={handleInputChange} /> : <span>{user.details.jurisdiction}</span>}
                         </div>
                     </>
                 );
@@ -148,7 +143,7 @@ export default function ProfilePage() {
         }
     };
 
-    if (loading) return <div className={styles.profileContainer}><p>Loading profile...</p></div>;
+    if (loading) return <div className={styles.profileContainer}><ProfileSkeletonLoader /></div>;
     if (error) return <div className={styles.profileContainer}><p className={styles.error}>{error}</p></div>;
     if (!user) return null;
 
@@ -159,6 +154,7 @@ export default function ProfilePage() {
                 <h2 className={styles.title}>My Profile</h2>
                 <div className={styles.profileCard}>
                     <div className={styles.profileHeader}>
+                        
                         <h3>{user.username}</h3>
                         <p className={styles.role}>{user.role}</p>
                     </div>

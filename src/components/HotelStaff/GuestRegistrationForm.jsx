@@ -38,9 +38,26 @@ const VerificationStatus = ({ status }) => {
 // Webcam Modal for live photo capture
 const WebcamModal = ({ onCapture, onCancel, videoConstraints }) => { // Added videoConstraints prop
   const webcamRef = useRef(null);
+  const canvasRef = useRef(null); // Create a ref for the canvas
+
   const capture = useCallback(() => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    onCapture(imageSrc);
+    const webcam = webcamRef.current;
+    const canvas = canvasRef.current;
+    if (webcam && canvas) {
+      const video = webcam.video;
+      const ctx = canvas.getContext('2d');
+      
+      // Set canvas dimensions to match video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      // Draw the video frame to the canvas
+      ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      
+      // Get the image data from the canvas
+      const imageSrc = canvas.toDataURL('image/jpeg');
+      onCapture(imageSrc);
+    }
   }, [webcamRef, onCapture]);
 
   return (
@@ -53,6 +70,8 @@ const WebcamModal = ({ onCapture, onCancel, videoConstraints }) => { // Added vi
           width="100%"
           videoConstraints={videoConstraints}
         />
+        {/* Hidden canvas for processing */}
+        <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
         <div className={styles.webcamControls}>
           <button type="button" onClick={capture} className={styles.captureBtn}>
             Capture Photo
@@ -83,8 +102,8 @@ export default function GuestRegistrationForm({ onAddGuest }) {
   const [errors, setErrors] = useState({});
   const [isWebcamOpen, setIsWebcamOpen] = useState(false);
   const [captureFor, setCaptureFor] = useState(null);
-  
-  // 4. ADDED: State to manage the AI verification process
+
+  //  State to manage the AI verification process
   const [verification, setVerification] = useState({ state: null, message: '' });
 
   // --- Webcam Handlers ---
@@ -93,26 +112,41 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     setIsWebcamOpen(true);
   };
 
+  {/* MODIFICATION A: Part 1 - Updated handleCapture function */}
   const handleCapture = (imageSrc) => {
     if (!captureFor) return;
     const { type, index } = captureFor;
-    
+  
     if (type === "main") {
       setForm((prev) => ({ ...prev, livePhoto: imageSrc }));
       setErrors((prev) => ({ ...prev, livePhoto: null }));
-    } else if (type === "idFront") {
-        setVerification({ state: null, message: '' }); // Reset on new capture
-        setForm((prev) => ({ ...prev, idImageFront: imageSrc }));
-        setErrors((prev) => ({...prev, idImageFront: null}));
-    } else if (type === "idBack") {
-        setForm((prev) => ({...prev, idImageBack: imageSrc }));
-        setErrors((prev) => ({...prev, idImageBack: null}));
-    } else if (type === "adult") {
+    }
+    else if (type === "idFront") {
+      setVerification({ state: null, message: '' });
+      setForm((prev) => ({ ...prev, idImageFront: imageSrc }));
+      setErrors((prev) => ({ ...prev, idImageFront: null }));
+    }
+    else if (type === "idBack") {
+      setForm((prev) => ({ ...prev, idImageBack: imageSrc }));
+      setErrors((prev) => ({ ...prev, idImageBack: null }));
+    }
+    // ADDED THESE NEW HANDLERS
+    else if (type === "adultIdFront") {
+      handleOtherAdultChange(index, "idImageFront", imageSrc);
+    } else if (type === "adultIdBack") {
+      handleOtherAdultChange(index, "idImageBack", imageSrc);
+    } else if (type === "childIdFront") {
+      handleChildChange(index, "idImageFront", imageSrc);
+    } else if (type === "childIdBack") {
+      handleChildChange(index, "idImageBack", imageSrc);
+    }
+    // The existing adult and child handlers are for live photos
+    else if (type === "adult") {
       handleOtherAdultChange(index, "livePhoto", imageSrc);
     } else if (type === "child") {
       handleChildChange(index, "livePhoto", imageSrc);
     }
-    
+  
     setIsWebcamOpen(false);
     setCaptureFor(null);
   };
@@ -159,7 +193,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     // Debounce to avoid firing on every keystroke
     const timer = setTimeout(() => {
         verifyNameAndId();
-    }, 1000); 
+    }, 1000);
 
     return () => clearTimeout(timer); // Cleanup timer
 
@@ -193,6 +227,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     }
   };
 
+  {/* MODIFICATION A: Part 2 - Updated initial state for new guests */}
   const addOtherAdult = () =>
     setForm((prev) => ({
       ...prev,
@@ -200,7 +235,8 @@ export default function GuestRegistrationForm({ onAddGuest }) {
         ...prev.guests,
         adults: [
           ...prev.guests.adults,
-          { name: "", dob: "", age: "", idType: "", idNumber: "", idImage: null, livePhoto: null },
+          // Add idImageFront and idImageBack
+          { name: "", dob: "", age: "", idType: "", idNumber: "", idImageFront: null, idImageBack: null, livePhoto: null },
         ],
       },
     }));
@@ -230,8 +266,6 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     if (key !== "dob") setErrors((prev) => ({ ...prev, [`adult_${key}_${index}`]: null }));
   };
 
-  const handleOtherAdultFileChange = (idx, e, fieldName) =>
-    handleOtherAdultChange(idx, fieldName, e.target.files[0]);
 
   const addChild = () =>
     setForm((prev) => ({
@@ -240,7 +274,8 @@ export default function GuestRegistrationForm({ onAddGuest }) {
         ...prev.guests,
         children: [
           ...prev.guests.children,
-          { name: "", dob: "", age: "", idType: "", idNumber: "", idImage: null, livePhoto: null },
+          // Add idImageFront and idImageBack
+          { name: "", dob: "", age: "", idType: "", idNumber: "", idImageFront: null, idImageBack: null, livePhoto: null },
         ],
       },
     }));
@@ -270,10 +305,9 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     if (key !== "dob") setErrors((prev) => ({ ...prev, [`child_${key}_${index}`]: null }));
   };
 
-  const handleChildFileChange = (idx, e, fieldName) => handleChildChange(idx, fieldName, e.target.files[0]);
 
+  {/* MODIFICATION C: Part 1 - Updated validate function */}
   const validate = () => {
-    // Your existing validation logic is perfect and remains unchanged.
     const errs = {};
     if (!form.name.trim()) errs.name = "Full name is required";
     if (!form.dob) errs.dob = "DOB is required";
@@ -302,7 +336,9 @@ export default function GuestRegistrationForm({ onAddGuest }) {
       if (!g.idType) errs[`adult_idType_${idx}`] = "ID proof type is required";
       if (!g.idNumber || !g.idNumber.trim()) errs[`adult_idNumber_${idx}`] = "ID number is required";
       if (!g.livePhoto) errs[`adult_livePhoto_${idx}`] = "Live photo is required";
-      if (!g.idImage) errs[`adult_idImage_${idx}`] = "ID image is required";
+      // REPLACE the idImage check with these two:
+      if (!g.idImageFront) errs[`adult_idImageFront_${idx}`] = "ID front is required";
+      if (!g.idImageBack) errs[`adult_idImageBack_${idx}`] = "ID back is required";
     });
 
     form.guests.children.forEach((c, idx) => {
@@ -310,7 +346,9 @@ export default function GuestRegistrationForm({ onAddGuest }) {
       if (!c.dob) errs[`child_dob_${idx}`] = "DOB is required";
       if (c.age >= 10) {
         if (!c.idType) errs[`child_idType_${idx}`] = "ID proof type is required";
-        if (!c.idImage) errs[`child_idImage_${idx}`] = "ID image is required";
+        // REPLACE the idImage check with these two:
+        if (!c.idImageFront) errs[`child_idImageFront_${idx}`] = "ID front is required";
+        if (!c.idImageBack) errs[`child_idImageBack_${idx}`] = "ID back is required";
       }
       if (!c.livePhoto) errs[`child_livePhoto_${idx}`] = "Live photo is required";
     });
@@ -319,66 +357,78 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     return Object.keys(errs).length === 0;
   };
 
+  {/* MODIFICATION C: Part 2 - Updated handleSubmit function */}
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validate()) {
-    toast.error("Please fill all required fields correctly.");
-    return;
-  }
+    e.preventDefault();
+    if (!validate()) {
+      toast.error("Please fill all required fields correctly.");
+      return;
+    }
 
-  const toastId = toast.loading("Registering guest...");
+    const toastId = toast.loading("Registering guest...");
 
-  try {
-    const formData = new FormData();
+    try {
+      const formData = new FormData();
 
-    // Append primary guest data
-    formData.append('primaryGuestName', form.name);
-    formData.append('primaryGuestDob', form.dob);
-    formData.append('primaryGuestGender', form.gender);
-    formData.append('primaryGuestPhone', form.phone);
-    formData.append('primaryGuestEmail', form.email);
-    formData.append('primaryGuestAddress', `${form.address.city}, ${form.address.district}, ${form.address.state} - ${form.address.pincode}`);
-    formData.append('idType', form.idType);
-    formData.append('idNumber', form.idNumber);
+      // Append primary guest data
+      formData.append('primaryGuestName', form.name);
+      formData.append('primaryGuestDob', form.dob);
+      formData.append('primaryGuestGender', form.gender);
+      formData.append('primaryGuestPhone', form.phone);
+      formData.append('primaryGuestEmail', form.email);
+      formData.append('primaryGuestAddress', `${form.address.city}, ${form.address.district}, ${form.address.state} - ${form.address.pincode}`);
+      formData.append('idType', form.idType);
+      formData.append('idNumber', form.idNumber);
 
-    // Append files
-    formData.append('idImageFront', dataURLtoFile(form.idImageFront, 'idImageFront.jpg'));
-    formData.append('idImageBack', dataURLtoFile(form.idImageBack, 'idImageBack.jpg'));
-    formData.append('livePhoto', dataURLtoFile(form.livePhoto, 'livePhoto.jpg'));
+      // Append files
+      formData.append('idImageFront', dataURLtoFile(form.idImageFront, 'idImageFront.jpg'));
+      formData.append('idImageBack', dataURLtoFile(form.idImageBack, 'idImageBack.jpg'));
+      formData.append('livePhoto', dataURLtoFile(form.livePhoto, 'livePhoto.jpg'));
 
-    // Append stay details
-    formData.append('purposeOfVisit', form.purpose);
-    formData.append('checkIn', form.checkIn);
-    formData.append('expectedCheckout', form.expectedCheckout);
-    formData.append('roomNumber', form.roomNumber);
+      // Append stay details
+      formData.append('purposeOfVisit', form.purpose);
+      formData.append('checkIn', form.checkIn);
+      formData.append('expectedCheckout', form.expectedCheckout);
+      formData.append('roomNumber', form.roomNumber);
 
-    // Append accompanying guests as a JSON string
-    formData.append('accompanyingGuests', JSON.stringify(form.guests));
+      // ADD logic to append accompanying guest images
+      form.guests.adults.forEach((adult, index) => {
+        if (adult.idImageFront) formData.append(`adult_${index}_idImageFront`, dataURLtoFile(adult.idImageFront, `adult_${index}_idFront.jpg`));
+        if (adult.idImageBack) formData.append(`adult_${index}_idImageBack`, dataURLtoFile(adult.idImageBack, `adult_${index}_idBack.jpg`));
+      });
 
-    const response = await apiClient.post('/guests/register', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+      form.guests.children.forEach((child, index) => {
+        if (child.idImageFront) formData.append(`child_${index}_idImageFront`, dataURLtoFile(child.idImageFront, `child_${index}_idFront.jpg`));
+        if (child.idImageBack) formData.append(`child_${index}_idImageBack`, dataURLtoFile(child.idImageBack, `child_${index}_idBack.jpg`));
+      });
 
-    toast.success(response.data.message || "Guest registered successfully!", { id: toastId });
+      // Append accompanying guests as a JSON string
+      formData.append('accompanyingGuests', JSON.stringify(form.guests));
 
-    // Reset form and call external handler
-    onAddGuest && onAddGuest(); // Assuming onAddGuest is for refreshing lists
-    setForm(getInitialFormState());
-    setErrors({});
+      const response = await apiClient.post('/guests/register', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || "Failed to register guest.";
-    toast.error(errorMessage, { id: toastId });
-    console.error("Guest registration failed:", error);
-  }
-};
+      toast.success(response.data.message || "Guest registered successfully!", { id: toastId });
+
+      // Reset form and call external handler
+      onAddGuest && onAddGuest(); // Assuming onAddGuest is for refreshing lists
+      setForm(getInitialFormState());
+      setErrors({});
+
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Failed to register guest.";
+      toast.error(errorMessage, { id: toastId });
+      console.error("Guest registration failed:", error);
+    }
+  };
   // ...
   
   // Determine camera facing mode based on capture type
   const getCameraFacingMode = () => {
-    if (captureFor?.type === 'idFront' || captureFor?.type === 'idBack') {
+    if (captureFor?.type.includes('id')) { // Simplified logic for all ID captures
       return "environment"; // Use back camera for documents
     }
     return "user"; // Use front camera for selfies
@@ -501,57 +551,57 @@ export default function GuestRegistrationForm({ onAddGuest }) {
         {/* --- All other fieldsets (Address, Purpose, Adults, Children) and the submit button remain exactly the same. --- */}
         {/* ... */}
        <fieldset>
-  <legend>Address *</legend>
-  <div className={styles.row}>
-    <label>
-      State *
-      <input
-        type="text"
-        name="address.state"
-        value={form.address.state}
-        onChange={handleChange}
-      />
-      {errors["address.state"] && (
-        <span className={styles.error}>{errors["address.state"]}</span>
-      )}
-    </label>
-    <label>
-      District *
-      <input
-        type="text"
-        name="address.district"
-        value={form.address.district}
-        onChange={handleChange}
-      />
-      {errors["address.district"] && (
-        <span className={styles.error}>{errors["address.district"]}</span>
-      )}
-    </label>
-    <label>
-      City *
-      <input
-        type="text"
-        name="address.city"
-        value={form.address.city}
-        onChange={handleChange}
-      />
-      {errors["address.city"] && (
-        <span className={styles.error}>{errors["address.city"]}</span>
-      )}
-    </label>
-    <label>
-      Pin Code *
-      <input
-        type="text"
-        name="address.pincode"
-        value={form.address.pincode}
-        onChange={handleChange}
-      />
-      {errors["address.pincode"] && (
-        <span className={styles.error}>{errors["address.pincode"]}</span>
-      )}
-    </label>
-  </div>
+ <legend>Address *</legend>
+ <div className={styles.row}>
+   <label>
+     State *
+     <input
+       type="text"
+       name="address.state"
+       value={form.address.state}
+       onChange={handleChange}
+     />
+     {errors["address.state"] && (
+       <span className={styles.error}>{errors["address.state"]}</span>
+     )}
+   </label>
+   <label>
+     District *
+     <input
+       type="text"
+       name="address.district"
+       value={form.address.district}
+       onChange={handleChange}
+     />
+     {errors["address.district"] && (
+       <span className={styles.error}>{errors["address.district"]}</span>
+     )}
+   </label>
+   <label>
+     City *
+     <input
+       type="text"
+       name="address.city"
+       value={form.address.city}
+       onChange={handleChange}
+     />
+     {errors["address.city"] && (
+       <span className={styles.error}>{errors["address.city"]}</span>
+     )}
+   </label>
+   <label>
+     Pin Code *
+     <input
+       type="text"
+       name="address.pincode"
+       value={form.address.pincode}
+       onChange={handleChange}
+     />
+     {errors["address.pincode"] && (
+       <span className={styles.error}>{errors["address.pincode"]}</span>
+     )}
+   </label>
+ </div>
 </fieldset>
 <label>
   Purpose of Visit *
@@ -705,17 +755,27 @@ export default function GuestRegistrationForm({ onAddGuest }) {
           <span className={styles.error}>{errors[`adult_idNumber_${idx}`]}</span>
         )}
       </label>
-      <label>
-        Upload ID Image *
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => handleOtherAdultFileChange(idx, e, "idImage")}
-        />
-        {errors[`adult_idImage_${idx}`] && (
-          <span className={styles.error}>{errors[`adult_idImage_${idx}`]}</span>
-        )}
-      </label>
+
+      {/* MODIFICATION B: Part 1 - Replaced file upload with webcam buttons for Adults */}
+      {/* REMOVED the existing "Upload ID Image" label and input */}
+      {/* ADDED these two blocks instead */}
+      <div className={styles.livePhotoContainer}>
+        <label>ID Front *</label>
+        <button type="button" className={styles.addBtn} onClick={() => openWebcam("adultIdFront", idx)}>
+          Capture Front
+        </button>
+        {guest.idImageFront && <img src={guest.idImageFront} alt="Adult ID Front" className={styles.photoPreviewCompact} />}
+        {errors[`adult_idImageFront_${idx}`] && <span className={styles.error}>{errors[`adult_idImageFront_${idx}`]}</span>}
+      </div>
+      <div className={styles.livePhotoContainer}>
+        <label>ID Back *</label>
+        <button type="button" className={styles.addBtn} onClick={() => openWebcam("adultIdBack", idx)}>
+          Capture Back
+        </button>
+        {guest.idImageBack && <img src={guest.idImageBack} alt="Adult ID Back" className={styles.photoPreviewCompact} />}
+        {errors[`adult_idImageBack_${idx}`] && <span className={styles.error}>{errors[`adult_idImageBack_${idx}`]}</span>}
+      </div>
+
       <div className={styles.livePhotoContainer}>
         <label>Live Photo *</label>
         <button
@@ -768,9 +828,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
           onChange={(e) => handleChildChange(idx, "name", e.target.value)}
         />
         {errors[`child_name_${idx}`] && (
-          <span className={
-
-styles.error}>{errors[`child_name_${idx}`]}</span>
+          <span className={styles.error}>{errors[`child_name_${idx}`]}</span>
         )}
       </label>
       <label>
@@ -821,17 +879,26 @@ styles.error}>{errors[`child_name_${idx}`]}</span>
               <span className={styles.error}>{errors[`child_idType_${idx}`]}</span>
             )}
           </label>
-          <label>
-            Upload ID Image *
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleChildFileChange(idx, e, "idImage")}
-            />
-            {errors[`child_idImage_${idx}`] && (
-              <span className={styles.error}>{errors[`child_idImage_${idx}`]}</span>
-            )}
-          </label>
+          
+          {/* MODIFICATION B: Part 2 - Replaced file upload with webcam buttons for Children */}
+          {/* REMOVED the existing "Upload ID Image" label and input */}
+          {/* ADDED these two blocks instead */}
+          <div className={styles.livePhotoContainer}>
+            <label>ID Front *</label>
+            <button type="button" className={styles.addBtn} onClick={() => openWebcam("childIdFront", idx)}>
+              Capture Front
+            </button>
+            {child.idImageFront && <img src={child.idImageFront} alt="Child ID Front" className={styles.photoPreviewCompact} />}
+            {errors[`child_idImageFront_${idx}`] && <span className={styles.error}>{errors[`child_idImageFront_${idx}`]}</span>}
+          </div>
+          <div className={styles.livePhotoContainer}>
+            <label>ID Back *</label>
+            <button type="button" className={styles.addBtn} onClick={() => openWebcam("childIdBack", idx)}>
+              Capture Back
+            </button>
+            {child.idImageBack && <img src={child.idImageBack} alt="Child ID Back" className={styles.photoPreviewCompact} />}
+            {errors[`child_idImageBack_${idx}`] && <span className={styles.error}>{errors[`child_idImageBack_${idx}`]}</span>}
+          </div>
         </>
       )}
       <div className={styles.livePhotoContainer}>

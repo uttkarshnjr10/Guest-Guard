@@ -1,23 +1,28 @@
 import React, { useState, useEffect, useCallback } from "react";
 import apiClient from "../../api/apiClient";
-import styles from "./ManageHotels.module.css";
+import styles from "./ManagePolice.module.css"; // Updated to use ManagePolice.module.css
 import { toast } from "react-hot-toast";
 import TableSkeletonLoader from "../../components/common/TableSkeletonLoader";
+import PoliceProfileModal from "../../components/admin/PoliceProfileModal";
 
 export default function ManagePolice() {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchUsers = useCallback(async () => {
+ const fetchUsers = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = { searchTerm, status: statusFilter };
       const { data } = await apiClient.get('/users/police', { params });
       setUsers(data);
-    } catch {
-      toast.error('Failed to fetch police user data.');
+    } catch (error) { // Add "error" to the catch block
+      // Add this console.error log
+      console.error("Failed to fetch police user data:", error); 
+      toast.error('Failed to fetch police user data. Check console for details.');
     } finally {
       setIsLoading(false);
     }
@@ -30,7 +35,18 @@ export default function ManagePolice() {
     return () => clearTimeout(debounceFetch);
   }, [fetchUsers]);
 
-  const handleAction = async (action, userId) => {
+  const handleUserClick = (user) => {
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleAction = async (action, userId, event) => {
+    event.stopPropagation();
     const user = users.find(u => u.id === userId);
     const confirmationMessage = `${action} the user "${user.name}"? This action cannot be undone.`;
 
@@ -97,7 +113,7 @@ export default function ManagePolice() {
           <tbody>
             {users.length > 0 ? (
               users.map((user, index) => (
-                <tr key={user.id}>
+                <tr key={user.id} onClick={() => handleUserClick(user)} className={styles.clickableRow}>
                   <td>{index + 1}</td>
                   <td>{user.name}</td>
                   <td>{user.location}</td>
@@ -106,15 +122,15 @@ export default function ManagePolice() {
                       {user.status}
                     </span>
                   </td>
-                  <td>
+                  <td onClick={(e) => e.stopPropagation()}>
                     <button 
-                      onClick={() => handleAction(user.status === 'Active' ? 'Suspend' : 'Activate', user.id)} 
+                      onClick={(e) => handleAction(user.status === 'Active' ? 'Suspend' : 'Activate', user.id, e)} 
                       className={styles.actionBtn}
                     >
                       {user.status === 'Active' ? 'Suspend' : 'Activate'}
                     </button>
                     <button 
-                      onClick={() => handleAction('Delete', user.id)} 
+                      onClick={(e) => handleAction('Delete', user.id, e)} 
                       className={styles.actionBtnDelete}
                     >
                       Delete
@@ -130,6 +146,7 @@ export default function ManagePolice() {
           </tbody>
         </table>
       )}
+      {isModalOpen && <PoliceProfileModal user={selectedUser} onClose={handleCloseModal} />}
     </div>
   );
 }
