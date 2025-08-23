@@ -1,9 +1,7 @@
-// src/pages/Login.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import apiClient from "../../api/apiClient";
 import { toast } from "react-hot-toast";
-// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion"; 
 import styles from "./Login.module.css";
 
@@ -35,7 +33,7 @@ export default function Login({ setAuth }) {
     }
   }, [location]);
 
-  // ✅ Animation variants
+  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
@@ -113,7 +111,6 @@ export default function Login({ setAuth }) {
       <div className={`${styles.circle} ${styles.c2}`}></div>
       <div className={`${styles.circle} ${styles.c3}`}></div>
 
-      {/* ✅ Wrap login box with motion */}
       <motion.div
         className={styles.loginBox}
         variants={containerVariants}
@@ -122,7 +119,7 @@ export default function Login({ setAuth }) {
       >
         <motion.div className={styles.header} variants={itemVariants}>
           <h2>Centralized Data Management</h2>
-          <p>Secure Access for Authorized Personnel</p>
+          <p>Login with Your Provided Credential</p>
         </motion.div>
 
         <form onSubmit={handleSubmit} className={styles.form} noValidate>
@@ -164,11 +161,19 @@ export default function Login({ setAuth }) {
           </motion.button>
         </form>
 
-        <motion.div className={styles.demoInfo} variants={itemVariants}>
-          <p>
-            <strong>Login with Provided Credential</strong>
-          </p>
-        </motion.div>
+        <motion.button
+          type="button"
+          className={styles.homeBtn}
+          onClick={() => navigate("/")}
+          variants={itemVariants}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          style={{ marginBottom: '1.1rem', marginTop: '0.8rem' }} // Adjusted margin-top to move slightly lower
+        >
+           ← Home
+        </motion.button>
+
+        
       </motion.div>
     </div>
   );

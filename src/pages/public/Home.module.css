@@ -98,14 +98,25 @@
   text-decoration: none;
   font-weight: 600;
   font-size: 1.1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 5px 20px rgba(59, 130, 246, 0.4);
+  transition: 
+    transform 0.17s cubic-bezier(0.4, 0, 0.2, 1), 
+    box-shadow 0.2s ease,
+    background 0.3s;
+  box-shadow: 0 5px 20px rgba(59, 130, 246, 0.40);
 }
 
 .ctaButton:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6);
+  transform: translateY(-3px) scale(1.06);
+  box-shadow: 0 10px 32px rgba(59, 130, 246, 0.23), 0 0 0 4px #bfdbfe44;
+  background: linear-gradient(90deg, #6366F1, #3B82F6); /* subtle gradient flip */
 }
+
+.ctaButton:active {
+  transform: scale(0.97) translateY(1.5px);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+  background: linear-gradient(90deg, #486aec, #4259b6);
+}
+
 
 .heroAnimation {
   display: flex;
@@ -113,7 +124,7 @@
   justify-content: center;
 }
 
-/* --- Features Section (styles remain the same) --- */
+/* --- Features Section (styles remain for compatibility with Why Us page) --- */
 .featuresSection {
   position: relative;
   z-index: 1;
@@ -165,6 +176,38 @@
   color: #1a202c;
   margin-bottom: 1rem;
 }
+
+/* --- Why Us Button --- */
+.topRightButton {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  z-index: 10;
+}
+
+.whyUsButton {
+  background: linear-gradient(90deg, #e0e7ff, #a5b4fc); /* Lighter gradient */
+  color: #3730a3; /* Deep indigo, ties to theme */
+  padding: 0.75rem 2rem;
+  border-radius: 24px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.07rem;
+  border: 1.5px solid #a5b4fc; /* Soft border */
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08); /* Softer shadow */
+  opacity: 0.97;
+  transition: background 0.21s, color 0.21s, transform 0.17s, opacity 0.18s;
+  display: inline-block;
+}
+
+.whyUsButton:hover {
+  background: linear-gradient(90deg, #a5b4fc, #6366F1);
+  color: #fff;
+  transform: translateY(-2px) scale(1.04);
+  opacity: 1;
+  border-color: #6366F1;
+}
+
 
 /* --- Responsive Design --- */
 @media (max-width: 950px) {

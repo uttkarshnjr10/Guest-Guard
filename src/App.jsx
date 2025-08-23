@@ -6,6 +6,7 @@ import styles from './AppLayout.module.css';
 
 // --- Page Imports ---
 import Home from "./pages/public/Home";
+import WhyUs from './pages/public/WhyUs';
 import Login from "./pages/public/Login";
 import ForcePasswordReset from "./pages/ForcePasswordReset";
 import ProfilePage from "./pages/shared/ProfilePage";
@@ -137,6 +138,7 @@ function AppContent() {
         <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
+            <Route path="/why-us" element={<WhyUs />} />
             <Route path="/login" element={<Login setAuth={setAuth} />} />
             <Route path="/reset-password" element={<ForcePasswordReset />} />
 
