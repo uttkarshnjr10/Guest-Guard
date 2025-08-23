@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./TodaysGuestList.module.css";
 import { format } from "date-fns";
 
-// MODIFIED: We now accept an 'onCheckout' function as a prop
+// props: guests, onCheckout
 export default function TodaysGuestList({ guests, onCheckout }) {
   console.log("TodaysGuestList rendered with:", { guests, onCheckout });
   
@@ -10,10 +10,10 @@ export default function TodaysGuestList({ guests, onCheckout }) {
     return <p>No checked-in guests found.</p>;
   }
 
+  // handle checkout action
   const handleCheckoutClick = (guestId) => {
     console.log("Checkout button clicked for guest ID:", guestId);
     if (!guestId) {
-      console.error("No guest ID provided");
       alert("Error: Could not identify guest for checkout");
       return;
     }
@@ -24,7 +24,6 @@ export default function TodaysGuestList({ guests, onCheckout }) {
     if (onCheckout && typeof onCheckout === 'function') {
       onCheckout(guestId);
     } else {
-      console.error("onCheckout is not a function:", onCheckout);
       alert("Error: Checkout function not available");
     }
   };
@@ -38,7 +37,7 @@ export default function TodaysGuestList({ guests, onCheckout }) {
           <th>Phone</th>
           <th>Check-In</th>
           <th>Checkout (Expected)</th>
-          {/* NEW: Add a header for actions */}
+          {/* actions */}
           <th>Actions</th>
         </tr>
       </thead>
@@ -57,7 +56,7 @@ export default function TodaysGuestList({ guests, onCheckout }) {
               <td>{g.primaryGuest?.phone || 'N/A'}</td>
               <td>{g.stayDetails?.checkIn ? format(new Date(g.stayDetails.checkIn), "dd MMM, HH:mm") : 'N/A'}</td>
               <td>{g.stayDetails?.expectedCheckout ? format(new Date(g.stayDetails.expectedCheckout), "dd MMM, HH:mm") : 'N/A'}</td>
-              {/* NEW: Add a cell with the checkout button */}
+              {/* checkout button */}
               <td>
                 <button
                   className={styles.checkoutBtn}

@@ -3,12 +3,15 @@ import apiClient from "../../api/apiClient";
 import styles from "./ManageHotels.module.css";
 import { toast } from "react-hot-toast";
 import TableSkeletonLoader from "../../components/common/TableSkeletonLoader";
+import HotelProfileModal from "../../components/admin/HotelProfileModal"; // Import the new modal component
 
 export default function ManageHotels() {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [selectedHotel, setSelectedHotel] = useState(null); // New state for selected hotel
+  const [isModalOpen, setIsModalOpen] = useState(false); // New state for modal visibility
 
   const fetchUsers = useCallback(async () => {
     setIsLoading(true);
@@ -16,8 +19,9 @@ export default function ManageHotels() {
       const params = { searchTerm, status: statusFilter };
       const { data } = await apiClient.get('/users/hotels', { params });
       setUsers(data);
-    } catch {
-      toast.error('Failed to fetch hotel data.');
+    } catch (error) { // Added error parameter for better logging
+      console.error("Failed to fetch hotel data:", error); // Log the actual error
+      toast.error('Failed to fetch hotel data. Check console for details.');
     } finally {
       setIsLoading(false);
     }
@@ -30,10 +34,27 @@ export default function ManageHotels() {
     return () => clearTimeout(debounceFetch);
   }, [fetchUsers]);
 
-  const handleAction = async (action, userId) => {
+  // Handler to open the modal
+  const handleHotelClick = (hotel) => {
+    setSelectedHotel(hotel);
+    setIsModalOpen(true);
+  };
+
+  // Handler to close the modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedHotel(null);
+  };
+
+  const handleAction = async (action, userId, event) => { // Added event parameter
+    // Stop propagation to prevent the row click from also opening the modal
+    event.stopPropagation(); 
+    
     const user = users.find(u => u.id === userId);
     const confirmationMessage = `${action} the user "${user.name}"? This action cannot be undone.`;
 
+    // Replaced window.confirm with a more robust custom modal if available,
+    // but for now keeping window.confirm as per existing code.
     if (!window.confirm(confirmationMessage)) return;
 
     const toastId = toast.loading(`${action === 'Delete' ? 'Deleting' : 'Updating'} user...`);
@@ -97,10 +118,14 @@ export default function ManageHotels() {
           <tbody>
             {users.length > 0 ? (
               users.map((user, index) => (
-                <tr key={user.id}>
+                <tr 
+                  key={user.id} 
+                  onClick={() => handleHotelClick(user)} // Added click handler for the row
+                  className={styles.clickableRow} // Add a class for styling if desired
+                >
                   <td>{index + 1}</td>
-                  <td>{user.name}</td>
-                  <td>{user.location}</td>
+                  <td>{user.hotelName || user.name}</td> {/* Use hotelName if available, else username */}
+                  <td>{user.city}</td>
                   <td>
                     <span className={user.status === "Active" ? styles.statusActive : styles.statusSuspended}>
                       {user.status}
@@ -108,13 +133,13 @@ export default function ManageHotels() {
                   </td>
                   <td>
                     <button 
-                      onClick={() => handleAction(user.status === 'Active' ? 'Suspend' : 'Activate', user.id)} 
+                      onClick={(e) => handleAction(user.status === 'Active' ? 'Suspend' : 'Activate', user.id, e)} 
                       className={styles.actionBtn}
                     >
                       {user.status === 'Active' ? 'Suspend' : 'Activate'}
                     </button>
                     <button 
-                      onClick={() => handleAction('Delete', user.id)} 
+                      onClick={(e) => handleAction('Delete', user.id, e)} 
                       className={styles.actionBtnDelete}
                     >
                       Delete
@@ -130,6 +155,8 @@ export default function ManageHotels() {
           </tbody>
         </table>
       )}
+      {/* Render the HotelProfileModal when isModalOpen is true */}
+      {isModalOpen && <HotelProfileModal hotel={selectedHotel} onClose={handleCloseModal} />}
     </div>
   );
 }
