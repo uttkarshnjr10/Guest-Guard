@@ -1,53 +1,75 @@
 @import '../../styles/variables.module.css';
-/* Assuming this path is correct */
 
+/* --- Main Form Container --- */
 .form {
-  background: white;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%); /* Subtle gradient for depth */
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 6px 16px rgba(38, 83, 212, 0.1);
-  max-width: 900px;
-  margin: 2rem auto;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--text-dark);
+  box-shadow: 0 8px 24px rgba(0, 30, 100, 0.1);
+  max-width: 920px; /* Optimal width for readability */
+  margin: 1.5rem auto;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #1e293b;
+  box-sizing: border-box;
+  border: 1px solid #e2e8f0;
+}
+
+/* --- Section Headers --- */
+legend {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--primary-blue);
+  padding: 0 0.75rem;
+  letter-spacing: 0.02em;
+  background: #ffffff;
+  border-radius: 6px;
+}
+
+/* --- Fieldset Styling --- */
+fieldset {
+  border: 1px solid #e2e8f0; /* Clean line box style */
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
 }
 
-h3 {
-  margin-bottom: 1.5rem;
-  color: var(--primary-blue);
-  font-weight: 700;
-  font-size: 1.7rem;
-  text-align: center;
+fieldset:last-of-type {
+  margin-bottom: 0;
 }
 
+/* --- Input & Layout --- */
 .row {
-  display: flex;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem; /* Balanced spacing */
+  margin-bottom: 1.25rem;
 }
 
 label {
-  flex: 1 1 220px; /* Allows growth/shrink, with min basis */
   display: flex;
   flex-direction: column;
   font-weight: 600;
-  font-size: 0.9rem;
-  position: relative;
-  min-width: 180px; /* Helps with wrapping */
+  font-size: 0.95rem;
+  color: #2d3748;
+  min-width: 160px;
   box-sizing: border-box;
 }
 
 input,
 select,
 textarea {
-  margin-top: 0.4rem;
-  padding: 0.65rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  margin-top: 0.5rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  width: 100%;
+  max-width: 320px; /* Slightly larger inputs */
+  background: #f9fafb;
+  transition: all 0.2s ease;
   font-family: inherit;
   box-sizing: border-box;
 }
@@ -57,243 +79,282 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--primary-blue);
-  box-shadow: 0 0 0 3px rgba(38, 83, 212, 0.15);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  background: #ffffff;
 }
 
 textarea {
   resize: vertical;
-  min-height: 60px;
+  min-height: 80px;
+  max-width: 480px;
 }
 
 .error {
   color: var(--danger);
-  font-size: 0.8rem;
-  margin-top: 4px;
-  position: absolute;
-  bottom: -18px;
-  left: 0;
-  font-weight: 600;
-}
-
-fieldset {
-  border: 1px solid var(--border);
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  border-radius: 8px;
-  box-sizing: border-box;
-}
-
-legend {
-  font-weight: 700;
-  color: var(--primary-blue);
-  padding: 0 0.5rem;
-  font-size: 1.1rem;
-}
-
-/* --- FIX FOR OTHER GUESTS SECTION --- */
-.otherGuestRow {
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+  font-weight: 500;
   display: flex;
-  flex-wrap: wrap; /* Allow fields to wrap onto next line */
-  gap: 1rem;
-  padding: 1.5rem;
-  margin-bottom: 1.2rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background-color: #f9fafb;
-  position: relative;
-  box-sizing: border-box;
+  align-items: center;
+  gap: 0.25rem;
 }
 
-.otherGuestRow label {
-  flex: 1 1 220px; /* Allows grow/shrink with a base of 220px for consistent width */
-  min-width: 180px;
-}
-
+/* --- Guest Details Section --- */
 .guestDetailsRow {
-  margin-bottom: 1rem;
+  background: #f9fafc;
+  border: 1px solid #e2e8f0; /* Line box style */
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
-/* Buttons */
+/* --- Buttons --- */
 .removeBtn {
-  background-color: #ef4444; /* Slightly softened red */
-  color: white;
-  border: none;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
   padding: 0.5rem 1rem;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.9rem;
-  transition: background-color 0.2s;
-  /* Positioned top right inside guest blocks */
+  transition: all 0.2s ease;
   position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  z-index: 1;
-  box-sizing: border-box;
+  top: 1rem;
+  right: 1rem;
 }
 
 .removeBtn:hover {
-  background-color: #dc2626;
+  background: #ef4444;
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
 .addBtn {
-  background-color: #16a34a; /* Nice green */
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  padding: 0.6rem 1.25rem;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 700;
-  font-size: 1rem;
-  margin-top: 0.5rem;
-  transition: background-color 0.2s;
-  display: inline-block;
-  box-sizing: border-box;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .addBtn:hover {
-  background-color: #15803d;
+  background: #10b981;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 .submitBtn {
-  background-color: var(--primary-blue);
-  color: white;
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  color: #ffffff;
   border: none;
-  padding: 0.85rem 2.5rem;
-  font-size: 1.1rem;
+  padding: 0.9rem 2rem;
+  font-size: 1rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
   font-weight: 700;
-  margin-top: 1.5rem;
+  margin: 1.5rem auto;
   display: block;
-  margin-left: auto;
-  margin-right: auto; /* Center button */
-  box-sizing: border-box;
+  transition: all 0.2s ease;
 }
 
 .submitBtn:hover {
-  background-color: var(--secondary-blue);
   transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
 }
 
-/* Small live photo thumbnails */
+/* --- Photo & Webcam --- */
+.livePhotoContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  flex: 1;
+  min-width: 160px;
+  padding: 0.75rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.livePhotoContainer:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.livePhotoContainer label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
 .photoPreviewCompact {
-  width: 80px;
-  height: 80px;
+  width: 140px; /* Larger for better visibility */
+  height: 140px;
   object-fit: cover;
   border-radius: 8px;
-  margin-top: 0.5rem;
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  border: 1px solid #d1d5db;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Webcam modal overlay */
+.photoPreviewCompact:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
 .webcamOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
 }
 
-/* Container around the webcam */
 .webcamContainer {
-  background: white;
-  padding: 1rem;
+  background: #ffffff;
+  padding: 1.5rem;
   border-radius: 12px;
-  max-width: 480px;
+  max-width: 600px;
   width: 90vw;
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-/* Webcam buttons container */
 .webcamControls {
   display: flex;
-  justify-content: space-between;
-  margin-top: 0.8rem;
+  gap: 1rem;
+  margin-top: 1rem;
+  justify-content: center;
 }
 
 .captureBtn, .cancelBtn {
   flex: 1;
-  padding: 0.6rem 1rem;
-  margin: 0 0.4rem;
-  cursor: pointer;
-  border-radius: 6px;
+  padding: 0.8rem 1.25rem;
+  border-radius: 8px;
   border: none;
   font-weight: 600;
-  font-size: 1rem;
-  transition: background-color 0.2s ease;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .captureBtn {
-  background-color: var(--primary-blue);
-  color: white;
+  background: var(--primary-blue);
+  color: #ffffff;
 }
 
 .captureBtn:hover {
-  background-color: var(--secondary-blue);
+  background: var(--secondary-blue);
+  transform: translateY(-1px);
 }
 
 .cancelBtn {
-  background-color: #ccc;
+  background: #e2e8f0;
+  color: #2d3748;
 }
 
 .cancelBtn:hover {
-  background-color: #aaa;
+  background: #d1d5db;
+  transform: translateY(-1px);
 }
 
-/* Responsive tweaks */
+/* --- Verification Status --- */
+.statusVerifying,
+.statusSuccess,
+.statusFailed {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  text-align: center;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
+.statusVerifying {
+  background: #e5e7eb;
+  color: #2d3748;
+}
+
+.statusSuccess {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.statusFailed {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+/* --- Responsive Design --- */
 @media (max-width: 768px) {
+  .form {
+    padding: 1.25rem;
+    margin: 1rem 0.5rem;
+  }
   .row {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
-
-  label {
-    min-width: 100%;
+  .guestDetailsRow {
+    padding: 1rem;
+    grid-template-columns: 1fr;
   }
-
-  .otherGuestRow label {
-    flex: 1 1 100%;
-    min-width: 100%;
-  }
-
   .removeBtn {
     position: relative;
     top: auto;
     right: auto;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    align-self: flex-end;
+  }
+  .livePhotoContainer {
+    min-width: 100%;
+  }
+  .photoPreviewCompact {
+    width: 120px;
+    height: 120px;
+  }
+  input,
+  select,
+  textarea {
+    max-width: 100%;
   }
 }
 
-
-/* Add these styles to the end of GuestRegistrationForm.module.css */
-
-.statusVerifying,
-.statusSuccess,
-.statusFailed {
-  font-size: 0.9rem;
-  font-weight: 500;
-  margin-top: 8px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  text-align: center;
-}
-
-.statusVerifying {
-  color: #546e7a; /* blue-grey */
-  background-color: #eceff1;
-}
-
-.statusSuccess {
-  color: #2e7d32; /* dark green */
-  background-color: #e8f5e9;
-}
-
-.statusFailed {
-  color: #c62828; /* dark red */
-  background-color: #ffcdd2;
+@media (max-width: 480px) {
+  .form {
+    padding: 1rem;
+  }
+  .webcamContainer {
+    padding: 1rem;
+    width: 100vw;
+    border-radius: 0;
+  }
+  .captureBtn, .cancelBtn {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+  legend {
+    font-size: 1.1rem;
+  }
 }

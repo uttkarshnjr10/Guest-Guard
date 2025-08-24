@@ -142,9 +142,9 @@ export default function GuestRegistrationForm({ onAddGuest }) {
       handleChildChange(index, "idImageFront", imageSrc);
     } else if (type === "childIdBack") {
       handleChildChange(index, "idImageBack", imageSrc);
-    } else if (type === "adult") {
+    } else if (type === "adultLivePhoto") {
       handleOtherAdultChange(index, "livePhoto", imageSrc);
-    } else if (type === "child") {
+    } else if (type === "childLivePhoto") {
       handleChildChange(index, "livePhoto", imageSrc);
     }
 
@@ -310,7 +310,6 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     }
 
     const toastId = toast.loading("Registering guest...");
-    setVerification({ state: "verifying", message: "" });
 
     try {
       const formData = new FormData();
@@ -358,8 +357,6 @@ export default function GuestRegistrationForm({ onAddGuest }) {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setVerification({ state: "success", message: "Name successfully verified." });
-
       toast.success(response.data.message || "Guest registered successfully!", { id: toastId });
 
       onAddGuest && onAddGuest();
@@ -369,7 +366,6 @@ export default function GuestRegistrationForm({ onAddGuest }) {
       const errorMessage = error.response?.data?.message || "Failed to register guest.";
       toast.error(errorMessage, { id: toastId });
       console.error("Guest registration failed:", error);
-      setVerification({ state: "failed", message: errorMessage });
     }
   };
 
@@ -526,7 +522,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
             <div className={styles.livePhotoContainer}>
               <label>ID Proof Front *</label>
               <button type="button" className={styles.addBtn} onClick={() => openWebcam("idFront")}>
-                Capture Front
+                Capture
               </button>
               {form.idImageFront && (
                 <img src={form.idImageFront} alt="ID Front Preview" className={styles.photoPreviewCompact} />
@@ -537,7 +533,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
             <div className={styles.livePhotoContainer}>
               <label>ID Proof Back *</label>
               <button type="button" className={styles.addBtn} onClick={() => openWebcam("idBack")}>
-                Capture Back
+                Capture
               </button>
               {form.idImageBack && (
                 <img src={form.idImageBack} alt="ID Back Preview" className={styles.photoPreviewCompact} />
@@ -547,7 +543,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
             <div className={styles.livePhotoContainer}>
               <label>Live Photo *</label>
               <button type="button" className={styles.addBtn} onClick={() => openWebcam("main")}>
-                Take Live Photo
+                Capture
               </button>
               {form.livePhoto && (
                 <img src={form.livePhoto} alt="Live Preview" className={styles.photoPreviewCompact} />
@@ -642,7 +638,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
               <div className={styles.livePhotoContainer}>
                 <label>ID Front *</label>
                 <button type="button" className={styles.addBtn} onClick={() => openWebcam("adultIdFront", idx)}>
-                  Capture Front
+                  Capture
                 </button>
                 {guest.idImageFront && (
                   <img src={guest.idImageFront} alt="Adult ID Front" className={styles.photoPreviewCompact} />
@@ -652,7 +648,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
               <div className={styles.livePhotoContainer}>
                 <label>ID Back *</label>
                 <button type="button" className={styles.addBtn} onClick={() => openWebcam("adultIdBack", idx)}>
-                  Capture Back
+                  Capture
                 </button>
                 {guest.idImageBack && (
                   <img src={guest.idImageBack} alt="Adult ID Back" className={styles.photoPreviewCompact} />
@@ -661,8 +657,8 @@ export default function GuestRegistrationForm({ onAddGuest }) {
               </div>
               <div className={styles.livePhotoContainer}>
                 <label>Live Photo *</label>
-                <button type="button" className={styles.addBtn} onClick={() => openWebcam("adult", idx)}>
-                  Take Live Photo
+                <button type="button" className={styles.addBtn} onClick={() => openWebcam("adultLivePhoto", idx)}>
+                  Capture
                 </button>
                 {guest.livePhoto && (
                   <img src={guest.livePhoto} alt="Adult Live" className={styles.photoPreviewCompact} />
@@ -753,7 +749,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
                   <div className={styles.livePhotoContainer}>
                     <label>ID Front *</label>
                     <button type="button" className={styles.addBtn} onClick={() => openWebcam("childIdFront", idx)}>
-                      Capture Front
+                      Capture
                     </button>
                     {child.idImageFront && (
                       <img src={child.idImageFront} alt="Child ID Front" className={styles.photoPreviewCompact} />
@@ -765,7 +761,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
                   <div className={styles.livePhotoContainer}>
                     <label>ID Back *</label>
                     <button type="button" className={styles.addBtn} onClick={() => openWebcam("childIdBack", idx)}>
-                      Capture Back
+                      Capture
                     </button>
                     {child.idImageBack && (
                       <img src={child.idImageBack} alt="Child ID Back" className={styles.photoPreviewCompact} />
@@ -778,8 +774,8 @@ export default function GuestRegistrationForm({ onAddGuest }) {
               )}
               <div className={styles.livePhotoContainer}>
                 <label>Live Photo *</label>
-                <button type="button" className={styles.addBtn} onClick={() => openWebcam("child", idx)}>
-                  Take Live Photo
+                <button type="button" className={styles.addBtn} onClick={() => openWebcam("childLivePhoto", idx)}>
+                  Capture
                 </button>
                 {child.livePhoto && (
                   <img src={child.livePhoto} alt="Child Live" className={styles.photoPreviewCompact} />
