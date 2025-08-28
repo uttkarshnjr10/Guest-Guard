@@ -1,13 +1,12 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-// Create a new axios instance
+// Axios instance with API base URL
 const apiClient = axios.create({
-  // ✅ CHANGE THIS LINE: Add '/api' to the base URL
   baseURL: `${import.meta.env.VITE_API_BASE_URL}/api`,
 });
 
-// Use an interceptor to automatically add the auth token to every request
+// Add auth token to every request if available
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('authToken');
@@ -21,16 +20,14 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Optional: Add an interceptor to handle common 401 Unauthorized errors
+// Show error if session expired (401)
 apiClient.interceptors.response.use(
-  (response) => response, // Directly return successful responses
+  (response) => response,
   (error) => {
-    // If the error is a 401, it means the token is invalid or expired
     if (error.response && error.response.status === 401) {
-      // Here you could automatically log the user out and redirect to the login page
-      // For now, we'll just show a toast
       toast.error('Session expired. Please log in again.');
-      // You could add: localStorage.removeItem('authToken'); window.location.href = '/login';
+      // Optionally: remove token and redirect to login
+      //  could add: localStorage.removeItem('authToken'); window.location.href = '/login';
     }
     return Promise.reject(error);
   }

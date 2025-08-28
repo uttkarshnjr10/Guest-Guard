@@ -1,8 +1,8 @@
 @import '../../styles/variables.module.css';
 
 .mainContent {
-  margin-left: 0; /* No sidebar offset */
-  padding: 2rem 2rem; /* Reduced top padding to shift content up */
+  margin-left: 0;
+  padding: 0.0rem 2rem 2rem 2rem; /* Reduced top padding further */
   background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%); /* Subtle gradient for depth */
   min-height: 100vh;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -81,7 +81,7 @@ p {
 /* --- Responsive Design --- */
 @media (max-width: 768px) {
   .mainContent {
-    padding: 1.5rem 1rem;
+    padding: 0.3rem 1rem 1.5rem 1rem; /* Reduced top padding for mobile */
   }
   h1 {
     font-size: 1.5rem;
@@ -104,7 +104,7 @@ p {
 
 @media (max-width: 480px) {
   .mainContent {
-    padding: 1rem 0.75rem;
+    padding: 0.15rem 0.75rem 1rem 0.75rem; /* Further reduced top padding for small screens */
   }
   h1 {
     font-size: 1.35rem;

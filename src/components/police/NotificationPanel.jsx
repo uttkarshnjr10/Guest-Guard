@@ -23,7 +23,7 @@ export default function NotificationPanel() {
 
     useEffect(() => {
         fetchNotifications();
-        // Optional: you can add polling to refresh notifications periodically
+        // Optional: can add polling to refresh notifications periodically
         // const interval = setInterval(fetchNotifications, 60000); // Poll every 60 seconds
         // return () => clearInterval(interval);
     }, []);

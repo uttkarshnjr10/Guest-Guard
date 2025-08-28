@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import apiClient from "../../api/apiClient"; // ✅ centralized axios client
+import apiClient from "../../api/apiClient"; 
 import GuestRegistrationForm from "../../components/HotelStaff/GuestRegistrationForm";
 import TodaysGuestList from "../../components/HotelStaff/TodaysGuestList";
 import styles from "./HotelStaffDashboard.module.css";
@@ -38,7 +38,7 @@ export default function HotelStaffDashboard() {
     fetchGuests();
   }, [fetchGuests]);
 
-  // ✅ Handles new guest registration
+  // Handles new guest registration
   const handleAddGuest = async (guestPayload) => {
     const toastId = toast.loading("Registering new guest...");
     try {
@@ -60,7 +60,7 @@ export default function HotelStaffDashboard() {
       formData.append("idType", guestPayload.idType);
       formData.append("idNumber", guestPayload.idNumber);
 
-      // ✅ Let axios/browser set headers — no manual multipart config
+      // axios/browser set headers — no manual multipart config
       const response = await apiClient.post("/guests/register", formData);
 
       setGuests((prevGuests) => [response.data, ...prevGuests]);
@@ -75,7 +75,7 @@ export default function HotelStaffDashboard() {
     }
   };
 
-  // ✅ Handles checkout
+  // Handles checkout
   const handleCheckout = async (guestId) => {
     if (!window.confirm("Are you sure you want to check out this guest?")) return;
 
@@ -102,10 +102,10 @@ export default function HotelStaffDashboard() {
 
   return (
     <main className={styles.mainContent}>
-      <h1>Hotel Dashboard</h1>
+      <h1>Dashboard</h1>
 
       <section className={styles.section}>
-        <h2>New Guest Registration</h2>
+        <h2>Guest Registration Form</h2>
         <GuestRegistrationForm onAddGuest={handleAddGuest} />
       </section>
 

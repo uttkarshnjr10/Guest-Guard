@@ -1,40 +1,179 @@
-/* Add these new styles to your existing RegisterNewUser.module.css file.
-  You can adjust colors and spacing to match your theme.
-*/
-
-/* Styles for the success message box */
-.credentialBox {
-  background-color: #f0fdf4; /* Light green background */
-  border: 1px solid #bbf7d0; /* Green border */
-  border-radius: 8px;
+.mainContent {
+  margin-left: 70px;   /* offset for sidebar width */
+  margin-top: -30px;
   padding: 2rem;
-  text-align: center;
-  max-width: 600px;
-  margin: 2rem auto;
-  animation: fadeIn 0.5s ease-out; /* Entrance animation */
+  background-color: #f9fafb;
+  display: flex;
+  justify-content: flex-start;  /* keep content aligned left */
+  align-items: flex-start;
+  width: calc(100% - 220px); /* prevents it from overflowing */
 }
 
-/* Keyframe animation for the success box */
+/* NEW container to control the form's width and centering */
+.formContainer {
+  width: 100%;
+  max-width: 700px;
+}
+
+/* Header styles - now inside the form box */
+.header {
+  text-align: center;
+  margin-bottom: 1.5rem; /* Reduced margin */
+}
+
+.header h1 {
+  font-size: 1.75rem; /* Slightly smaller for a cleaner look */
+  color: #1f2937;
+  font-weight: 600;
+}
+
+/* Type switch row enhancements */
+.typeSwitchRow {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem; /* Adjusted spacing */
+  gap: 1rem;
+}
+
+.typeLabel {
+  padding: 0.7rem 1.5rem;
+  border: 1px solid #d1d5db; /* Made border thinner */
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.typeLabel.active {
+  background-color: #4f46e5;
+  border-color: #4f46e5;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.1);
+}
+
+.typeSwitchRow input[type="radio"] {
+  display: none;
+}
+
+/* Form box styles */
+.formBox {
+  background-color: #ffffff;
+  padding: 2.5rem; /* Increased padding slightly for better internal spacing */
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* A slightly more pronounced shadow */
+  border: 1px solid #e5e7eb;
+}
+
+/* Form row styles */
+.formRow {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.25rem; /* Adjusted margin */
+}
+
+/* NEW grid layout for two-column fields */
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.formRow label {
+  font-weight: 500; /* Adjusted font-weight */
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* Input field styles */
+.inputField {
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.inputField:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Error message */
+.error {
+  color: #ef4444;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+/* Form actions */
+.formActions {
+  display: flex;
+  justify-content: flex-end; /* Aligns button to the right */
+  margin-top: 2rem;
+}
+
+.submitBtn {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+}
+
+.submitBtn:hover {
+  background-color: #4338ca;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
+}
+
+.submitBtn:disabled {
+  background-color: #a5b4fc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Success credential box styles (unchanged) */
+.credentialBox {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 2.5rem;
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto; /* Keep this centered */
+  animation: fadeIn 0.5s ease-out;
+}
+
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .credentialBox h3 {
-  color: #166534; /* Dark green text */
-  font-size: 1.5rem;
+  color: #166534;
+  font-size: 1.8rem;
   margin-top: 0;
+  margin-bottom: 1rem;
 }
 
 .credentialInfo {
   color: #15803d;
   margin-bottom: 2rem;
+  font-size: 1rem;
 }
 
 .credentialRow {
@@ -42,15 +181,17 @@
   justify-content: space-between;
   align-items: center;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  margin-bottom: 1rem;
+  border: 1px solid #e5e7eb;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
   text-align: left;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .credentialRow b {
   color: #334155;
+  font-size: 1rem;
 }
 
 .credentialValue {
@@ -66,122 +207,74 @@
   background-color: #f1f5f9;
   border: 1px solid #e2e8f0;
   color: #475569;
-  padding: 0.3rem 0.8rem;
-  border-radius: 4px;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  transition: all 0.2s ease; /* Smooth transition for all properties */
+  transition: all 0.2s ease;
 }
 
 .copyBtn:hover {
   background-color: #e2e8f0;
-  transform: translateY(-2px); /* Add a slight lift on hover */
+  transform: translateY(-2px);
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .copyBtn:active {
   background-color: #cbd5e1;
-  transform: translateY(0); /* Return to original position on click */
+  transform: translateY(0);
 }
 
 .registerAnotherBtn {
   background-color: #2563eb;
   color: white;
   border: none;
-  padding: 0.8rem 1.5rem;
+  padding: 1rem 2rem;
   font-size: 1rem;
-  font-weight: bold;
-  border-radius: 6px;
+  font-weight: 600;
+  border-radius: 8px;
   cursor: pointer;
-  margin-top: 1.5rem;
-  transition: all 0.2s ease-in-out; /* Smooth transition */
+  margin-top: 2rem;
+  transition: all 0.2s ease-in-out;
   box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
 }
 
 .registerAnotherBtn:hover {
   background-color: #1d4ed8;
-  transform: scale(1.02); /* Slightly enlarge on hover */
+  transform: scale(1.02);
   box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
 }
 
 .registerAnotherBtn:active {
-    transform: scale(0.98); /* Shrink slightly on click */
+  transform: scale(0.98);
 }
 
-/* Enhanced radio button styles */
-.typeSwitchRow {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 2rem;
-    gap: 1rem;
-}
-
-.typeSwitchRow label {
-    padding: 0.75rem 1.5rem;
-    border: 2px solid #d1d5db;
-    border-radius: 50px; /* Pill shape */
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 600;
-    color: #4b5563;
-}
-
-.typeSwitchRow label.active {
-  background-color: #e0e7ff;
-  border-color: #4f46e5;
-  color: #4f46e5;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-/* Hide the actual radio button */
-.typeSwitchRow input[type="radio"] {
-    display: none;
-}
-
-/* Add focus state to form inputs */
-.formBox input:focus {
-    outline: none;
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-}
-
-/* Add this at the end of the file */
-.formBox select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #fff;
-  font-size: 1rem;
-}
-
-.formBox select:disabled {
-  background-color: #f0f0f0;
-  cursor: not-allowed;
-}    
-
+/* React Select overrides (unchanged) */
 :global(.react-select__control) {
-  border: 1px solid #ccc !important;
+  border: 1px solid #d1d5db !important;
   box-shadow: none !important;
-  padding: 2px;
-  border-radius: 4px !important;
+  padding: 0.25rem;
+  border-radius: 8px !important;
+  transition: all 0.2s ease;
 }
 
 :global(.react-select__control--is-focused) {
-  border-color: #007bff !important;
+  border-color: #4f46e5 !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
 }
 
 :global(.react-select__menu) {
-  border-radius: 4px !important;
-  z-index: 2 !important; /* Ensure dropdown appears above other elements */
+  border-radius: 8px !important;
+  z-index: 10 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 :global(.react-select__option--is-focused) {
-  background-color: #deebff !important;
+  background-color: #e0e7ff !important;
 }
 
 :global(.react-select__option--is-selected) {
-  background-color: #007bff !important;
+  background-color: #4f46e5 !important;
   color: white !important;
 }

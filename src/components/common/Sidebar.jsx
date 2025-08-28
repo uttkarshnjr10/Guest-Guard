@@ -1,4 +1,4 @@
-// src/components/common/Sidebar.jsx (or PoliceSidebar.jsx if separate)
+// src/components/common/Sidebar.jsx 
 
 import React from "react";
 import { NavLink } from "react-router-dom";

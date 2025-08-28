@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import styles from './Home.module.css';
-import { motion } from 'framer-motion'; // Add this import
+import { motion } from 'framer-motion'; 
 import Lottie from 'lottie-react';
 import AnimatedText from './AnimatedText';
 import signupAnimation from './Signup Flow.json';

@@ -19,6 +19,7 @@ function dataURLtoFile(dataurl, filename) {
 }
 
 // Component to display AI verification status
+/*
 const VerificationStatus = ({ status }) => {
   if (!status.state) return null;
 
@@ -33,6 +34,7 @@ const VerificationStatus = ({ status }) => {
   }
   return null;
 };
+*/
 
 // Webcam Modal for capturing photos
 const WebcamModal = ({ onCapture, onCancel, videoConstraints }) => {
@@ -112,7 +114,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
   const [errors, setErrors] = useState({});
   const [isWebcamOpen, setIsWebcamOpen] = useState(false);
   const [captureFor, setCaptureFor] = useState(null);
-  const [verification, setVerification] = useState({ state: null, message: "" });
+  // const [verification, setVerification] = useState({ state: null, message: "" });
 
   // Webcam Handlers
   const openWebcam = (type, index = null) => {
@@ -128,7 +130,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
       setForm((prev) => ({ ...prev, livePhoto: imageSrc }));
       setErrors((prev) => ({ ...prev, livePhoto: null }));
     } else if (type === "idFront") {
-      setVerification({ state: null, message: "" });
+      // setVerification({ state: null, message: "" });
       setForm((prev) => ({ ...prev, idImageFront: imageSrc }));
       setErrors((prev) => ({ ...prev, idImageFront: null }));
     } else if (type === "idBack") {
@@ -301,7 +303,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     return Object.keys(errs).length === 0;
   };
 
-  // Form Submission
+  // Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) {
@@ -528,7 +530,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
                 <img src={form.idImageFront} alt="ID Front Preview" className={styles.photoPreviewCompact} />
               )}
               {errors.idImageFront && <span className={styles.error}>{errors.idImageFront}</span>}
-              <VerificationStatus status={verification} />
+              {/* <VerificationStatus status={verification} /> */}
             </div>
             <div className={styles.livePhotoContainer}>
               <label>ID Proof Back *</label>

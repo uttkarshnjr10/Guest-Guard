@@ -21,28 +21,27 @@ export default function RegisterNewUser() {
   const [error, setError] = useState("");
   const [successData, setSuccessData] = useState(null);
 
- useEffect(() => {
-   const fetchPoliceStations = async () => {
-       setStationsLoading(true);
-       try {
-        // apiClient automatically handles the token and base URL
-         const { data } = await apiClient.get('/stations');
-          const formattedStations = data.map(station => ({
-            value: station._id,
-            label: station.name
-           }));
-           setPoliceStations(formattedStations);
-        } catch (err) {
-         console.error("Failed to fetch police stations", err);
-         toast.error("Could not load police stations. Please refresh.");
-         setError("Could not load police stations. Please refresh.");
-        } finally {
-         setStationsLoading(false);
-         }
-       };
+  useEffect(() => {
+    const fetchPoliceStations = async () => {
+      setStationsLoading(true);
+      try {
+        const { data } = await apiClient.get('/stations');
+        const formattedStations = data.map(station => ({
+          value: station._id,
+          label: station.name
+        }));
+        setPoliceStations(formattedStations);
+      } catch (err) {
+        console.error("Failed to fetch police stations", err);
+        toast.error("Could not load police stations. Please refresh.");
+        setError("Could not load police stations. Please refresh.");
+      } finally {
+        setStationsLoading(false);
+      }
+    };
 
-     fetchPoliceStations();
-    }, []);
+    fetchPoliceStations();
+  }, []);
 
   const handleTypeChange = (newUserType) => {
     setUserType(newUserType);
@@ -102,17 +101,13 @@ export default function RegisterNewUser() {
     }
 
     try {
-      // apiClient automatically handles the token and base URL
       const response = await apiClient.post('/users/register', payload);
-
       toast.success(response.data.message, { id: toastId });
-
       setSuccessData({
         message: "User Registered Successfully!",
         username: response.data.username,
         password: response.data.temporaryPassword
       });
-
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || "An error occurred.";
       setError(errorMessage);
@@ -154,59 +149,100 @@ export default function RegisterNewUser() {
 
   return (
     <main className={styles.mainContent}>
-      <header>
-        <h1>Register New User</h1>
-      </header>
+      <div className={styles.formContainer}> {/* New container to center the form content */}
+        <form onSubmit={handleSubmit} className={styles.formBox}>
+          {/* Moved Header and Type Switch inside the formBox for better grouping */}
+          <header className={styles.header}>
+            <h1>Register New User</h1>
+          </header>
 
-      <div className={styles.typeSwitchRow}>
-        <label className={userType === USER_TYPES.HOTEL ? styles.active : ''}>
-          <input type="radio" value={USER_TYPES.HOTEL} checked={userType === USER_TYPES.HOTEL} onChange={() => handleTypeChange(USER_TYPES.HOTEL)} />
-          Hotel
-        </label>
-        <label className={userType === USER_TYPES.POLICE ? styles.active : ''}>
-          <input type="radio" value={USER_TYPES.POLICE} checked={userType === USER_TYPES.POLICE} onChange={() => handleTypeChange(USER_TYPES.POLICE)} />
-          Police Station
-        </label>
+          <div className={styles.typeSwitchRow}>
+            <label className={`${styles.typeLabel} ${userType === USER_TYPES.HOTEL ? styles.active : ''}`}>
+              <input type="radio" value={USER_TYPES.HOTEL} checked={userType === USER_TYPES.HOTEL} onChange={() => handleTypeChange(USER_TYPES.HOTEL)} />
+              Hotel
+            </label>
+            <label className={`${styles.typeLabel} ${userType === USER_TYPES.POLICE ? styles.active : ''}`}>
+              <input type="radio" value={USER_TYPES.POLICE} checked={userType === USER_TYPES.POLICE} onChange={() => handleTypeChange(USER_TYPES.POLICE)} />
+              Police Station
+            </label>
+          </div>
+
+          {userType === USER_TYPES.HOTEL ? (
+            <>
+              <div className={styles.formRow}>
+                <label>Hotel Name *</label>
+                <input name="name" required value={formData.name} onChange={handleChange} className={styles.inputField} />
+              </div>
+              <div className={styles.formRow}>
+                <label>Official Address *</label>
+                <input name="address" required value={formData.address} onChange={handleChange} className={styles.inputField} />
+              </div>
+
+              {/* A new grid container to place fields side-by-side */}
+              <div className={styles.formGrid}>
+                <div className={styles.formRow}>
+                  <label>City *</label>
+                  <input name="city" required value={formData.city} onChange={handleChange} className={styles.inputField} />
+                </div>
+                <div className={styles.formRow}>
+                  <label>License Number *</label>
+                  <input name="license" required value={formData.license} onChange={handleChange} className={styles.inputField} />
+                </div>
+              </div>
+
+              <div className={styles.formRow}>
+                <label>Contact Email *</label>
+                <input name="contact" type="email" required value={formData.contact} onChange={handleChange} className={styles.inputField} />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.formGrid}>
+                 <div className={styles.formRow}>
+                  <label>Station Name *</label>
+                  <input name="station" required value={formData.station} onChange={handleChange} className={styles.inputField} />
+                </div>
+                <div className={styles.formRow}>
+                  <label>Jurisdiction *</label>
+                  <input name="jurisdiction" required value={formData.jurisdiction} onChange={handleChange} className={styles.inputField} />
+                </div>
+              </div>
+              
+               <div className={styles.formRow}>
+                <label>Assign to Police Station *</label>
+                <Select
+                  options={policeStations}
+                  onChange={handleSelectChange}
+                  isLoading={stationsLoading}
+                  placeholder="Search and select a station..."
+                  noOptionsMessage={() => 'No stations found.'}
+                  classNamePrefix="react-select"
+                  required
+                />
+              </div>
+
+              <div className={styles.formGrid}>
+                <div className={styles.formRow}>
+                  <label>City *</label>
+                  <input name="city" required value={formData.city} onChange={handleChange} className={styles.inputField} />
+                </div>
+                <div className={styles.formRow}>
+                  <label>Contact Email *</label>
+                  <input name="contact" type="email" required value={formData.contact} onChange={handleChange} className={styles.inputField} />
+                </div>
+              </div>
+            </>
+          )}
+
+          {error && <p className={styles.error}>{error}</p>}
+
+          <div className={styles.formActions}>
+            <button className={styles.submitBtn} type="submit" disabled={isLoading}>
+              {isLoading ? 'Registering...' : 'Register User'}
+            </button>
+          </div>
+        </form>
       </div>
-
-      <form onSubmit={handleSubmit} className={styles.formBox}>
-        {userType === USER_TYPES.HOTEL ? (
-          <>
-            <div className={styles.formRow}><label>Hotel Name *</label><input name="name" required value={formData.name} onChange={handleChange} /></div>
-            <div className={styles.formRow}><label>Official Address *</label><input name="address" required value={formData.address} onChange={handleChange} /></div>
-            <div className={styles.formRow}><label>City *</label><input name="city" required value={formData.city} onChange={handleChange} /></div>
-            <div className={styles.formRow}><label>License Number *</label><input name="license" required value={formData.license} onChange={handleChange} /></div>
-            <div className={styles.formRow}><label>Contact Email *</label><input name="contact" type="email" required value={formData.contact} onChange={handleChange} /></div>
-          </>
-        ) : (
-          <>
-            <div className={styles.formRow}><label>Station Name *</label><input name="station" required value={formData.station} onChange={handleChange} /></div>
-            <div className={styles.formRow}>
-              <label>Assign to Police Station *</label>
-              <Select
-                options={policeStations}
-                onChange={handleSelectChange}
-                isLoading={stationsLoading}
-                placeholder="Search and select a station..."
-                noOptionsMessage={() => 'No stations found. Add one in "Manage Stations".'}
-                classNamePrefix="react-select"
-                required
-              />
-            </div>
-            <div className={styles.formRow}><label>Jurisdiction *</label><input name="jurisdiction" required value={formData.jurisdiction} onChange={handleChange} /></div>
-            <div className={styles.formRow}><label>City *</label><input name="city" required value={formData.city} onChange={handleChange} /></div>
-            <div className={styles.formRow}><label>Contact Email *</label><input name="contact" type="email" required value={formData.contact} onChange={handleChange} /></div>
-          </>
-        )}
-
-        {error && <p className={styles.error}>{error}</p>}
-
-        <div className={styles.formActions}>
-          <button className={styles.submitBtn} type="submit" disabled={isLoading}>
-            {isLoading ? 'Registering...' : 'Register User'}
-          </button>
-        </div>
-      </form>
     </main>
   );
 }
