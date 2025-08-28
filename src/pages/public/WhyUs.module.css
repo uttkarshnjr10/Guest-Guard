@@ -1,11 +1,12 @@
 .pageWrapper {
   min-height: 100vh;
-  background: linear-gradient(180deg, #f0f4f8 0%, #ffffff 100%);
+  background: linear-gradient(180deg, #e6f0fa 0%, #ffffff 100%);
   padding: 2rem 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .container {
-  max-width: 75rem;
+  max-width: 72rem;
   margin: 0 auto;
   padding: 0 1.5rem;
 }
@@ -14,18 +15,31 @@
   padding: 3rem 0;
 }
 
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
 .sectionTitle {
   font-size: 2.25rem;
   font-weight: 700;
   color: #1a202c;
-  text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 0.75rem;
   animation: fadeIn 1s ease-out;
+}
+
+.sectionSubtitle {
+  font-size: 1.1rem;
+  color: #4a5568;
+  max-width: 36rem;
+  margin: 0 auto;
+  animation: fadeInUp 1s ease-out 0.2s;
+  animation-fill-mode: backwards;
 }
 
 .featuresGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
   margin-bottom: 3rem;
 }
@@ -38,6 +52,7 @@
   transition: transform 0.4s ease, box-shadow 0.4s ease;
   animation: slideUp 0.8s ease-out;
   animation-fill-mode: backwards;
+  text-align: center;
 }
 
 .featureCard:nth-child(1) { animation-delay: 0.1s; }
@@ -49,7 +64,7 @@
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
-.iconWrapper {
+.featureIconWrapper {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -57,23 +72,26 @@
   height: 3rem;
   background: linear-gradient(135deg, #4299e1 0%, #63b3ed 100%);
   border-radius: 50%;
-  font-size: 1.5rem;
-  color: #ffffff;
   margin: 0 auto 1rem;
   transition: transform 0.3s ease, background 0.3s ease;
 }
 
-.featureCard:hover .iconWrapper {
+.featureCard:hover .featureIconWrapper {
   transform: scale(1.15);
   background: linear-gradient(135deg, #2b6cb0 0%, #4299e1 100%);
 }
 
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #ffffff;
+}
+
 .cardTitle {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 600;
   color: #1a202c;
   margin-bottom: 0.5rem;
-  text-align: center;
 }
 
 .cardSubtitle {
@@ -81,28 +99,27 @@
   font-weight: 500;
   color: #718096;
   margin-bottom: 0.5rem;
-  text-align: center;
 }
 
 .cardDescription {
   font-size: 0.9rem;
   color: #4a5568;
   line-height: 1.5;
-  text-align: center;
 }
 
 .aboutSection {
   padding: 3rem 0;
+  background: #f7fafc;
 }
 
 .aboutGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
 }
 
 .teamCard {
-  background: #f7fafc;
+  background: #ffffff;
   padding: 1.75rem;
   border-radius: 0.75rem;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
@@ -123,10 +140,17 @@
 .avatar {
   width: 5rem;
   height: 5rem;
-  background: linear-gradient(135deg, #4299e1 0%, #63b3ed 100%);
   border-radius: 50%;
   margin: 0 auto 1rem;
   transition: transform 0.3s ease;
+}
+
+.satyaAvatar {
+  background: linear-gradient(135deg, #4299e1 0%, #63b3ed 100%);
+}
+
+.uttkarshAvatar {
+  background: linear-gradient(135deg, #ed8936 0%, #f6ad55 100%);
 }
 
 .teamCard:hover .avatar {
@@ -150,23 +174,18 @@
 
 /* Animations */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (min-width: 768px) {
@@ -174,12 +193,16 @@
     font-size: 2.5rem;
   }
 
+  .sectionSubtitle {
+    font-size: 1.25rem;
+  }
+
   .container {
     padding: 0 2rem;
   }
 
   .cardTitle {
-    font-size: 1.35rem;
+    font-size: 1.4rem;
   }
 
   .cardDescription {
