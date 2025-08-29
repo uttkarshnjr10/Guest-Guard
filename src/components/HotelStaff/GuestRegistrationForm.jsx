@@ -304,72 +304,94 @@ export default function GuestRegistrationForm({ onAddGuest }) {
   };
 
   // Handle Form Submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) {
-      toast.error("Please fill all required fields correctly.");
-      return;
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validate()) {
+    toast.error("Please fill all required fields correctly.");
+    return;
+  }
 
-    const toastId = toast.loading("Registering guest...");
+  const toastId = toast.loading("Registering guest...");
 
+  // Create the FormData object first
+  const formData = new FormData();
+  try {
+    // Append primary guest data
+    formData.append("primaryGuestName", form.name);
+    formData.append("primaryGuestDob", form.dob);
+    formData.append("primaryGuestGender", form.gender);
+    formData.append("primaryGuestPhone", form.phone);
+    formData.append("primaryGuestEmail", form.email);
+    formData.append("primaryGuestAddress", `${form.address.city}, ${form.address.district}, ${form.address.state} - ${form.address.pincode}`);
+    formData.append("idType", form.idType);
+    formData.append("idNumber", form.idNumber);
+
+    // Append stay details
+    formData.append("purposeOfVisit", form.purpose);
+    formData.append("checkIn", form.checkIn);
+    formData.append("expectedCheckout", form.expectedCheckout);
+    formData.append("roomNumber", form.roomNumber);
+
+    // Append files
+    formData.append("idImageFront", dataURLtoFile(form.idImageFront, "idImageFront.jpg"));
+    formData.append("idImageBack", dataURLtoFile(form.idImageBack, "idImageBack.jpg"));
+    formData.append("livePhoto", dataURLtoFile(form.livePhoto, "livePhoto.jpg"));
+
+    // Append accompanying guest images and details
+    form.guests.adults.forEach((adult, index) => {
+      if (adult.idImageFront)
+        formData.append(`adult_${index}_idImageFront`, dataURLtoFile(adult.idImageFront, `adult_${index}_idFront.jpg`));
+      if (adult.idImageBack)
+        formData.append(`adult_${index}_idImageBack`, dataURLtoFile(adult.idImageBack, `adult_${index}_idBack.jpg`));
+      if (adult.livePhoto)
+        formData.append(`adult_${index}_livePhoto`, dataURLtoFile(adult.livePhoto, `adult_${index}_livePhoto.jpg`));
+    });
+
+    form.guests.children.forEach((child, index) => {
+      if (child.idImageFront)
+        formData.append(`child_${index}_idImageFront`, dataURLtoFile(child.idImageFront, `child_${index}_idFront.jpg`));
+      if (child.idImageBack)
+        formData.append(`child_${index}_idImageBack`, dataURLtoFile(child.idImageBack, `child_${index}_idBack.jpg`));
+      if (child.livePhoto)
+        formData.append(`child_${index}_livePhoto`, dataURLtoFile(child.livePhoto, `child_${index}_livePhoto.jpg`));
+    });
+
+    // Append accompanying guests as a JSON string
+    formData.append("accompanyingGuests", JSON.stringify(form.guests));
+
+  } catch (dataError) {
+    // This will catch any errors during FormData creation (e.g., from dataURLtoFile)
+    toast.error("Error preparing registration data.", { id: toastId });
+    console.error("Error creating FormData:", dataError);
+    return; // Stop execution if data preparation fails
+  }
+
+  // Now, perform the API call
+  try {
+    const response = await apiClient.post("/guests/register", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    // --- This is the key change ---
+    // Show success toast FIRST
+    toast.success(response.data.message || "Guest registered successfully!", { id: toastId });
+
+    // Then, safely perform post-success actions in a separate try-catch
     try {
-      const formData = new FormData();
-
-      // Append primary guest data
-      formData.append("primaryGuestName", form.name);
-      formData.append("primaryGuestDob", form.dob);
-      formData.append("primaryGuestGender", form.gender);
-      formData.append("primaryGuestPhone", form.phone);
-      formData.append("primaryGuestEmail", form.email);
-      formData.append("primaryGuestAddress", `${form.address.city}, ${form.address.district}, ${form.address.state} - ${form.address.pincode}`);
-      formData.append("idType", form.idType);
-      formData.append("idNumber", form.idNumber);
-
-      // Append stay details
-      formData.append("purposeOfVisit", form.purpose);
-      formData.append("checkIn", form.checkIn);
-      formData.append("expectedCheckout", form.expectedCheckout);
-      formData.append("roomNumber", form.roomNumber);
-
-      // Append files
-      formData.append("idImageFront", dataURLtoFile(form.idImageFront, "idImageFront.jpg"));
-      formData.append("idImageBack", dataURLtoFile(form.idImageBack, "idImageBack.jpg"));
-      formData.append("livePhoto", dataURLtoFile(form.livePhoto, "livePhoto.jpg"));
-
-      // Append accompanying guest images
-      form.guests.adults.forEach((adult, index) => {
-        if (adult.idImageFront)
-          formData.append(`adult_${index}_idImageFront`, dataURLtoFile(adult.idImageFront, `adult_${index}_idFront.jpg`));
-        if (adult.idImageBack)
-          formData.append(`adult_${index}_idImageBack`, dataURLtoFile(adult.idImageBack, `adult_${index}_idBack.jpg`));
-      });
-
-      form.guests.children.forEach((child, index) => {
-        if (child.idImageFront)
-          formData.append(`child_${index}_idImageFront`, dataURLtoFile(child.idImageFront, `child_${index}_idFront.jpg`));
-        if (child.idImageBack)
-          formData.append(`child_${index}_idImageBack`, dataURLtoFile(child.idImageBack, `child_${index}_idBack.jpg`));
-      });
-
-      // Append accompanying guests as a JSON string
-      formData.append("accompanyingGuests", JSON.stringify(form.guests));
-
-      const response = await apiClient.post("/guests/register", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      toast.success(response.data.message || "Guest registered successfully!", { id: toastId });
-
       onAddGuest && onAddGuest();
       setForm(getInitialFormState());
       setErrors({});
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || "Failed to register guest.";
-      toast.error(errorMessage, { id: toastId });
-      console.error("Guest registration failed:", error);
+    } catch (postSuccessError) {
+      console.error("Error in post-registration cleanup:", postSuccessError);
+      // We don't show another toast here because the main action was successful.
     }
-  };
+
+  } catch (apiError) {
+    const errorMessage = apiError.response?.data?.message || "Failed to register guest.";
+    toast.error(errorMessage, { id: toastId });
+    console.error("Guest registration failed:", apiError);
+  }
+};
 
   // Camera facing mode logic
   const getCameraFacingMode = () => {

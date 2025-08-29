@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import apiClient from "../../api/apiClient"; 
+import apiClient from "../../api/apiClient";
 import GuestRegistrationForm from "../../components/HotelStaff/GuestRegistrationForm";
 import TodaysGuestList from "../../components/HotelStaff/TodaysGuestList";
 import styles from "./HotelStaffDashboard.module.css";
@@ -12,17 +12,18 @@ export default function HotelStaffDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Fetch guests
+  // Fetch guests - this remains the same
   const fetchGuests = useCallback(async () => {
     setLoading(true);
     try {
       const { data } = await apiClient.get("/guests/all");
       setGuests(data);
+      setError(""); // Clear previous errors on successful fetch
     } catch (err) {
       console.error("Error fetching guests:", err);
       if (err.code === "ERR_NETWORK") {
         setError(
-          "Network error: Backend server is not running. Please start the backend server on port 5003."
+          "Network error: Backend server is not running. Please start the backend server."
         );
       } else {
         setError(
@@ -38,44 +39,15 @@ export default function HotelStaffDashboard() {
     fetchGuests();
   }, [fetchGuests]);
 
-  // Handles new guest registration
-  const handleAddGuest = async (guestPayload) => {
-    const toastId = toast.loading("Registering new guest...");
-    try {
-      const formData = new FormData();
-
-      // Append files
-      formData.append("idImageFront", guestPayload.idImageFront);
-      formData.append("idImageBack", guestPayload.idImageBack);
-      formData.append("livePhoto", guestPayload.livePhoto);
-
-
-      // Append structured data
-      formData.append("primaryGuest", JSON.stringify(guestPayload.primaryGuest));
-      formData.append("stayDetails", JSON.stringify(guestPayload.stayDetails));
-      formData.append(
-        "accompanyingGuests",
-        JSON.stringify(guestPayload.accompanyingGuests)
-      );
-      formData.append("idType", guestPayload.idType);
-      formData.append("idNumber", guestPayload.idNumber);
-
-      // axios/browser set headers — no manual multipart config
-      const response = await apiClient.post("/guests/register", formData);
-
-      setGuests((prevGuests) => [response.data, ...prevGuests]);
-      toast.success("Guest registered successfully!", { id: toastId });
-    } catch (err) {
-      console.error("Registration failed:", err);
-      const errorMessage =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Failed to register guest.";
-      toast.error(errorMessage, { id: toastId });
-    }
+  // --- THIS IS THE KEY CHANGE ---
+  // This function is now simplified. Its only job is to re-fetch the guest list.
+  // The GuestRegistrationForm handles the actual registration.
+  const handleSuccessfulRegistration = () => {
+    toast.success("Guest list updated!");
+    fetchGuests(); // Re-fetch the guest list to show the new guest
   };
 
-  // Handles checkout
+  // The handleCheckout function remains the same
   const handleCheckout = async (guestId) => {
     if (!window.confirm("Are you sure you want to check out this guest?")) return;
 
@@ -94,7 +66,7 @@ export default function HotelStaffDashboard() {
       console.error("Checkout error:", err);
       const message =
         err.code === "ERR_NETWORK"
-          ? "Network error: Backend server is not running. Please start the backend server on port 5003."
+          ? "Network error: Backend server is not running."
           : `Error: Could not check out guest. ${err.response?.data?.message || err.message}`;
       toast.error(message, { id: toastId });
     }
@@ -106,7 +78,8 @@ export default function HotelStaffDashboard() {
 
       <section className={styles.section}>
         <h2>Guest Registration Form</h2>
-        <GuestRegistrationForm onAddGuest={handleAddGuest} />
+        {/* Pass the new, simplified function to the form */}
+        <GuestRegistrationForm onAddGuest={handleSuccessfulRegistration} />
       </section>
 
       <section className={styles.section}>
