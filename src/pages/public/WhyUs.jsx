@@ -73,12 +73,10 @@ export default function App() {
             <div className={styles.teamCard}>
               <div className={`${styles.avatar} ${styles.satyaAvatar}`}></div>
               <h3 className={styles.cardTitle}>Satya Dev</h3>
-              <p className={styles.cardSubtitle}>Project Lead & Test Engineer</p>
-              <p className={styles.cardDescription}>
-                A curious and hardworking problem-solver, Satya leads our project vision with a focus on meticulous testing and ensuring a robust, reliable system. He is constantly exploring new technologies to enhance our platform.
-              </p>
-              <a href="mailto:satya@mail29.com" className={styles.emailLink}>
-                satya@mail29.com
+              <p className={styles.cardSubtitle}>Project Lead & Testing</p>
+            
+              <a href="mailto:satyadev.mail29@gmail.com" className={styles.emailLink}>
+                satyadev.mail29@gmail.com
               </a>
             </div>
             {/* Team Member 2: Uttkarsh Kumar */}
@@ -86,9 +84,7 @@ export default function App() {
               <div className={`${styles.avatar} ${styles.uttkarshAvatar}`}></div>
               <h3 className={styles.cardTitle}>Uttkarsh Kumar</h3>
               <p className={styles.cardSubtitle}>Full-Stack Developer</p>
-              <p className={styles.cardDescription}>
-                Uttkarsh is a dedicated and skilled full-stack developer, the technical backbone of the team. He is passionate about bringing seamless functionality and innovative solutions to life through his deep expertise.
-              </p>
+              
               <a href="mailto:uttkarsh.iist26@gmail.com" className={styles.emailLink}>
                 uttkarsh.iist26@gmail.com
               </a>
