@@ -358,3 +358,68 @@ textarea {
     font-size: 1.1rem;
   }
 }
+
+/* GuestRegistrationForm.module.css */
+
+.autocompleteWrapper {
+  position: relative;
+}
+
+.suggestionsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  top: 100%; /* Position it right below the wrapper */
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.suggestionItem {
+  padding: 10px 15px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.suggestionItem:hover {
+  background-color: #f0f0f0;
+}
+
+.suggestionName {
+  font-weight: bold;
+}
+
+.suggestionDetail {
+  font-size: 0.9em;
+  color: #555;
+}
+
+/* GuestRegistrationForm.module.css */
+
+.scanButton {
+  display: inline-block;
+  margin-left: 15px;
+  padding: 5px 10px;
+  background-color: #e8eaf6; /* A light, friendly color */
+  color: #3f51b5;
+  border: 1px solid #3f51b5;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: bold;
+  transition: all 0.2s ease-in-out;
+}
+
+.scanButton:hover {
+  background-color: #3f51b5;
+  color: #fff;
+}

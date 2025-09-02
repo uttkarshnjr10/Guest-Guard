@@ -1,9 +1,12 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
 import styles from "./GuestRegistrationForm.module.css";
 import { toast } from "react-hot-toast";
 import { differenceInYears, parseISO, format } from "date-fns";
 import apiClient from "../../api/apiClient";
+import { countries } from '../../data/countries';
+import { nationalities } from '../../data/nationalities';
+import { phoneCodes } from '../../data/phoneCodes';
 
 // Helper Function: Converts a dataURL (from webcam) to a File object
 function dataURLtoFile(dataurl, filename) {
@@ -95,7 +98,15 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     gender: "",
     phone: "",
     email: "",
-    address: { state: "", district: "", city: "", pincode: "" },
+    address: {
+              street: '',
+              city: '',
+              state: '',
+              district: '', 
+              pincode: '',  
+              country: ''
+            },
+    nationality: '',
     purpose: "",
     checkIn: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
     expectedCheckout: "",
@@ -114,7 +125,89 @@ export default function GuestRegistrationForm({ onAddGuest }) {
   const [errors, setErrors] = useState({});
   const [isWebcamOpen, setIsWebcamOpen] = useState(false);
   const [captureFor, setCaptureFor] = useState(null);
-  // const [verification, setVerification] = useState({ state: null, message: "" });
+  const [isScanning, setIsScanning] = useState(false);
+  const [citySuggestions, setCitySuggestions] = useState([]);
+  const [guestNameSuggestions, setGuestNameSuggestions] = useState([]); // New state for guest name autocomplete suggestions 
+  const [emailSuggestions, setEmailSuggestions] = useState([]);
+
+  useEffect(() => {
+  // If the city input is empty or has less than 2 chars, clear suggestions
+  if (form.address.city.length < 2) {
+    setCitySuggestions([]);
+    return;
+  }
+
+  // Set up a timer to wait 300ms after the user stops typing
+  const debounceTimer = setTimeout(() => {
+    const fetchCities = async () => {
+      try {
+        const response = await apiClient.get('/autocomplete', {
+          params: {
+            field: 'city',
+            query: form.address.city,
+          },
+        });
+        setCitySuggestions(response.data);
+      } catch (error) {
+        console.error('Failed to fetch city suggestions:', error);
+        setCitySuggestions([]); // Clear suggestions on error
+      }
+    };
+
+    fetchCities();
+  }, 300);
+
+  // This is a cleanup function that runs before the next effect
+  // It cancels the previous timer, so we only make one API call
+  return () => clearTimeout(debounceTimer);
+
+}, [form.address.city]); // This effect re-runs whenever the city value changes
+  
+useEffect(() => {
+  if (form.name.length < 3) {
+    setGuestNameSuggestions([]);
+    return;
+  }
+
+  const debounceTimer = setTimeout(() => {
+    const fetchGuests = async () => {
+      try {
+        const response = await apiClient.get('/autocomplete', {
+          params: {
+            field: 'guestName',
+            query: form.name,
+          },
+        });
+        setGuestNameSuggestions(response.data);
+      } catch (error) {
+        console.error('Failed to fetch guest suggestions:', error);
+        setGuestNameSuggestions([]);
+      }
+    };
+
+    fetchGuests();
+  }, 500); // A slightly longer delay is good for name searches
+
+  return () => clearTimeout(debounceTimer);
+}, [form.name]);
+
+// ... inside the GuestRegistrationForm component
+
+const handleEmailChange = (e) => {
+  const { name, value } = e.target;
+  setForm((prev) => ({ ...prev, [name]: value }));
+
+  if (value.includes('@')) {
+    const afterAt = value.split('@')[1];
+    const domains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com'];
+    const suggestions = domains
+      .filter((domain) => domain.startsWith(afterAt))
+      .map((domain) => value.split('@')[0] + '@' + domain);
+    setEmailSuggestions(suggestions);
+  } else {
+    setEmailSuggestions([]);
+  }
+};
 
   // Webcam Handlers
   const openWebcam = (type, index = null) => {
@@ -154,20 +247,48 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     setCaptureFor(null);
   };
 
-  // Form Handlers
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name.startsWith("address.")) {
-      const addrKey = name.split(".")[1];
-      setForm((prev) => ({
-        ...prev,
-        address: { ...prev.address, [addrKey]: value },
-      }));
-    } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
+  // Replace your existing handleChange function with this one
+
+const handleChange = (e) => {
+  const { name, value } = e.target;
+  
+  // --- START OF CORRECTION ---
+
+  // If the input name contains a dot (like "address.pincode")
+  if (name.includes('.')) {
+    const [parentKey, childKey] = name.split('.'); // Splits "address.pincode" into "address" and "pincode"
+    
+    setForm(prev => ({
+      ...prev,
+      [parentKey]: {
+        ...prev[parentKey],
+        [childKey]: value
+      }
+    }));
+
+  } else {
+    // This handles all other inputs (name, email, checkIn, etc.)
+    let updatedValue = { [name]: value };
+
+    // If the check-in date is changed, validate and clear the checkout date if needed
+    if (name === 'checkIn' && form.expectedCheckout && new Date(value) > new Date(form.expectedCheckout)) {
+      updatedValue.expectedCheckout = '';
     }
+    
+    setForm(prev => ({
+      ...prev,
+      ...updatedValue
+    }));
+  }
+
+  
+  // --- END OF CORRECTION ---
+
+  // Reset error for this field
+  if (errors[name]) {
     setErrors((prev) => ({ ...prev, [name]: null }));
-  };
+  }
+};
 
   const handleDobChange = (e) => {
     const dobVal = e.target.value;
@@ -253,7 +374,31 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     });
     if (key !== "dob") setErrors((prev) => ({ ...prev, [`child_${key}_${index}`]: null }));
   };
+const handleSelectGuest = (guest) => {
+  // Format the date of birth correctly for the input field (YYYY-MM-DD)
+  const formattedDob = guest.dob ? new Date(guest.dob).toISOString().split('T')[0] : '';
 
+  // Update the form state with the selected guest's data
+  setForm(prev => ({
+    ...prev,
+    name: guest.name || '',
+    dob: formattedDob,
+    gender: guest.gender || '',
+    phone: guest.phone || '',
+    email: guest.email || '',
+    nationality: guest.nationality || '', 
+    address: {
+      street: guest.address?.street || '',
+      city: guest.address?.city || '',
+      state: guest.address?.state || '',
+      pincode: guest.address?.pincode || '', 
+      country: guest.address?.country || '',
+    }
+  }));
+
+  // Clear the suggestions list
+  setGuestNameSuggestions([]);
+};
   // Validation
   const validate = () => {
     const errs = {};
@@ -263,10 +408,12 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     if (!form.phone.trim()) errs.phone = "Phone number is required";
     if (!form.email.trim()) errs.email = "Email is required";
 
-    ["state", "district", "city", "pincode"].forEach((field) => {
-      if (!form.address[field].trim())
-        errs[`address.${field}`] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
-    });
+     ['state', 'district', 'city', 'pincode', 'country'].forEach((field) => {
+    // Check if the field exists and is empty after trimming
+    if (!form.address[field] || !form.address[field].trim()) {
+      errs[`address.${field}`] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+    }
+  });
 
     if (!form.purpose.trim()) errs.purpose = "Purpose is required";
     if (!form.checkIn) errs.checkIn = "Check-in time is required";
@@ -303,6 +450,99 @@ export default function GuestRegistrationForm({ onAddGuest }) {
     return Object.keys(errs).length === 0;
   };
 
+  // Add this function inside your component, before the handleSubmit function
+
+const parseOcrData = (text) => {
+  const data = {};
+  
+  // Rule for Date of Birth (DD/MM/YYYY format)
+  const dobRegex = /(\d{2}\/\d{2}\/\d{4})/;
+  const dobMatch = text.match(dobRegex);
+  if (dobMatch) {
+    // Convert DD/MM/YYYY to YYYY-MM-DD for the form input
+    const [day, month, year] = dobMatch[0].split('/');
+    data.dob = `${year}-${month}-${day}`;
+  }
+
+  // Rule for Name
+  // This is tricky and can be improved. We look for lines that are likely a name.
+  // For now, we'll look for a line that often follows "Name" or is near the DOB.
+  const lines = text.split('\n');
+  // A simple heuristic: find a line with 2-3 words that's all letters and spaces
+  const nameRegex = /^[A-Za-z\s]{2,50}$/; 
+  let potentialName = lines.find(line => line.split(' ').length >= 2 && line.split(' ').length <= 4 && nameRegex.test(line.trim()));
+  if(potentialName) data.name = potentialName.trim();
+
+
+  // Rule for Aadhaar Number (12 digits, possibly with spaces)
+  const aadhaarRegex = /(\d{4}\s?\d{4}\s?\d{4})/;
+  const aadhaarMatch = text.match(aadhaarRegex);
+  if (aadhaarMatch) {
+    data.idType = 'Aadhaar';
+    data.idNumber = aadhaarMatch[0].replace(/\s/g, ''); // Remove spaces
+  }
+
+  // Rule for Gender
+  if (text.includes('Male') || text.includes('MALE')) {
+    data.gender = 'Male';
+  } else if (text.includes('Female') || text.includes('FEMALE')) {
+    data.gender = 'Female';
+  }
+  
+  return data;
+};
+
+// Add this function inside your component
+
+const handleOcrScan = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  setIsScanning(true);
+  const toastId = toast.loading('Scanning ID card, please wait...');
+
+  const formDataToSend = new FormData();
+  formDataToSend.append('idImage', file);
+
+  try {
+    // 1. Call the backend to get the raw text
+    const response = await apiClient.post('/ocr/scan', formDataToSend, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    const rawText = response.data.text;
+    
+    // 2. Parse the text to find the data
+    const extractedData = parseOcrData(rawText);
+    
+    // 3. Update the form state with the extracted data
+    setForm(prev => ({
+        ...prev,
+        name: extractedData.name || prev.name,
+        dob: extractedData.dob || prev.dob,
+        gender: extractedData.gender || prev.gender,
+        idType: extractedData.idType || prev.idType,
+        idNumber: extractedData.idNumber || prev.idNumber,
+    }));
+
+    // 4. Automatically place the scanned image into the ID Front preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+        setForm(prev => ({ ...prev, idImageFront: reader.result }));
+    };
+    reader.readAsDataURL(file);
+
+    toast.success('Scan complete! Please verify the details.', { id: toastId });
+
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Failed to scan ID card.';
+    toast.error(errorMessage, { id: toastId });
+  } finally {
+    setIsScanning(false);
+    // Reset the file input so the user can scan another ID if needed
+    event.target.value = null; 
+  }
+};
+
   // Handle Form Submission
 const handleSubmit = async (e) => {
   e.preventDefault();
@@ -313,85 +553,109 @@ const handleSubmit = async (e) => {
 
   const toastId = toast.loading("Registering guest...");
 
-  // Create the FormData object first
-  const formData = new FormData();
+  const formDataToSend = new FormData();
   try {
-    // Append primary guest data
-    formData.append("primaryGuestName", form.name);
-    formData.append("primaryGuestDob", form.dob);
-    formData.append("primaryGuestGender", form.gender);
-    formData.append("primaryGuestPhone", form.phone);
-    formData.append("primaryGuestEmail", form.email);
-    formData.append("primaryGuestAddress", `${form.address.city}, ${form.address.district}, ${form.address.state} - ${form.address.pincode}`);
-    formData.append("idType", form.idType);
-    formData.append("idNumber", form.idNumber);
+    // --- Primary Guest Details ---
+    formDataToSend.append("primaryGuestName", form.name);
+    formDataToSend.append("primaryGuestDob", form.dob);
+    formDataToSend.append("primaryGuestGender", form.gender);
+    formDataToSend.append("primaryGuestPhone", form.phone);
+    formDataToSend.append("primaryGuestEmail", form.email);
 
-    // Append stay details
-    formData.append("purposeOfVisit", form.purpose);
-    formData.append("checkIn", form.checkIn);
-    formData.append("expectedCheckout", form.expectedCheckout);
-    formData.append("roomNumber", form.roomNumber);
+    // --- Address (split into fields) ---
+    formDataToSend.append("primaryGuestAddressStreet", form.address.street || "");
+    formDataToSend.append("primaryGuestAddressCity", form.address.city || "");
+    formDataToSend.append("primaryGuestAddressState", form.address.state || "");
+    formDataToSend.append("primaryGuestAddressZipCode", form.address.pincode || "");
+    formDataToSend.append("primaryGuestAddressCountry", form.address.country || "");
 
-    // Append files
-    formData.append("idImageFront", dataURLtoFile(form.idImageFront, "idImageFront.jpg"));
-    formData.append("idImageBack", dataURLtoFile(form.idImageBack, "idImageBack.jpg"));
-    formData.append("livePhoto", dataURLtoFile(form.livePhoto, "livePhoto.jpg"));
+    // --- Nationality ---
+    formDataToSend.append("primaryGuestNationality", form.nationality || "");
 
-    // Append accompanying guest images and details
+    // --- ID Details ---
+    formDataToSend.append("idType", form.idType);
+    formDataToSend.append("idNumber", form.idNumber);
+
+    if (form.idImageFront)
+      formDataToSend.append("idImageFront", dataURLtoFile(form.idImageFront, "idImageFront.jpg"));
+    if (form.idImageBack)
+      formDataToSend.append("idImageBack", dataURLtoFile(form.idImageBack, "idImageBack.jpg"));
+    if (form.livePhoto)
+      formDataToSend.append("livePhoto", dataURLtoFile(form.livePhoto, "livePhoto.jpg"));
+
+    // --- Stay Details ---
+    formDataToSend.append("purposeOfVisit", form.purpose);
+    formDataToSend.append("checkIn", form.checkIn);
+    formDataToSend.append("expectedCheckout", form.expectedCheckout);
+    formDataToSend.append("roomNumber", form.roomNumber);
+
+    // --- Accompanying Guests (JSON string) ---
+    formDataToSend.append("accompanyingGuests", JSON.stringify(form.guests));
+
+    // --- Accompanying Guest Files ---
     form.guests.adults.forEach((adult, index) => {
       if (adult.idImageFront)
-        formData.append(`adult_${index}_idImageFront`, dataURLtoFile(adult.idImageFront, `adult_${index}_idFront.jpg`));
+        formDataToSend.append(
+          `adult_${index}_idImageFront`,
+          dataURLtoFile(adult.idImageFront, `adult_${index}_idFront.jpg`)
+        );
       if (adult.idImageBack)
-        formData.append(`adult_${index}_idImageBack`, dataURLtoFile(adult.idImageBack, `adult_${index}_idBack.jpg`));
+        formDataToSend.append(
+          `adult_${index}_idImageBack`,
+          dataURLtoFile(adult.idImageBack, `adult_${index}_idBack.jpg`)
+        );
       if (adult.livePhoto)
-        formData.append(`adult_${index}_livePhoto`, dataURLtoFile(adult.livePhoto, `adult_${index}_livePhoto.jpg`));
+        formDataToSend.append(
+          `adult_${index}_livePhoto`,
+          dataURLtoFile(adult.livePhoto, `adult_${index}_livePhoto.jpg`)
+        );
     });
 
     form.guests.children.forEach((child, index) => {
       if (child.idImageFront)
-        formData.append(`child_${index}_idImageFront`, dataURLtoFile(child.idImageFront, `child_${index}_idFront.jpg`));
+        formDataToSend.append(
+          `child_${index}_idImageFront`,
+          dataURLtoFile(child.idImageFront, `child_${index}_idFront.jpg`)
+        );
       if (child.idImageBack)
-        formData.append(`child_${index}_idImageBack`, dataURLtoFile(child.idImageBack, `child_${index}_idBack.jpg`));
+        formDataToSend.append(
+          `child_${index}_idImageBack`,
+          dataURLtoFile(child.idImageBack, `child_${index}_idBack.jpg`)
+        );
       if (child.livePhoto)
-        formData.append(`child_${index}_livePhoto`, dataURLtoFile(child.livePhoto, `child_${index}_livePhoto.jpg`));
+        formDataToSend.append(
+          `child_${index}_livePhoto`,
+          dataURLtoFile(child.livePhoto, `child_${index}_livePhoto.jpg`)
+        );
     });
-
-    // Append accompanying guests as a JSON string
-    formData.append("accompanyingGuests", JSON.stringify(form.guests));
-
   } catch (dataError) {
-    // This will catch any errors during FormData creation (e.g., from dataURLtoFile)
     toast.error("Error preparing registration data.", { id: toastId });
     console.error("Error creating FormData:", dataError);
-    return; // Stop execution if data preparation fails
+    return;
   }
 
-  // Now, perform the API call
+  // --- API Call ---
   try {
-    const response = await apiClient.post("/guests/register", formData, {
+    const response = await apiClient.post("/guests/register", formDataToSend, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
-    // --- This is the key change ---
-    // Show success toast FIRST
     toast.success(response.data.message || "Guest registered successfully!", { id: toastId });
 
-    // Then, safely perform post-success actions in a separate try-catch
     try {
       onAddGuest && onAddGuest();
       setForm(getInitialFormState());
       setErrors({});
     } catch (postSuccessError) {
       console.error("Error in post-registration cleanup:", postSuccessError);
-      // We don't show another toast here because the main action was successful.
     }
-
   } catch (apiError) {
     const errorMessage = apiError.response?.data?.message || "Failed to register guest.";
     toast.error(errorMessage, { id: toastId });
     console.error("Guest registration failed:", apiError);
   }
 };
+
 
   // Camera facing mode logic
   const getCameraFacingMode = () => {
@@ -401,6 +665,7 @@ const handleSubmit = async (e) => {
     return "user";
   };
 
+  const minCheckInDate = format(new Date(), "yyyy-MM-dd'T'HH:mm");
   // Render
   return (
     <>
@@ -414,13 +679,50 @@ const handleSubmit = async (e) => {
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
         {/* Main Guest Details */}
         <fieldset>
-          <legend>Main Guest Details</legend>
+          <legend>Main Guest Details
+             <label htmlFor="ocr-file-input" className={styles.scanButton} title="Scan ID Card with AI">
+        🪄 Scan ID
+         </label>
+          </legend>
+          <input 
+      type="file" 
+      id="ocr-file-input"
+      style={{ display: 'none' }} 
+      onChange={handleOcrScan}
+      accept="image/*"
+      disabled={isScanning}
+  />
           <div className={styles.row}>
-            <label>
-              Full Name *
-              <input type="text" name="name" value={form.name} onChange={handleChange} />
-              {errors.name && <span className={styles.error}>{errors.name}</span>}
-            </label>
+            {/* Add a wrapper div to contain the input and the suggestions */}
+<div className={styles.autocompleteWrapper}>
+  <label>
+    Full Name *
+    <input
+      type="text"
+      name="name"
+      value={form.name}
+      onChange={handleChange}
+      autoComplete="off"
+    />
+    {errors.name && <span className={styles.error}>{errors.name}</span>}
+  </label>
+
+  {/* --- NEW: Custom Suggestions Dropdown --- */}
+  {guestNameSuggestions.length > 0 && (
+    <ul className={styles.suggestionsList}>
+      {guestNameSuggestions.map((guest, index) => (
+        <li
+          key={index} // Using index is acceptable here as the list is temporary
+          className={styles.suggestionItem}
+          onClick={() => handleSelectGuest(guest)}
+        >
+          <span className={styles.suggestionName}>{guest.name}</span>
+          <span className={styles.suggestionDetail}>{guest.phone}</span>
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
             <label>
               Date of Birth *
               <input
@@ -448,45 +750,140 @@ const handleSubmit = async (e) => {
             </label>
           </div>
           <div className={styles.row}>
-            <label>
-              Phone Number *
-              <input type="tel" name="phone" value={form.phone} onChange={handleChange} />
-              {errors.phone && <span className={styles.error}>{errors.phone}</span>}
-            </label>
-            <label>
-              Email *
-              <input type="email" name="email" value={form.email} onChange={handleChange} />
-              {errors.email && <span className={styles.error}>{errors.email}</span>}
-            </label>
+     
+<label>
+  Phone Number *
+  <input 
+    type="tel" 
+    name="phone" 
+    value={form.phone} 
+    onChange={handleChange} 
+    list="phone-codes-list" // <-- ADD THIS
+  />
+  {/* ADD THIS DATALIST */}
+  <datalist id="phone-codes-list">
+    {phoneCodes.map((code) => (
+      <option key={code} value={code} />
+    ))}
+  </datalist>
+  {errors.phone && <span className={styles.error}>{errors.phone}</span>}
+</label>
+<label>
+  Email *
+  <input 
+    type="email" 
+    name="email" 
+    value={form.email} 
+    onChange={handleEmailChange} 
+    list="email-suggestions" 
+  />
+  {/* ADD THIS DATALIST */}
+  <datalist id="email-suggestions">
+    {emailSuggestions.map((suggestion) => (
+      <option key={suggestion} value={suggestion} />
+    ))}
+  </datalist>
+  {errors.email && <span className={styles.error}>{errors.email}</span>}
+</label>
           </div>
         </fieldset>
 
-        {/* Address */}
-        <fieldset>
-          <legend>Address *</legend>
-          <div className={styles.row}>
-            <label>
-              State *
-              <input type="text" name="address.state" value={form.address.state} onChange={handleChange} />
-              {errors["address.state"] && <span className={styles.error}>{errors["address.state"]}</span>}
-            </label>
-            <label>
-              District *
-              <input type="text" name="address.district" value={form.address.district} onChange={handleChange} />
-              {errors["address.district"] && <span className={styles.error}>{errors["address.district"]}</span>}
-            </label>
-            <label>
-              City *
-              <input type="text" name="address.city" value={form.address.city} onChange={handleChange} />
-              {errors["address.city"] && <span className={styles.error}>{errors["address.city"]}</span>}
-            </label>
-            <label>
-              Pin Code *
-              <input type="text" name="address.pincode" value={form.address.pincode} onChange={handleChange} />
-              {errors["address.pincode"] && <span className={styles.error}>{errors["address.pincode"]}</span>}
-            </label>
-          </div>
-        </fieldset>
+       {/* Address */}
+<fieldset>
+  <legend>Address *</legend>
+  
+  {/* Row 1: State, District, City, Pincode */}
+  <div className={styles.row}>
+    <label>
+      State *
+      <input 
+        type="text" 
+        name="address.state" 
+        value={form.address.state} 
+        onChange={handleChange} 
+      />
+      {errors["address.state"] && <span className={styles.error}>{errors["address.state"]}</span>}
+    </label>
+
+    <label>
+      District *
+      <input 
+        type="text" 
+        name="address.district" 
+        value={form.address.district} 
+        onChange={handleChange} 
+      />
+      {errors["address.district"] && <span className={styles.error}>{errors["address.district"]}</span>}
+    </label>
+
+    <label>
+      City *
+      <input
+        type="text"
+        name="address.city"
+        value={form.address.city}
+        onChange={handleChange}
+        list="city-suggestions"
+        autoComplete="off"
+      />
+      {errors["address.city"] && <span className={styles.error}>{errors["address.city"]}</span>}
+      <datalist id="city-suggestions">
+        {citySuggestions.map((city) => (
+          <option key={city} value={city} />
+        ))}
+      </datalist>
+    </label>
+
+    <label>
+      Pin Code *
+      <input 
+        type="text" 
+        name="address.pincode" 
+        value={form.address.pincode} 
+        onChange={handleChange} 
+      />
+      {errors["address.pincode"] && <span className={styles.error}>{errors["address.pincode"]}</span>}
+    </label>
+  </div>
+
+  {/* Row 2: Country, Nationality */}
+  <div className={styles.row}>
+    <label>
+      Country *
+      <input
+        type="text"
+        name="address.country"
+        value={form.address.country}
+        onChange={handleChange}
+        list="country-list"
+      />
+      <datalist id="country-list">
+        {countries.map((country) => (
+          <option key={country} value={country} />
+        ))}
+      </datalist>
+      {errors["address.country"] && <span className={styles.error}>{errors["address.country"]}</span>}
+    </label>
+
+    <label>
+      Nationality *
+      <input
+        type="text"
+        name="nationality"
+        value={form.nationality}
+        onChange={handleChange}
+        list="nationality-list"
+      />
+      <datalist id="nationality-list">
+        {nationalities.map((nationality) => (
+          <option key={nationality} value={nationality} />
+        ))}
+      </datalist>
+      {errors.nationality && <span className={styles.error}>{errors.nationality}</span>}
+    </label>
+  </div>
+</fieldset>
+
 
         {/* Stay Details */}
         <fieldset>
@@ -502,18 +899,30 @@ const handleSubmit = async (e) => {
             />
             {errors.purpose && <span className={styles.error}>{errors.purpose}</span>}
           </label>
-          <div className={styles.row}>
-            <label>
-              Check-In Time *
-              <input type="datetime-local" name="checkIn" value={form.checkIn} onChange={handleChange} />
-              {errors.checkIn && <span className={styles.error}>{errors.checkIn}</span>}
-            </label>
-            <label>
-              Expected Checkout *
-              <input type="datetime-local" name="expectedCheckout" value={form.expectedCheckout} onChange={handleChange} />
-              {errors.expectedCheckout && <span className={styles.error}>{errors.expectedCheckout}</span>}
-            </label>
-          </div>
+         <div className={styles.row}>
+  <label>
+    Check-In Time *
+    <input
+      type="datetime-local"
+      name="checkIn"
+      value={form.checkIn}
+      onChange={handleChange}
+      min={minCheckInDate} // Prevents selecting a past date/time
+    />
+    {errors.checkIn && <span className={styles.error}>{errors.checkIn}</span>}
+  </label>
+  <label>
+    Expected Checkout *
+    <input
+      type="datetime-local"
+      name="expectedCheckout"
+      value={form.expectedCheckout}
+      onChange={handleChange}
+      min={form.checkIn} // Prevents selecting a date/time before check-in
+    />
+    {errors.expectedCheckout && <span className={styles.error}>{errors.expectedCheckout}</span>}
+  </label>
+</div>
           <label>
             Allocated Hotel Room Number *
             <input type="text" name="roomNumber" value={form.roomNumber} onChange={handleChange} />
