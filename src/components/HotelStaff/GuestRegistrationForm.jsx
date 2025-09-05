@@ -681,7 +681,7 @@ const handleSubmit = async (e) => {
         <fieldset>
           <legend>Main Guest Details
              <label htmlFor="ocr-file-input" className={styles.scanButton} title="Scan ID Card with AI">
-        🪄 Scan ID
+         Scan ID
          </label>
           </legend>
           <input 
