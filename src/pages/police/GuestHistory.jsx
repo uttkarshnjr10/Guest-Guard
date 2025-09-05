@@ -1,8 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import apiClient from '../../api/apiClient'; 
+import apiClient from '../../api/apiClient';
 import { format } from 'date-fns';
 import styles from './GuestHistory.module.css';
+
+// Helper function to format the address
+const formatAddress = (address) => {
+  // If the address is a simple string (for older guests), return it directly.
+  if (typeof address === 'string') {
+    return address;
+  }
+  // If the address is an object (for newer guests), format it into a string.
+  if (typeof address === 'object' && address !== null) {
+    const parts = [
+      address.street,
+      address.city,
+      address.state,
+      address.zipCode,
+      address.country,
+    ];
+    // Filter out any empty parts and join them with commas.
+    return parts.filter(part => part).join(', ');
+  }
+  // Provide a fallback if the address is missing.
+  return 'No address available';
+};
+
 
 export default function GuestHistory() {
   const { guestId } = useParams(); // Get the guest ID from the URL
@@ -32,7 +55,7 @@ export default function GuestHistory() {
 
     try {
       const { data } = await apiClient.post(`/police/guests/${guestId}/remarks`, { text: newRemark });
-      
+
       setHistory(prevHistory => ({
         ...prevHistory,
         remarks: [data, ...prevHistory.remarks],
@@ -57,7 +80,8 @@ export default function GuestHistory() {
           <h1>{primaryGuest.primaryGuest.name}</h1>
           <p><strong>ID:</strong> {primaryGuest.idType} - {primaryGuest.idNumber}</p>
           <p><strong>Phone:</strong> {primaryGuest.primaryGuest.phone}</p>
-          <p><strong>Address:</strong> {primaryGuest.primaryGuest.address}</p>
+          {/* ✅ USE THE FORMATTER FUNCTION HERE */}
+          <p><strong>Address:</strong> {formatAddress(primaryGuest.primaryGuest.address)}</p>
         </div>
       </div>
 
@@ -69,12 +93,11 @@ export default function GuestHistory() {
             {stayHistory.map(stay => (
               <div key={stay._id} className={styles.timelineItem}>
                 <div className={styles.timelineContent}>
-                  {/* ✅ Added optional chaining for city */}
                   <p className={styles.hotel}>
                     {stay.hotel.username} ({stay.hotel.details?.city || 'N/A'})
                   </p>
                   <p className={styles.dates}>
-                    {format(new Date(stay.stayDetails.checkIn), 'dd MMM yyyy')} - 
+                    {format(new Date(stay.stayDetails.checkIn), 'dd MMM yyyy')} -
                     {format(new Date(stay.stayDetails.expectedCheckout), 'dd MMM yyyy')}
                   </p>
                 </div>
@@ -88,8 +111,8 @@ export default function GuestHistory() {
           <h2>Alerts ({alerts.length})</h2>
           {alerts.length > 0 ? (
             alerts.map(alert => (
-              <div 
-                key={alert._id} 
+              <div
+                key={alert._id}
                 className={`${styles.alertItem} ${styles[alert.status.toLowerCase()]}`}
               >
                 <strong>{alert.status}:</strong> {alert.reason}
@@ -98,12 +121,12 @@ export default function GuestHistory() {
             ))
           ) : <p>No alerts for this guest.</p>}
         </div>
-        
+
         {/* Remarks Section */}
         <div className={`${styles.card} ${styles.fullWidth}`}>
           <h2>Officer Remarks</h2>
           <form onSubmit={handleAddRemark} className={styles.remarkForm}>
-            <textarea 
+            <textarea
               value={newRemark}
               onChange={(e) => setNewRemark(e.target.value)}
               placeholder="Add a new investigative remark..."

@@ -102,8 +102,8 @@ export default function GuestRegistrationForm({ onAddGuest }) {
               street: '',
               city: '',
               state: '',
-              district: '', 
-              pincode: '',  
+        //    district:'',
+              zipCode: '',
               country: ''
             },
     nationality: '',
@@ -247,12 +247,12 @@ const handleEmailChange = (e) => {
     setCaptureFor(null);
   };
 
-  // Replace your existing handleChange function with this one
+  
 
 const handleChange = (e) => {
   const { name, value } = e.target;
   
-  // --- START OF CORRECTION ---
+  
 
   // If the input name contains a dot (like "address.pincode")
   if (name.includes('.')) {
@@ -282,7 +282,7 @@ const handleChange = (e) => {
   }
 
   
-  // --- END OF CORRECTION ---
+ 
 
   // Reset error for this field
   if (errors[name]) {
@@ -391,7 +391,8 @@ const handleSelectGuest = (guest) => {
       street: guest.address?.street || '',
       city: guest.address?.city || '',
       state: guest.address?.state || '',
-      pincode: guest.address?.pincode || '', 
+    //  pincode: guest.address?.pincode || '', 
+      zipCode: guest.address?.zipCode || '',
       country: guest.address?.country || '',
     }
   }));
@@ -408,10 +409,11 @@ const handleSelectGuest = (guest) => {
     if (!form.phone.trim()) errs.phone = "Phone number is required";
     if (!form.email.trim()) errs.email = "Email is required";
 
-     ['state', 'district', 'city', 'pincode', 'country'].forEach((field) => {
-    // Check if the field exists and is empty after trimming
+      ['state', 'city', 'zipCode', 'country'].forEach((field) => {
     if (!form.address[field] || !form.address[field].trim()) {
-      errs[`address.${field}`] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+      // Create a more user-friendly field name for the error message
+      const fieldName = field === 'zipCode' ? 'Zip Code' : field.charAt(0).toUpperCase() + field.slice(1);
+      errs[`address.${field}`] = `${fieldName} is required`;
     }
   });
 
@@ -450,7 +452,7 @@ const handleSelectGuest = (guest) => {
     return Object.keys(errs).length === 0;
   };
 
-  // Add this function inside your component, before the handleSubmit function
+
 
 const parseOcrData = (text) => {
   const data = {};
@@ -465,8 +467,7 @@ const parseOcrData = (text) => {
   }
 
   // Rule for Name
-  // This is tricky and can be improved. We look for lines that are likely a name.
-  // For now, we'll look for a line that often follows "Name" or is near the DOB.
+  
   const lines = text.split('\n');
   // A simple heuristic: find a line with 2-3 words that's all letters and spaces
   const nameRegex = /^[A-Za-z\s]{2,50}$/; 
@@ -492,7 +493,7 @@ const parseOcrData = (text) => {
   return data;
 };
 
-// Add this function inside your component
+//OcrScan Handler
 
 const handleOcrScan = async (event) => {
   const file = event.target.files[0];
@@ -562,17 +563,18 @@ const handleSubmit = async (e) => {
     formDataToSend.append("primaryGuestPhone", form.phone);
     formDataToSend.append("primaryGuestEmail", form.email);
 
-    // --- Address (split into fields) ---
+    //  Address 
     formDataToSend.append("primaryGuestAddressStreet", form.address.street || "");
     formDataToSend.append("primaryGuestAddressCity", form.address.city || "");
     formDataToSend.append("primaryGuestAddressState", form.address.state || "");
-    formDataToSend.append("primaryGuestAddressZipCode", form.address.pincode || "");
+  //  formDataToSend.append("primaryGuestAddressZipCode", form.address.pincode || "");
+    formDataToSend.append("primaryGuestAddressZipCode", form.address.zipCode || "");
     formDataToSend.append("primaryGuestAddressCountry", form.address.country || "");
 
-    // --- Nationality ---
+    //  Nationality
     formDataToSend.append("primaryGuestNationality", form.nationality || "");
 
-    // --- ID Details ---
+    //  ID Details 
     formDataToSend.append("idType", form.idType);
     formDataToSend.append("idNumber", form.idNumber);
 
@@ -787,12 +789,11 @@ const handleSubmit = async (e) => {
 </label>
           </div>
         </fieldset>
-
-       {/* Address */}
+{/* Address */}
 <fieldset>
   <legend>Address *</legend>
   
-  {/* Row 1: State, District, City, Pincode */}
+  {/* Row 1: State, City, Zip Code */}
   <div className={styles.row}>
     <label>
       State *
@@ -805,16 +806,7 @@ const handleSubmit = async (e) => {
       {errors["address.state"] && <span className={styles.error}>{errors["address.state"]}</span>}
     </label>
 
-    <label>
-      District *
-      <input 
-        type="text" 
-        name="address.district" 
-        value={form.address.district} 
-        onChange={handleChange} 
-      />
-      {errors["address.district"] && <span className={styles.error}>{errors["address.district"]}</span>}
-    </label>
+    {/* The 'District' input has been removed because it does not exist in my backend model. */}
 
     <label>
       City *
@@ -835,18 +827,19 @@ const handleSubmit = async (e) => {
     </label>
 
     <label>
-      Pin Code *
+      Zip Code * {/* MODIFIED: Label text changed */}
       <input 
         type="text" 
-        name="address.pincode" 
-        value={form.address.pincode} 
+        name="address.zipCode"  /* MODIFIED: 'name' attribute updated */
+        value={form.address.zipCode}  /* MODIFIED: 'value' updated */
         onChange={handleChange} 
       />
-      {errors["address.pincode"] && <span className={styles.error}>{errors["address.pincode"]}</span>}
+      {/* MODIFIED: Error key updated */}
+      {errors["address.zipCode"] && <span className={styles.error}>{errors["address.zipCode"]}</span>}
     </label>
   </div>
 
-  {/* Row 2: Country, Nationality */}
+  {/* Row 2: Country, Nationality (This part was correct and remains unchanged) */}
   <div className={styles.row}>
     <label>
       Country *
@@ -858,6 +851,7 @@ const handleSubmit = async (e) => {
         list="country-list"
       />
       <datalist id="country-list">
+        {/* Make sure 'countries' is defined in your component's scope */}
         {countries.map((country) => (
           <option key={country} value={country} />
         ))}
@@ -875,6 +869,7 @@ const handleSubmit = async (e) => {
         list="nationality-list"
       />
       <datalist id="nationality-list">
+        {/* Make sure 'nationalities' is defined in your component's scope */}
         {nationalities.map((nationality) => (
           <option key={nationality} value={nationality} />
         ))}
@@ -883,7 +878,6 @@ const handleSubmit = async (e) => {
     </label>
   </div>
 </fieldset>
-
 
         {/* Stay Details */}
         <fieldset>
