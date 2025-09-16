@@ -6,16 +6,15 @@
   background: #e9eef2;
   background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   color: #2d3748;
-  overflow: hidden; /* Prevent scrolling */
-  height: 100vh; /* Full viewport height */
-  width: 100vw; /* Full viewport width */
-  display: flex; /* Use flex to manage content */
-  flex-direction: column; /* Stack children vertically */
+  overflow: hidden;
+  height: 100vh;
+  width: 98vw;
+  display: flex;
+  flex-direction: column;
   position: relative;
-  /* New: Ensure this overrides global styles */
-  min-height: 0 !important; /* Override any global min-height */
-  margin: 0 !important; /* Override any global margins */
-  padding: 0 !important; /* Override any global padding */
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* --- Animated Aurora Background --- */
@@ -24,18 +23,16 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%; /* Match parent height */
+  height: 100%;
   z-index: 0;
   filter: blur(120px);
   opacity: 0.5;
 }
-
 .aurora {
   position: absolute;
   border-radius: 50%;
   animation: float 20s infinite alternate;
 }
-
 .aurora1 {
   width: 600px;
   height: 600px;
@@ -43,7 +40,6 @@
   top: 5%;
   left: 10%;
 }
-
 .aurora2 {
   width: 500px;
   height: 500px;
@@ -53,7 +49,6 @@
   animation-duration: 25s;
   animation-delay: -5s;
 }
-
 @keyframes float {
   from { transform: translateY(20px) translateX(-10px) rotate(0deg); }
   to { transform: translateY(-20px) translateX(10px) rotate(10deg); }
@@ -68,24 +63,27 @@
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem; /* Reduced padding to fit content */
-  height: 100%; /* Fill parent height */
+  padding: 1rem;
+  height: 100%;
   width: 100%;
 }
-
 .heroText {
   display: flex;
   flex-direction: column;
+  /* NEW: Align text to the left by default in the hero section */
+  text-align: left; 
 }
 
-/* TITLE STYLE: Adjusted for the animation component */
+/* --- UPDATED TITLE STYLE --- */
 .title {
-  font-size: 3.8rem;
+  font-size: 3.4rem;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.25; /* Slightly increased line height for better readability */
   color: #1a202c;
-  margin-bottom: 1.5rem; /* Reduced margin to fit content */
-  min-height: 150px; /* Reserve space to prevent layout shift */
+  margin-bottom: 1rem; /* Slightly reduced margin */
+  min-height: 150px;
+  /* NEW: Ensure text alignment for the entire title */
+  text-align: left; 
 }
 
 .subtitle {
@@ -93,9 +91,10 @@
   line-height: 1.7;
   max-width: 500px;
   color: #4a5568;
-  margin-bottom: 2rem; /* Reduced margin to fit content */
+  margin-bottom: 2rem;
 }
 
+/* --- PRIMARY BUTTON --- */
 .ctaButton {
   display: inline-block;
   background: linear-gradient(90deg, #3B82F6, #6366F1);
@@ -111,24 +110,21 @@
     background 0.3s;
   box-shadow: 0 5px 20px rgba(59, 130, 246, 0.40);
 }
-
 .ctaButton:hover {
   transform: translateY(-3px) scale(1.06);
   box-shadow: 0 10px 32px rgba(59, 130, 246, 0.23), 0 0 0 4px #bfdbfe44;
   background: linear-gradient(90deg, #6366F1, #3B82F6);
 }
-
 .ctaButton:active {
   transform: scale(0.97) translateY(1.5px);
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
   background: linear-gradient(90deg, #486aec, #4259b6);
 }
-
 .heroAnimation {
   display: flex;
   align-items: center;
   justify-content: center;
-  max-height: 400px; /* Limit animation size to prevent overflow */
+  max-height: 400px;
 }
 
 /* --- Features Section (styles remain for compatibility with Why Us page) --- */
@@ -140,14 +136,12 @@
   padding: 6rem 2rem;
   text-align: center;
 }
-
 .sectionTitle {
   font-size: 2.5rem;
   font-weight: 600;
   color: #1a202c;
   margin-bottom: 4rem;
 }
-
 .featuresGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -155,7 +149,6 @@
   max-width: 1200px;
   margin: 0 auto;
 }
-
 .featureCard {
   background: #ffffff;
   padding: 2.5rem 2rem;
@@ -164,19 +157,16 @@
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
-
 .featureCard:hover {
   transform: translateY(-8px);
   border-color: #3B82F6;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
-
 .iconWrapper {
   font-size: 2.5rem;
   margin-bottom: 1.5rem;
   color: #3B82F6;
 }
-
 .featureCard h3 {
   font-size: 1.5rem;
   font-weight: 600;
@@ -187,11 +177,10 @@
 /* --- Why Us Button --- */
 .topRightButton {
   position: absolute;
-  top: 20px; /* Adjusted for better spacing */
+  top: 20px;
   right: 40px;
   z-index: 10;
 }
-
 .whyUsButton {
   background: linear-gradient(90deg, #e0e7ff, #a5b4fc);
   color: #3730a3;
@@ -206,7 +195,6 @@
   transition: background 0.21s, color 0.21s, transform 0.17s, opacity 0.18s;
   display: inline-block;
 }
-
 .whyUsButton:hover {
   background: linear-gradient(90deg, #a5b4fc, #6366F1);
   color: #fff;
@@ -220,33 +208,82 @@
   .hero {
     grid-template-columns: 1fr;
     text-align: center;
-    padding: 1rem; /* Reduced padding for mobile */
-    height: 100%; /* Full height */
+    padding: 1rem;
+    height: 100%;
   }
   .heroText {
     align-items: center;
+    text-align: center; /* Center text on mobile */
   }
   .heroAnimation {
     grid-row: 1;
-    max-width: 300px; /* Smaller animation on mobile */
-    max-height: 300px; /* Limit height to fit */
+    max-width: 300px;
+    max-height: 300px;
     margin: 0 auto 1.5rem;
   }
   .title {
-    font-size: 2.5rem; /* Slightly smaller for mobile */
-    min-height: 100px; /* Adjust for mobile */
+    font-size: 2.5rem;
+    min-height: 100px;
     margin-bottom: 1rem;
+    /* NEW: Center title on mobile */
+    text-align: center; 
   }
   .subtitle {
     font-size: 1rem;
     margin-bottom: 1.5rem;
   }
   .topRightButton {
-    top: 10px; /* Adjust for mobile */
+    top: 10px;
     right: 20px;
   }
   .whyUsButton {
     padding: 0.5rem 1.5rem;
     font-size: 0.95rem;
   }
+  /* NEW: Center buttons on mobile */
+  .buttonContainer {
+    justify-content: center;
+  }
+}
+
+/* --- CONTAINER FOR BOTH BUTTONS --- */
+.buttonContainer {
+  display: flex;
+  gap: 1.25rem;
+  margin-top: 1rem;
+  align-items: center;
+}
+
+/* --- UPDATED SECONDARY BUTTON --- */
+.secondaryCtaButton {
+  display: inline-block;
+  background: transparent;
+  color: #3B82F6;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border: 2px solid #3B82F6;
+  transition: all 0.2s ease-in-out;
+}
+.secondaryCtaButton:hover {
+  background: #3B82F6;
+  color: #ffffff;
+  transform: translateY(-3px) scale(1.06);
+  box-shadow: 0 5px 20px rgba(59, 130, 246, 0.25);
+}
+
+/* --- ENHANCED HIGHLIGHT STYLE (for ApnaManager) --- */
+.highlight {
+  /* This creates the gradient text effect */
+  background: linear-gradient(90deg, #3B82F6, #6366F1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* NEW: Make it bold and slightly larger than surrounding text */
+  font-weight: 900; /* Extra bold */
+  font-size: 1.1em; /* Slightly larger than the parent font size */
+  /* NEW: Add a subtle text shadow for depth */
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15); 
 }

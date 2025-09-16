@@ -1,4 +1,8 @@
+// pages/admin/RegisterNewUser.jsx
+
 import React, { useState, useEffect } from "react";
+// Get data from prev page
+import { useLocation } from "react-router-dom";
 import apiClient from "../../api/apiClient";
 import Select from 'react-select';
 import styles from "./RegisterNewUser.module.css";
@@ -13,6 +17,10 @@ const initialHotelState = { name: "", city: "", address: "", license: "", contac
 const initialPoliceState = { station: "", jurisdiction: "", city: "", contact: "", policeStation: "" };
 
 export default function RegisterNewUser() {
+  // Get data
+  const location = useLocation();
+  const inquiryData = location.state?.inquiryData;
+
   const [userType, setUserType] = useState(USER_TYPES.HOTEL);
   const [formData, setFormData] = useState(initialHotelState);
   const [policeStations, setPoliceStations] = useState([]);
@@ -20,6 +28,21 @@ export default function RegisterNewUser() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [successData, setSuccessData] = useState(null);
+
+  // Pre-populate form
+  useEffect(() => {
+    if (inquiryData) {
+      setUserType(USER_TYPES.HOTEL);
+
+      setFormData({
+        name: inquiryData.hotelName || "",
+        city: inquiryData.district || "", // Using district for city
+        address: inquiryData.fullAddress || "",
+        license: inquiryData.gstNumber || "", // Using GST for license
+        contact: inquiryData.email || "",
+      });
+    }
+  }, [inquiryData]);
 
   useEffect(() => {
     const fetchPoliceStations = async () => {
@@ -31,8 +54,7 @@ export default function RegisterNewUser() {
           label: station.name
         }));
         setPoliceStations(formattedStations);
-      } catch (err) {
-        console.error("Failed to fetch police stations", err);
+      } catch  {
         toast.error("Could not load police stations. Please refresh.");
         setError("Could not load police stations. Please refresh.");
       } finally {
@@ -44,6 +66,10 @@ export default function RegisterNewUser() {
   }, []);
 
   const handleTypeChange = (newUserType) => {
+    if (inquiryData) {
+      toast.error("Cannot change user type when approving an inquiry.");
+      return;
+    }
     setUserType(newUserType);
     const initialState = newUserType === USER_TYPES.HOTEL ? initialHotelState : initialPoliceState;
     setFormData(initialState);
@@ -78,18 +104,15 @@ export default function RegisterNewUser() {
     setIsLoading(true);
     setError("");
     setSuccessData(null);
-
     const toastId = toast.loading('Registering user...');
 
     const { policeStation, ...otherDetails } = formData;
-
     const payload = {
       role: userType,
       email: formData.contact,
       username: (formData.name || formData.station).toLowerCase().replace(/\s+/g, ''),
       details: otherDetails,
     };
-
     if (userType === USER_TYPES.POLICE) {
       if (!policeStation) {
         setError("Please select a police station.");
@@ -108,6 +131,16 @@ export default function RegisterNewUser() {
         username: response.data.username,
         password: response.data.temporaryPassword
       });
+
+      if (inquiryData) {
+        try {
+          await apiClient.post(`/inquiries/${inquiryData._id}/approve`);
+        } catch (approveError) {
+          console.error("Failed to mark inquiry as approved:", approveError);
+          toast.error("User was registered, but failed to update inquiry status.");
+        }
+      }
+
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || "An error occurred.";
       setError(errorMessage);
@@ -149,9 +182,8 @@ export default function RegisterNewUser() {
 
   return (
     <main className={styles.mainContent}>
-      <div className={styles.formContainer}> {/* New container to center the form content */}
+      <div className={styles.formContainer}>
         <form onSubmit={handleSubmit} className={styles.formBox}>
-          {/* Moved Header and Type Switch inside the formBox for better grouping */}
           <header className={styles.header}>
             <h1>Register New User</h1>
           </header>
@@ -178,7 +210,6 @@ export default function RegisterNewUser() {
                 <input name="address" required value={formData.address} onChange={handleChange} className={styles.inputField} />
               </div>
 
-              {/* A new grid container to place fields side-by-side */}
               <div className={styles.formGrid}>
                 <div className={styles.formRow}>
                   <label>City *</label>
@@ -198,7 +229,7 @@ export default function RegisterNewUser() {
           ) : (
             <>
               <div className={styles.formGrid}>
-                 <div className={styles.formRow}>
+                <div className={styles.formRow}>
                   <label>Station Name *</label>
                   <input name="station" required value={formData.station} onChange={handleChange} className={styles.inputField} />
                 </div>
@@ -207,8 +238,8 @@ export default function RegisterNewUser() {
                   <input name="jurisdiction" required value={formData.jurisdiction} onChange={handleChange} className={styles.inputField} />
                 </div>
               </div>
-              
-               <div className={styles.formRow}>
+
+              <div className={styles.formRow}>
                 <label>Assign to Police Station *</label>
                 <Select
                   options={policeStations}

@@ -1,0 +1,120 @@
+/* pages/HotelRegistration.module.css */
+
+.pageContainer {
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+    background-color: #f4f7f6;
+    min-height: 100vh;
+}
+
+.formWrapper {
+    width: 100%;
+    max-width: 800px;
+    background: #fff;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.formGroup label {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.formGroup input,
+.formGroup textarea {
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+}
+
+.formGroup input[type="file"] {
+    padding: 0.5rem;
+}
+
+.submitButton {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 2.5rem;
+    transition: background-color 0.3s;
+}
+
+.submitButton:hover {
+    background-color: #0056b3;
+}
+
+.submitButton:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+}
+
+.successMessage {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 6px;
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.errorMessage {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 6px;
+    background-color: #f8d7da;
+    color: #721c24;
+}

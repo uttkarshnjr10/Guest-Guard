@@ -24,6 +24,8 @@ import ManagePoliceStations from "./pages/admin/ManagePoliceStations";
 import RegisterNewUser from "./pages/admin/RegisterNewUser";
 import ManageHotels from './pages/admin/ManageHotels';
 import AccessLogs from './pages/admin/AccessLogs';
+import HotelRegistration from './pages/public/HotelRegistration';
+import AdminInquiries from "./pages/admin/AdminInquiries";
 
 // --- Common Components ---
 import Navbar from './components/common/Navbar';
@@ -91,6 +93,7 @@ function RegionalAdminLayout({ auth, handleLogout }) {
     const sidebarLinks = [
         { to: "/regional-admin/dashboard", label: "Dashboard" },
         { to: "/regional-admin/hotels", label: "Manage Hotels" },
+        { to: "/regional-admin/inquiries", label: "Hotel Inquiries" },
         { to: "/regional-admin/police", label: "Manage Police" },
         { to: "/regional-admin/manage-stations", label: "Manage Stations" },
         { to: "/regional-admin/register", label: "Register User" },
@@ -138,6 +141,7 @@ function AppContent() {
         <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
+            <Route path="/hotel-registration" element={<HotelRegistration />} />
             <Route path="/why-us" element={<WhyUs />} />
             <Route path="/login" element={<Login setAuth={setAuth} />} />
             <Route path="/reset-password" element={<ForcePasswordReset />} />
@@ -193,6 +197,7 @@ function AppContent() {
                     <Route path="hotels" element={<ManageHotels />} />
                     <Route path="police" element={<ManagePolice />} />
                     <Route path="manage-stations" element={<ManagePoliceStations />} />
+                    <Route path="inquiries" element={<AdminInquiries />} />
                     <Route path="access-logs" element={<AccessLogs />} />
                     <Route path="register" element={<RegisterNewUser />} />
                     <Route path="profile" element={<ProfilePage />} />

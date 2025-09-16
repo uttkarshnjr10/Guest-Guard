@@ -1,27 +1,25 @@
+// Home.jsx
+
 import { Link } from 'react-router-dom';
 import styles from './Home.module.css';
 import { motion } from 'framer-motion'; 
 import Lottie from 'lottie-react';
-import AnimatedText from './AnimatedText';
 import signupAnimation from './Signup Flow.json';
 
 export default function Home() {
   return (
     <div className={styles.pageWrapper}>
-      {/* Upper right "Why Us" button */}
       <div className={styles.topRightButton}>
         <Link to="/why-us" className={styles.whyUsButton}>
           Why Us
         </Link>
       </div>
 
-      {/* Background Aurora */}
       <div className={styles.auroraBg}>
         <div className={`${styles.aurora} ${styles.aurora1}`}></div>
         <div className={`${styles.aurora} ${styles.aurora2}`}></div>
       </div>
 
-      {/* Hero Section */}
       <motion.header 
         className={styles.hero}
         initial={{ opacity: 0 }}
@@ -29,9 +27,15 @@ export default function Home() {
         transition={{ duration: 1 }}
       >
         <div className={styles.heroText}>
+          {/* --- UPDATED H1 STRUCTURE --- */}
           <h1 className={styles.title}>
-            <AnimatedText text="Welcome to Centralized Data Management System" />
+            Welcome to <br />
+            <span className={styles.highlight}>ApnaManager</span> <br />
+            a Centralized Data <br />
+            Management System
           </h1>
+          {/* ---------------------------- */}
+          
           <motion.p 
             className={styles.subtitle}
             initial={{ opacity: 0, y: 20 }}
@@ -40,7 +44,10 @@ export default function Home() {
           >
             We provides a unified platform for hotels and law enforcement to ensure guest safety through seamless digital verification and real-time data sharing.
           </motion.p>
+          
+          {/* --- BUTTON CONTAINER --- */}
           <motion.div
+            className={styles.buttonContainer}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.8 }}
@@ -48,8 +55,13 @@ export default function Home() {
             <Link to="/login" className={styles.ctaButton}>
               Get Started
             </Link>
+            
+            <Link to="/hotel-registration" className={styles.secondaryCtaButton}>
+              Join Us
+            </Link>
           </motion.div>
         </div>
+        
         <motion.div 
           className={styles.heroAnimation}
           initial={{ opacity: 0, scale: 0.8 }}
