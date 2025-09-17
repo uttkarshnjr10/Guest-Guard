@@ -1,11 +1,14 @@
+// src/pages/public/Login.jsx
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import apiClient from "../../api/apiClient";
 import { toast } from "react-hot-toast";
-import { motion } from "framer-motion"; 
+import { motion } from "framer-motion";
 import styles from "./Login.module.css";
+// Icons are still imported for input fields and password toggle
+import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 
-// Helper function to decode JWT token
+// Helper function to decode JWT token (unchanged)
 const decodeToken = (token) => {
   if (!token || typeof token !== "string") {
     console.error("decodeToken received an invalid token:", token);
@@ -22,6 +25,7 @@ const decodeToken = (token) => {
 export default function Login({ setAuth }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,7 +37,7 @@ export default function Login({ setAuth }) {
     }
   }, [location]);
 
-  // Animation variants
+  // Animation variants (unchanged)
   const containerVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
@@ -48,14 +52,12 @@ export default function Login({ setAuth }) {
     visible: { opacity: 1, y: 0 },
   };
 
-  // Move handleSubmit here, not inside any other function or block
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     const toastId = toast.loading("Signing in...");
 
     try {
-      // Use apiClient instead of axios
       const response = await apiClient.post("/auth/login", { email, password });
       
       if (response.status === 202) {
@@ -75,31 +77,17 @@ export default function Login({ setAuth }) {
         toast.success("Login successful!", { id: toastId });
 
         switch (decoded.role) {
-          case "Hotel":
-            navigate("/hotel");
-            break;
-          case "Police":
-            navigate("/police");
-            break;
-          case "Regional Admin":
-            navigate("/regional-admin");
-            break;
-          default:
-            navigate("/");
+          case "Hotel": navigate("/hotel"); break;
+          case "Police": navigate("/police"); break;
+          case "Regional Admin": navigate("/regional-admin"); break;
+          default: navigate("/");
         }
       } else {
         toast.error("Invalid token received. Please try again.", { id: toastId });
       }
     } catch (err) {
-      if (err.response?.status === 403) {
-        toast.error("Your account has been suspended. Please contact the administrator.", {
-          id: toastId,
-        });
-      } else {
-        toast.error(err.response?.data?.message || err.message || "An error occurred.", {
-          id: toastId,
-        });
-      }
+      const errorMessage = err.response?.data?.message || err.message || "An error occurred.";
+      toast.error(errorMessage, { id: toastId });
     } finally {
       setIsLoading(false);
     }
@@ -107,6 +95,7 @@ export default function Login({ setAuth }) {
 
   return (
     <div className={styles.container}>
+      {/* Background circles remain unchanged */}
       <div className={`${styles.circle} ${styles.c1}`}></div>
       <div className={`${styles.circle} ${styles.c2}`}></div>
       <div className={`${styles.circle} ${styles.c3}`}></div>
@@ -118,17 +107,18 @@ export default function Login({ setAuth }) {
         animate="visible"
       >
         <motion.div className={styles.header} variants={itemVariants}>
-          <h2>Centralized Data Management</h2>
+          <h2 className={styles.apnaManagerTitle}>ApnaManager</h2>
           <p>Login with Your Provided Credential</p>
         </motion.div>
 
         <form onSubmit={handleSubmit} className={styles.form} noValidate>
-          <motion.div className={styles.inputGroup} variants={itemVariants}>
-            <label htmlFor="username">Email Address</label>
+          <motion.div className={styles.inputWrapper} variants={itemVariants}>
+            <FiMail className={styles.inputIcon} />
             <input
-              id="username"
-              name="username"
+              id="email"
+              name="email"
               type="email"
+              placeholder="Email Address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -136,17 +126,21 @@ export default function Login({ setAuth }) {
             />
           </motion.div>
 
-          <motion.div className={styles.inputGroup} variants={itemVariants}>
-            <label htmlFor="password">Password</label>
+          <motion.div className={styles.inputWrapper} variants={itemVariants}>
+            <FiLock className={styles.inputIcon} />
             <input
               id="password"
               name="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
             />
+            <div className={styles.passwordIcon} onClick={() => setShowPassword(!showPassword)}>
+              {showPassword ? <FiEyeOff /> : <FiEye />}
+            </div>
           </motion.div>
 
           <motion.button
@@ -154,13 +148,14 @@ export default function Login({ setAuth }) {
             className={styles.submitBtn}
             disabled={isLoading}
             variants={itemVariants}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
           >
             {isLoading ? "Signing In..." : "Sign In"}
           </motion.button>
         </form>
 
+        {/* NEW: Re-added the Home Button */}
         <motion.button
           type="button"
           className={styles.homeBtn}
@@ -168,12 +163,10 @@ export default function Login({ setAuth }) {
           variants={itemVariants}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          style={{ marginBottom: '1.1rem', marginTop: '0.8rem' }} // Adjusted margin-top to move slightly lower
         >
-           ← Home
+          ← Home
         </motion.button>
 
-        
       </motion.div>
     </div>
   );

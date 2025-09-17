@@ -1,7 +1,7 @@
-/* src/pages/Login.module.css */
+/* src/pages/public/Login.module.css */
 
 .container {
-  min-height: 98vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,7 +12,7 @@
   overflow: hidden;
 }
 
-/* --- Animated Background --- */
+/* --- Animated Background (Unchanged) --- */
 .circle {
   position: absolute;
   border-radius: 50%;
@@ -29,138 +29,157 @@
   100% { transform: translateY(0) rotate(360deg); }
 }
 
-/* --- Login Box --- */
+/* --- Login Box (Unchanged) --- */
 .loginBox {
   width: 100%;
-  max-width: 420px;
-  background-color: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
+  max-width: 400px;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
   padding: 2.5rem;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   text-align: center;
   z-index: 2;
-  /* Animation for the box itself */
-  animation: fadeIn 0.8s ease-out;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-
+/* --- UPDATED Header Section --- */
 .header {
   margin-bottom: 2rem;
 }
-.header h2 {
-  color: #0d47a1;
+
+/* NEW: Style for ApnaManager title to match the image gradient */
+.apnaManagerTitle {
+  font-size: 2.8rem; /* Larger font size */
+  font-weight: 800; /* Bolder font weight */
+  margin-bottom: 0.5rem; /* Space below the title */
+  
+  /* Gradient text effect */
+  background: linear-gradient(90deg, #3f51b5 0%, #2196f3 100%); /* Blue gradient */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,0.1)); /* Subtle shadow for depth */
+}
+
+/* REMOVED: .headerIconWrapper styles */
+/* .headerIconWrapper { ... } */
+
+.header h2 { /* Targeting h2 if it's not .apnaManagerTitle, keep default */
+  color: #212529; /* Darker text */
   font-weight: 700;
-  font-size: 2rem;
+  font-size: 1.8rem;
+  margin: 0;
+ 
 }
 .header p {
-  color: #555;
-  font-size: 0.95rem;
+  color: #6c757d; /* Softer gray */
+  font-size: 1rem;
+  margin-top: 0.8rem; /* Adjusted for spacing below ApnaManager */
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  text-align: left;
 }
 
-.inputGroup {
+/* --- Input Fields with Icons (Unchanged) --- */
+.inputWrapper {
+  position: relative;
   margin-bottom: 1.25rem;
-  text-align: center;
-  /* Animation for each input group */
-  animation: slideInUp 0.6s ease-out forwards;
-  opacity: 0;
 }
-.inputGroup:nth-child(2) { animation-delay: 0.1s; }
-
-@keyframes slideInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.inputGroup label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #4b5563;
-  margin-bottom: 0.5rem;
-}
-
-.inputGroup input {
+.inputWrapper input {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.9rem 1rem 0.9rem 2.75rem;
   font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  border: 1px solid #dee2e6;
+  background-color: #f8f9fa;
   box-sizing: border-box;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.inputGroup input:focus {
+.inputWrapper input:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  border-color: #1e88e5;
+  box-shadow: 0 0 0 4px rgba(30, 136, 229, 0.2);
+}
+.inputWrapper input::placeholder {
+  color: #adb5bd;
 }
 
-.error {
-  color: #dc2626;
-  background-color: #fee2e2;
-  border-radius: 8px;
-  font-weight: 500;
-  padding: 0.75rem;
-  font-size: 0.9rem;
-  text-align: center;
+.inputIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #adb5bd;
+  font-size: 1.2rem;
+}
+.passwordIcon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+/* --- Actions (Forgot Password) (Unchanged) --- */
+.actions {
+  display: flex;
+  justify-content: flex-end;
   margin-bottom: 1.25rem;
 }
+.forgotLink {
+  font-size: 0.9rem;
+  color: #1e88e5;
+  text-decoration: none;
+  font-weight: 600;
+}
+.forgotLink:hover {
+  text-decoration: underline;
+}
 
+/* --- Submit Button (Unchanged) --- */
 .submitBtn {
-  background: linear-gradient(45deg, #2563eb, #1d4ed8);
+  background: #1e88e5;
   color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 0.85rem;
+  border-radius: 10px;
+  padding: 0.9rem;
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  animation: slideInUp 0.6s ease-out 0.2s forwards;
-  opacity: 0;
+  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 .submitBtn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+  background: #1565c0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(30, 136, 229, 0.3);
+}
+.submitBtn:disabled {
+  background-color: #90caf9;
+  cursor: not-allowed;
 }
 
-.demoInfo {
-  margin-top: 2rem;
-  font-size: 0.85rem;
-  color: #4b5563;
-}
 
 .homeBtn {
-  background: linear-gradient(90deg, #fff, #e3f0fa 90%);
-  color: #2563eb;
-  border: 1.5px solid #b3e5fc;
+  background: transparent;
+  color: #6c757d; /* A soft gray color */
+  border: 1px solid #dee2e6; /* Light border */
   border-radius: 8px;
-  padding: 0.6rem 1.2rem; /* Reduced padding for smaller size */
-  font-size: 0.9rem; /* Smaller font size */
+  padding: 0.5rem 1rem; /* Smaller padding */
+  font-size: 0.9rem; /* Smaller font */
   font-weight: 600;
-  margin-bottom: 1rem; /* Adjusted for balance */
-  margin-top: 0.5rem; /* Slightly increased to move lower */
   cursor: pointer;
-  box-shadow: 0 2px 8px 0 rgba(76, 175, 255, 0.1); /* Softer shadow for smaller button */
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  margin-top: 1.5rem; /* Space above the button */
+  transition: background-color 0.2s, color 0.2s;
 }
+
 .homeBtn:hover {
-  background: linear-gradient(90deg, #b3e5fc 50%, #fff 100%);
-  color: #174396;
-  box-shadow: 0 4px 12px 0 rgba(76, 175, 255, 0.12); /* Adjusted shadow */
-}
-.homeBtn:active {
-  background: #e1effd;
-  color: #174396;
-  box-shadow: 0 1px 4px 0 rgba(76, 175, 255, 0.11); /* Adjusted shadow */
+  background-color: #f8f9fa; /* Slight background on hover */
+  color: #212529; /* Darker text on hover */
 }

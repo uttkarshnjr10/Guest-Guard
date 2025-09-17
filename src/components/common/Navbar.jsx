@@ -13,7 +13,7 @@ export default function Navbar({ username, role, handleLogout }) {
         handleLogout();
         return;
       }
-      // Use apiClient instead of axios to automatically handle the base URL and headers
+    
       await apiClient.post('/auth/logout', {});
     } catch (error) {
       console.error("Logout API call failed:", error);
@@ -25,7 +25,7 @@ export default function Navbar({ username, role, handleLogout }) {
   return (
     <header className={styles.navbar}>
       <div className={styles.logo}>
-        Centralized Data Management
+        ApnaManager
       </div>
       <div className={styles.userInfo}>
         <div className={styles.userDetails}>
