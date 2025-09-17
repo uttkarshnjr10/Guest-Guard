@@ -33,7 +33,7 @@ export default function WhyUs() {
       <section className={styles.featuresSection}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Why GuestGuard?</h2>
+            <h2 className={styles.sectionTitle}>Why ApnaManager?</h2>
             <p className={styles.sectionSubtitle}>
               The future of secure, intelligent, and seamless guest management is here.
             </p>
