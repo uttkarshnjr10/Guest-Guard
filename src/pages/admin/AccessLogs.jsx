@@ -10,26 +10,26 @@ export default function AccessLogs() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const fetchLogs = async () => {
+  const fetchLogs = React.useCallback(async () => {
     setIsLoading(true);
     try {
       const { data } = await apiClient.get('/users/admin/logs', {
         params: { searchTerm },
       });
-      setLogs(data);
+      setLogs(data.data);
     } catch  {
       toast.error('Failed to fetch access logs.');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [searchTerm]);
 
   useEffect(() => {
     const debounceFetch = setTimeout(() => {
       fetchLogs();
     }, 300);
     return () => clearTimeout(debounceFetch);
-  }, [searchTerm]);
+  }, [fetchLogs]);
 
   const LOGS_TABLE_COLUMNS = 5;
 

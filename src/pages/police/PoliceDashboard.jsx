@@ -29,7 +29,7 @@ export default function PoliceDashboard() {
     const fetchDashboardData = async () => {
       try {
         const { data } = await apiClient.get("/police/dashboard");
-        setStats(data);
+        setStats(data.data);
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load dashboard data.");
       } finally {

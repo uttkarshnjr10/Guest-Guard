@@ -18,7 +18,7 @@ export default function ManageHotels() {
     try {
       const params = { searchTerm, status: statusFilter };
       const { data } = await apiClient.get('/users/hotels', { params });
-      setUsers(data);
+      setUsers(data.data);
     } catch (error) { // Added error parameter for better logging
       console.error("Failed to fetch hotel data:", error); // Log the actual error
       toast.error('Failed to fetch hotel data. Check console for details.');

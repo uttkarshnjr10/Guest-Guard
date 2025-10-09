@@ -48,7 +48,7 @@ export default function RegisterNewUser() {
     const fetchPoliceStations = async () => {
       setStationsLoading(true);
       try {
-        const { data } = await apiClient.get('/stations');
+        const { data: { data } } = await apiClient.get('/stations');
         const formattedStations = data.map(station => ({
           value: station._id,
           label: station.name
@@ -125,10 +125,10 @@ export default function RegisterNewUser() {
 
     try {
       const response = await apiClient.post('/users/register', payload);
-      toast.success(response.data.message, { id: toastId });
+      toast.success(response.data.data.message, { id: toastId });
       setSuccessData({
         message: "User Registered Successfully!",
-        username: response.data.username,
+        username: response.data.data.username,
         password: response.data.temporaryPassword
       });
 

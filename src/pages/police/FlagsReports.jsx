@@ -14,7 +14,7 @@ export default function FlagsReports() {
       setLoading(true);
       try {
         const { data } = await apiClient.get('/police/alerts');
-        setAlerts(data);
+        setAlerts(data.data);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch alerts.');
       } finally {

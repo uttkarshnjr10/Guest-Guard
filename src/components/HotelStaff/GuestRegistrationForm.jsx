@@ -147,7 +147,7 @@ export default function GuestRegistrationForm({ onAddGuest }) {
             query: form.address.city,
           },
         });
-        setCitySuggestions(response.data);
+        setCitySuggestions(response.data.data);
       } catch (error) {
         console.error('Failed to fetch city suggestions:', error);
         setCitySuggestions([]); // Clear suggestions on error
@@ -178,7 +178,7 @@ useEffect(() => {
             query: form.name,
           },
         });
-        setGuestNameSuggestions(response.data);
+        setGuestNameSuggestions(response.data.data);
       } catch (error) {
         console.error('Failed to fetch guest suggestions:', error);
         setGuestNameSuggestions([]);
@@ -510,7 +510,7 @@ const handleOcrScan = async (event) => {
     const response = await apiClient.post('/ocr/scan', formDataToSend, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    const rawText = response.data.text;
+    const rawText = response.data.data.text;
     
     // 2. Parse the text to find the data
     const extractedData = parseOcrData(rawText);

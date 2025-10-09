@@ -39,7 +39,7 @@ export default function GuestHistory() {
       if (!guestId) return;
       try {
         const { data } = await apiClient.get(`/police/guests/${guestId}/history`);
-        setHistory(data);
+        setHistory(data.data);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch guest history.');
       } finally {

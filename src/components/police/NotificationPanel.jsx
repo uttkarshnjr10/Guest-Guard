@@ -13,7 +13,7 @@ export default function NotificationPanel() {
         try {
             setLoading(true);
             const { data } = await apiClient.get('/notifications');
-            setNotifications(data);
+            setNotifications(data.data);
         } catch (error) {
             console.error('Failed to fetch notifications', error);
         } finally {

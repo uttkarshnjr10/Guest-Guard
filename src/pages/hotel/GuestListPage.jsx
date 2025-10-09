@@ -15,7 +15,7 @@ export default function GuestListPage() {
     setIsLoading(true);
     try {
       const { data } = await apiClient.get("/guests/all");
-      setGuests(data);
+      setGuests(data.data);
     } catch (error) {
       toast.error("Failed to fetch guest list.");
       console.error("Fetch guests failed:", error);

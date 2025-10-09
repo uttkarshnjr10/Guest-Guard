@@ -18,7 +18,7 @@ export default function ManagePolice() {
     try {
       const params = { searchTerm, status: statusFilter };
       const { data } = await apiClient.get('/users/police', { params });
-      setUsers(data);
+      setUsers(data.data);
     } catch (error) { // Add "error" to the catch block
       // Add this console.error log
       console.error("Failed to fetch police user data:", error); 

@@ -42,10 +42,9 @@
   font-weight: 700;
   color: #f5f5f7;
 }
-/* Add this to your Navbar.module.css */
-/* Find the .logoutBtn style in your file and replace it with this */
+
 .logoutBtn {
-  background-color: rgba(255, 255, 255, 0.1); /* A subtle, semi-transparent background */
+  background-color: rgba(255, 255, 255, 0.1); 
   color: #ebe6e5; /* A softer white */
   border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 0.5rem 1rem;
@@ -62,11 +61,15 @@
 }
 
 .logoutBtn:hover {
-  background-color: rgba(255, 255, 255, 0.2); /* Lighten on hover */
-  color: #ffffff; /* Make text brighter */
+  background-color: rgba(255, 255, 255, 0.2); 
+  color: #ffffff; 
   
-  /* This creates the subtle "lift" effect */
+ 
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
-
+/*
+.logoImage {
+  height: 40px; 
+  width: auto;
+}   */

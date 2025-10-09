@@ -14,7 +14,7 @@ export default function ManagePoliceStations() {
   const fetchStations = async () => {
     try {
       const { data } = await apiClient.get('/stations');
-      setStations(data);
+      setStations(data.data);
     } catch {
       toast.error('Could not fetch police stations.');
     } finally {

@@ -66,7 +66,7 @@ export default function Login({ setAuth }) {
         return;
       }
 
-      const { token } = response.data;
+      const { token } = response.data.data;
       if (!token) throw new Error("Login successful, but no token was provided.");
 
       localStorage.setItem("authToken", token);

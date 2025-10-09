@@ -15,7 +15,7 @@ export default function AdminInquiries() {
         const fetchInquiries = async () => {
             try {
                 const { data } = await apiClient.get('/inquiries/pending');
-                setInquiries(data);
+                setInquiries(data.data);
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to fetch inquiries.');
             } finally {

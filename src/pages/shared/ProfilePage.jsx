@@ -65,7 +65,7 @@ export default function ProfilePage() {
             try {
                 setLoading(true);
                 const { data } = await apiClient.get('/users/profile');
-                setUser(data);
+                setUser(data.data);
                 setFormData({ email: data.email, details: data.details || {} });
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to fetch profile.');
@@ -92,7 +92,7 @@ export default function ProfilePage() {
         const toastId = toast.loading('Saving profile...');
         try {
             const { data } = await apiClient.put('/users/profile', formData);
-            setUser(data);
+            setUser(data.data);
             setIsEditing(false);
             toast.success('Profile updated successfully!', { id: toastId });
         } catch (err) {

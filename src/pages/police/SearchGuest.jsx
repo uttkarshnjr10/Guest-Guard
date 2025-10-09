@@ -87,7 +87,7 @@ export default function SearchGuest() {
       // ✅ No need for token/config, interceptor handles it
       const payload = { query, searchBy, reason };
       const { data } = await apiClient.post('/police/search', payload);
-      setResults(data);
+      setResults(data.data);
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred during search.');
     } finally {
