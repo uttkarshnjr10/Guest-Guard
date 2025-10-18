@@ -1,4 +1,3 @@
-// src/hooks/useFetchData.js
 import { useState, useEffect } from 'react';
 import apiClient from '../api/apiClient';
 
@@ -8,30 +7,31 @@ export const useFetchData = (apiEndpoint) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchData = async () => {
+      setLoading(true);
+      setError('');
       try {
-        // Re-enable for real API calls
-        // const response = await apiClient.get(apiEndpoint);
-        // setData(response.data.data);
-
-        // Simulate API call for now
-        setTimeout(() => {
-          const mockData = [
-            { id: 1, name: 'Grand Palace Hotel', city: 'Indore', status: 'Approved' },
-            { id: 2, name: 'Royal Stay', city: 'Bhopal', status: 'Pending' },
-            { id: 3, name: 'Lakeview Inn', city: 'Udaipur', status: 'Approved' },
-            { id: 4, name: 'City Center Suites', city: 'Indore', status: 'Suspended' },
-          ];
-          setData(mockData);
-          setLoading(false);
-        }, 1500);
+        const response = await apiClient.get(apiEndpoint, { signal: controller.signal });
+        // This handles cases where your API returns data in a `data` property or as the root object.
+        setData(response.data.data || response.data || []);
       } catch (err) {
-        setError(err.response?.data?.message || `Failed to fetch data from ${apiEndpoint}`);
+        if (err.name !== 'CanceledError') {
+          setError(err.response?.data?.message || `Failed to fetch data.`);
+        }
+      } finally {
         setLoading(false);
       }
     };
+
     fetchData();
+
+    // Cleanup function to cancel the request if the component unmounts
+    return () => {
+      controller.abort();
+    };
   }, [apiEndpoint]);
 
   return { data, loading, error };
 };
+

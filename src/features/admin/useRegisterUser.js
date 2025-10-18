@@ -32,13 +32,17 @@ export const useRegisterUser = () => {
 
   useEffect(() => {
     const fetchPoliceStations = async () => {
-      // Simulate fetching stations
-      setTimeout(() => {
-        setPoliceStations([
-          { value: 'station1', label: 'Indore Central Station' },
-          { value: 'station2', label: 'Bhopal South Division' },
-        ]);
-      }, 500);
+      try {
+        // Fetch real police station data
+        const { data } = await apiClient.get('/stations');
+        const formattedStations = data.data.map(station => ({
+          value: station._id, // Assuming the backend sends _id
+          label: station.name,
+        }));
+        setPoliceStations(formattedStations);
+      } catch (error) {
+        toast.error('Could not fetch police stations.');
+      }
     };
     fetchPoliceStations();
   }, []);
@@ -67,22 +71,22 @@ export const useRegisterUser = () => {
     setLoading(true);
     const toastId = toast.loading('Registering user...');
 
-    // Simulate API call
-    setTimeout(() => {
-      const username = (formData.name || formData.station).toLowerCase().replace(/\s+/g, '');
-      setSuccessData({
-        message: "User Registered Successfully!",
-        username: username,
-        password: 'tempPassword123' // Fake temporary password
-      });
-      toast.success('User registered!', { id: toastId });
+    try {
+      const payload = { ...formData, role: userType };
+      // Call the register endpoint
+      const response = await apiClient.post('/users/register', payload);
+      setSuccessData(response.data.data); // Expects { message, username, password }
+      toast.success(response.data.message || 'User registered!', { id: toastId });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Registration failed.', { id: toastId });
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   const resetForm = () => {
     setSuccessData(null);
-    handleTypeChange(userType);
+    setFormData(userType === 'Hotel' ? initialHotelState : initialPoliceState);
   };
 
   return { userType, formData, policeStations, loading, successData, inquiryData, handleTypeChange, handleChange, handleSelectChange, handleSubmit, resetForm };

@@ -211,7 +211,6 @@ const handleSubmit = async (e) => {
       // Append accompanying guests as a JSON string
       formData.append('accompanyingGuests', JSON.stringify(formState.guests));
 
-      // <-- UPDATED SECTION START -->
       // Append files for accompanying guests
       formState.guests.adults.forEach((adult, index) => {
         if (adult.idImageFront) {
@@ -236,8 +235,8 @@ const handleSubmit = async (e) => {
           formData.append(`child_${index}_livePhoto`, dataURLtoFile(child.livePhoto, `child_${index}_livePhoto.jpg`));
         }
       });
-      // <-- UPDATED SECTION END -->
-
+      
+      // API call
       const response = await apiClient.post('/guests/register', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });

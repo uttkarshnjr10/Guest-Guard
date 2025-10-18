@@ -1,51 +1,46 @@
 // src/features/police/useCaseReports.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import apiClient from '../../api/apiClient';
 import toast from 'react-hot-toast';
 
 export const useCaseReports = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedReport, setSelectedReport] = useState(null);
 
-  useEffect(() => {
+  const fetchReports = useCallback(async () => {
     setLoading(true);
-    // Simulate API call to fetch existing case reports
-    setTimeout(() => {
-      setReports([
-        {
-          id: 'CASE-001', title: 'Investigation into Financial Fraud', status: 'Open',
-          officer: 'Officer Singh', createdAt: new Date(Date.now() - 86400000 * 2),
-          summary: 'Case opened following a flag on Rohan Sharma for suspicious transactions.',
-          linkedGuests: ['Rohan Sharma'],
-        },
-        {
-          id: 'CASE-002', title: 'Missing Person Inquiry', status: 'Closed',
-          officer: 'Officer Verma', createdAt: new Date(Date.now() - 86400000 * 10),
-          summary: 'Inquiry regarding Priya Mehta. Subject was located and case is now closed.',
-          linkedGuests: ['Priya Mehta'],
-        },
-      ]);
+    try {
+      // Fetch all existing case reports
+      const { data } = await apiClient.get('/police/reports');
+      setReports(data.data || []);
+    } catch (error) {
+      toast.error('Failed to fetch case reports.');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   }, []);
 
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
+
   const openModalToCreate = () => {
-    setSelectedReport(null);
     setIsModalOpen(true);
   };
 
-  const handleCreateReport = (newReportData) => {
-    toast.loading('Filing new case report...');
-    // Simulate API call
-    setTimeout(() => {
-        const newReport = { ...newReportData, id: `CASE-00${reports.length + 1}`, createdAt: new Date() };
-        setReports(prev => [newReport, ...prev]);
-        toast.dismiss();
-        toast.success('Case report filed successfully!');
-        setIsModalOpen(false);
-    }, 1000);
+  const handleCreateReport = async (newReportData) => {
+    const toastId = toast.loading('Filing new case report...');
+    try {
+      // Create a new case report
+      await apiClient.post('/police/reports', newReportData);
+      toast.success('Case report filed successfully!', { id: toastId });
+      setIsModalOpen(false);
+      fetchReports(); // Refresh the list of reports
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to file report.', { id: toastId });
+    }
   };
 
-  return { reports, loading, isModalOpen, setIsModalOpen, selectedReport, openModalToCreate, handleCreateReport };
+  return { reports, loading, isModalOpen, setIsModalOpen, openModalToCreate, handleCreateReport };
 };

@@ -1,5 +1,6 @@
 // src/features/police/useSearchGuest.js
 import { useState } from 'react';
+import apiClient from '../../api/apiClient';
 import toast from 'react-hot-toast';
 
 export const useSearchGuest = () => {
@@ -15,7 +16,7 @@ export const useSearchGuest = () => {
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
     if (!form.query.trim() || !form.reason.trim()) {
       toast.error('Search term and reason are mandatory.');
@@ -25,24 +26,29 @@ export const useSearchGuest = () => {
     setSearched(true);
     setError('');
 
-    // Simulate API call
-    setTimeout(() => {
-      setResults([
-        { _id: '12345', primaryGuest: { name: 'Rohan Sharma' }, idNumber: 'XXXX XXXX 1234', hotel: { username: 'Grand Palace' }, stayDetails: { checkIn: new Date() } },
-        { _id: '67890', primaryGuest: { name: 'Rohan Verma' }, idNumber: 'XXXX XXXX 5678', hotel: { username: 'Royal Stay' }, stayDetails: { checkIn: new Date(Date.now() - 86400000 * 5) } }
-      ]);
+    try {
+      // Perform a guest search by posting search criteria
+      const response = await apiClient.post('/police/search', form);
+      setResults(response.data.data || []);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Search failed.');
+      setResults([]);
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
-  const handleFlagSubmit = (reason) => {
-    toast.loading('Submitting alert...');
-    // Simulate API call
-    setTimeout(() => {
-        toast.dismiss();
-        toast.success(`Guest "${flaggingGuest.primaryGuest.name}" has been flagged.`);
-        setFlaggingGuest(null);
-    }, 1000);
+  const handleFlagSubmit = async (reason) => {
+    const toastId = toast.loading('Submitting alert...');
+    try {
+      // Create a new alert (flag) for a guest
+      const payload = { guestId: flaggingGuest._id, reason };
+      await apiClient.post('/police/alerts', payload);
+      toast.success(`Guest "${flaggingGuest.primaryGuest.name}" has been flagged.`, { id: toastId });
+      setFlaggingGuest(null);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to submit alert.', { id: toastId });
+    }
   };
 
   return { form, results, loading, error, searched, flaggingGuest, setFlaggingGuest, handleFormChange, handleSearch, handleFlagSubmit };

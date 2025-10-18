@@ -1,7 +1,8 @@
 // src/features/user/useUserProfile.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../auth/AuthContext';
+import apiClient from '../../api/apiClient';
 
 export const useUserProfile = () => {
   const { user } = useAuth();
@@ -10,30 +11,40 @@ export const useUserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
 
-  useEffect(() => {
-    // Simulate fetching profile data based on logged-in user
-    setTimeout(() => {
-      const mockProfile = {
-        'Hotel': { username: 'hotel_grand', email: 'contact@grand.com', role: 'Hotel', memberSince: new Date(Date.now() - 1000000000).toISOString(), details: { name: 'Grand Palace Hotel', city: 'Indore', address: '123 MG Road' } },
-        'Police': { username: 'officer_singh', email: 'singh@police.gov', role: 'Police', memberSince: new Date(Date.now() - 2000000000).toISOString(), details: { station: 'Central Station', jurisdiction: 'Indore' } },
-        'Regional Admin': { username: 'admin_user', email: 'admin@gov.in', role: 'Regional Admin', memberSince: new Date(Date.now() - 3000000000).toISOString(), details: {} },
-      };
-      const userProfile = mockProfile[user.role];
-      setProfile(userProfile);
-      setFormData({ email: userProfile.email, details: userProfile.details || {} });
+  const fetchProfile = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Fetch the current user's profile data
+      const { data } = await apiClient.get('/users/profile');
+      setProfile(data.data);
+      setFormData(data.data); // Initialize form with fetched data
+    } catch (error) {
+      toast.error('Could not fetch profile.');
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, [user]);
+    }
+  }, []);
 
-  const handleSave = () => {
-    toast.success('Profile updated successfully!');
-    setIsEditing(false);
-    // Here you would make an API call and update the profile state with the response
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  const handleSave = async () => {
+    const toastId = toast.loading('Updating profile...');
+    try {
+      // Update the user's profile
+      await apiClient.put('/users/profile', formData);
+      toast.success('Profile updated successfully!', { id: toastId });
+      setIsEditing(false);
+      fetchProfile(); // Refresh profile data
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update profile.', { id: toastId });
+    }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    setFormData({ email: profile.email, details: profile.details || {} });
+    setFormData(profile); // Reset form data to original profile
   };
 
   return { profile, loading, isEditing, setIsEditing, formData, setFormData, handleSave, handleCancel };

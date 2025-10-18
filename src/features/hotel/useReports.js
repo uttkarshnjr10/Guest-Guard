@@ -4,10 +4,11 @@ import { format } from 'date-fns';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import toast from 'react-hot-toast';
+import apiClient from '../../api/apiClient';
 
 export const useReports = () => {
   const [dateRange, setDateRange] = useState({
-    start: format(new Date(Date.now() - 86400000 * 30), 'yyyy-MM-dd'), // Default to last 30 days
+    start: format(new Date(Date.now() - 86400000 * 30), 'yyyy-MM-dd'),
     end: format(new Date(), 'yyyy-MM-dd'),
   });
   const [reportData, setReportData] = useState(null);
@@ -18,25 +19,25 @@ export const useReports = () => {
     setDateRange(prev => ({ ...prev, [name]: value }));
   };
 
-  const generateReport = () => {
+  const generateReport = async () => {
     setLoading(true);
-    // Simulate API call to fetch data for the selected date range
-    setTimeout(() => {
-      setReportData({
-        totalRegistrations: 152,
-        totalAdults: 280,
-        totalChildren: 45,
-        guestList: [ // Sample data for the PDF table
-          { name: 'Anjali Verma', checkIn: '2025-10-17', room: '101' },
-          { name: 'Vikram Singh', checkIn: '2025-10-16', room: '204' },
-        ]
+    setReportData(null);
+    try {
+      // Fetch report data from the backend with the selected date range
+      const response = await apiClient.get('/hotel/reports', {
+        params: dateRange,
       });
-      setLoading(false);
+      setReportData(response.data.data);
       toast.success('Report generated successfully!');
-    }, 1500);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to generate report.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const downloadPdf = () => {
+    if (!reportData) return;
     const doc = new jsPDF();
     doc.text('Guest Report', 14, 20);
     doc.setFontSize(12);
@@ -52,11 +53,13 @@ export const useReports = () => {
         ],
     });
 
-    doc.autoTable({
-        startY: doc.lastAutoTable.finalY + 10,
-        head: [['Guest Name', 'Check-In Date', 'Room No.']],
-        body: reportData.guestList.map(g => [g.name, g.checkIn, g.room]),
-    });
+    if (reportData.guestList && reportData.guestList.length > 0) {
+      doc.autoTable({
+          startY: doc.lastAutoTable.finalY + 10,
+          head: [['Guest Name', 'Check-In Date', 'Room No.']],
+          body: reportData.guestList.map(g => [g.name, format(new Date(g.checkIn), 'yyyy-MM-dd'), g.room]),
+      });
+    }
 
     doc.save(`Guest_Report_${dateRange.start}_to_${dateRange.end}.pdf`);
   };

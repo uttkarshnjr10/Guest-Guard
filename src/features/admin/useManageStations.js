@@ -11,20 +11,12 @@ export const useManageStations = () => {
   const fetchStations = useCallback(async () => {
     setLoading(true);
     try {
-      // Re-enable for real API
-      // const { data } = await apiClient.get('/stations');
-      // setStations(data.data);
-
-      // Simulate API call
-      setTimeout(() => {
-        setStations([
-          { _id: '1', name: 'Central Station', city: 'Indore', pincodes: ['452001', '452002'] },
-          { _id: '2', name: 'South Division', city: 'Bhopal', pincodes: ['462001', '462002'] },
-        ]);
-        setLoading(false);
-      }, 1000);
+      // Fetch all police stations
+      const { data } = await apiClient.get('/stations');
+      setStations(data.data || []);
     } catch {
       toast.error('Could not fetch police stations.');
+    } finally {
       setLoading(false);
     }
   }, []);
@@ -41,13 +33,19 @@ export const useManageStations = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const toastId = toast.loading('Adding new station...');
-    // Simulate API call
-    setTimeout(() => {
-      const newStation = { _id: Date.now().toString(), ...formState, pincodes: formState.pincodes.split(',').map(p => p.trim()) };
-      setStations(prev => [...prev, newStation]);
+    try {
+      const payload = {
+        ...formState,
+        pincodes: formState.pincodes.split(',').map(p => p.trim()).filter(Boolean)
+      };
+      // Create a new police station
+      await apiClient.post('/stations', payload);
       toast.success('Police station added successfully!', { id: toastId });
-      setFormState({ name: '', city: '', pincodes: '' });
-    }, 1000);
+      setFormState({ name: '', city: '', pincodes: '' }); // Reset form
+      fetchStations(); // Refresh the list
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to add station.', { id: toastId });
+    }
   };
 
   return { stations, loading, formState, handleInputChange, handleSubmit };

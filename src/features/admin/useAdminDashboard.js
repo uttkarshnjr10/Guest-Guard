@@ -10,25 +10,12 @@ export const useAdminDashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Re-enable when API is ready
-        // const response = await apiClient.get("/users/admin/dashboard");
-        // setData(response.data);
-
-        // Simulate API call for now
-        setTimeout(() => {
-          setData({
-            metrics: { hotels: 78, police: 45, guestsToday: 152, searchesToday: 98 },
-            feed: [
-              'Hotel "Grand Vista" was approved.',
-              'Police user "Officer Singh" logged in.',
-              'New inquiry received from "Sunset Inn".',
-              'Access logs for "Jaipur" region viewed.',
-            ],
-          });
-          setLoading(false);
-        }, 1500); // Simulate 1.5 second loading time
+        // Fetch real dashboard statistics from the backend
+        const response = await apiClient.get("/users/admin/dashboard");
+        setData(response.data.data || { metrics: {}, feed: [] });
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to load dashboard data.');
+      } finally {
         setLoading(false);
       }
     };

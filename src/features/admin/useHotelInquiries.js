@@ -1,5 +1,5 @@
 // src/features/admin/useHotelInquiries.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../api/apiClient';
 import toast from 'react-hot-toast';
@@ -10,56 +10,43 @@ export const useHotelInquiries = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchInquiries = async () => {
-      try {
-        // Re-enable for real API
-        // const { data } = await apiClient.get('/inquiries/pending');
-        // setInquiries(data.data);
-
-        // Simulate API call
-        setTimeout(() => {
-          setInquiries([
-            {
-              _id: '1', hotelName: 'Sunrise Grand', ownerName: 'Ravi Kumar',
-              email: 'ravi@sunrise.com', mobileNumber: '9876543210', gstNumber: 'GSTIN12345',
-              fullAddress: '123 MG Road', district: 'Indore', state: 'MP', pinCode: '452001',
-              ownerSignature: { url: '#' }, hotelStamp: { url: '#' }
-            },
-            {
-              _id: '2', hotelName: 'Lakeview Palace', ownerName: 'Priya Sharma',
-              email: 'priya@lakeview.com', mobileNumber: '9876543211', gstNumber: 'GSTIN67890',
-              fullAddress: '456 Lake Road', district: 'Bhopal', state: 'MP', pinCode: '462001',
-               ownerSignature: { url: '#' }, hotelStamp: { url: '#' }
-            },
-          ]);
-          setLoading(false);
-        }, 1500);
-      } catch (err) {
-        setError(err.response?.data?.message || 'Failed to fetch inquiries.');
-        setLoading(false);
-      }
-    };
-
-    fetchInquiries();
+  const fetchInquiries = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Fetch pending hotel inquiries
+      const { data } = await apiClient.get('/inquiries/pending');
+      setInquiries(data.data || []);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to fetch inquiries.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchInquiries();
+  }, [fetchInquiries]);
 
   const handleApprove = (inquiryId) => {
     const inquiryToApprove = inquiries.find(inq => inq._id === inquiryId);
     if (inquiryToApprove) {
+      // Navigate to the registration page with inquiry data
       navigate('/regional-admin/register', { state: { inquiryData: inquiryToApprove } });
     }
   };
 
   const handleReject = async (inquiryId) => {
     if (window.confirm('Are you sure you want to reject this inquiry?')) {
-      toast.loading('Rejecting inquiry...');
-      // Simulate API call
-      setTimeout(() => {
-        setInquiries(prev => prev.filter(inq => inq._id !== inquiryId));
-        toast.dismiss();
-        toast.success('Inquiry rejected.');
-      }, 500);
+      const toastId = toast.loading('Rejecting inquiry...');
+      try {
+        // Call the endpoint to update the inquiry status
+        await apiClient.put(`/inquiries/${inquiryId}/status`, { status: 'Rejected' });
+        toast.success('Inquiry rejected.', { id: toastId });
+        // Refresh the list to remove the rejected inquiry
+        fetchInquiries();
+      } catch (error) {
+        toast.error(error.response?.data?.message || 'Failed to reject inquiry.', { id: toastId });
+      }
     }
   };
 

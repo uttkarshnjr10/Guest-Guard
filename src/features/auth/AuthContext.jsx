@@ -12,9 +12,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('authToken');
     if (token) {
       try {
-        // We assume you have an endpoint like '/auth/me' that returns the user's data
-        // based on their token. This is a very common and secure pattern.
-        const response = await apiClient.get('/auth/me'); // <-- NEW API CALL
+        const response = await apiClient.get('/users/profile'); 
         setUser(response.data.user);
       } catch (error) {
         // If the token is invalid or expired, the interceptor will handle it,
@@ -31,7 +29,6 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      // Make a POST request to your backend's login endpoint
       const response = await apiClient.post('/auth/login', { email, password });
 
       const { user: userData, token } = response.data;

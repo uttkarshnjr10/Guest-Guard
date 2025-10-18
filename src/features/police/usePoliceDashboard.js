@@ -10,21 +10,12 @@ export const usePoliceDashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Re-enable when API is ready
-        // const { data } = await apiClient.get("/police/dashboard");
-        // setStats(data.data);
-
-        // Simulate API call for now
-        setTimeout(() => {
-          setStats({
-            totalHotels: 124,
-            guestsToday: 83,
-            alerts: [{ id: 1, message: 'Alert 1' }, { id: 2, message: 'Alert 2' }],
-          });
-          setLoading(false);
-        }, 1500); // Simulate 1.5 second loading time
+        // Fetch real-time dashboard data for police users
+        const { data } = await apiClient.get("/police/dashboard");
+        setStats(data.data || { totalHotels: 0, guestsToday: 0, alerts: [] });
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to load dashboard data.');
+      } finally {
         setLoading(false);
       }
     };
