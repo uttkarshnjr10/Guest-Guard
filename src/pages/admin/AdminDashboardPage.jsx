@@ -52,10 +52,10 @@ const AdminDashboardPage = () => {
               Array.from({ length: 4 }).map((_, i) => (
                 <li key={i} className="h-4 bg-gray-200 rounded animate-pulse"></li>
               ))
-            ) : data.feed.length > 0 ? (
+            ) : Array.isArray(data?.feed) && data.feed.length > 0 ? ( 
               data.feed.map((event, i) => <li key={i} className="border-l-2 border-blue-200 pl-3">{event}</li>)
             ) : (
-              <li>No recent activity.</li>
+              <li>No recent activity.</li> 
             )}
           </ul>
         </aside>

@@ -6,7 +6,6 @@ import Button from '../../components/ui/Button';
 import { FaCopy } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
-// Sub-component for the success screen
 const SuccessDisplay = ({ username, password, onReset }) => {
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);

@@ -14,7 +14,6 @@ export const useGuestHistory = () => {
     if (!guestId) return;
     setLoading(true);
     try {
-      // Fetch a specific guest's history by their ID
       const { data } = await apiClient.get(`/police/guests/${guestId}/history`);
       setHistory(data.data);
     } catch (err) {
@@ -31,7 +30,6 @@ export const useGuestHistory = () => {
   const addRemark = async (newRemark) => {
     const toastId = toast.loading('Adding remark...');
     try {
-      // Add a new remark to a guest's record
       await apiClient.post(`/police/guests/${guestId}/remarks`, { text: newRemark });
       toast.success('Remark added.', { id: toastId });
       fetchHistory(); // Refresh the history to show the new remark

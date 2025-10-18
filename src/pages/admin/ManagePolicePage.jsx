@@ -29,27 +29,35 @@ const ManagePolicePage = () => {
   } = useManagePolice();
 
   const columns = [
-    { Header: 'Station Name', accessor: 'name' },
-    { Header: 'Jurisdiction', accessor: 'location' },
+    {
+      Header: 'Station Name',
+      accessor: 'details.station',
+      Cell: (row) => row.details?.station || row.username || 'N/A'
+    },
+    {
+      Header: 'Jurisdiction',
+      accessor: 'details.jurisdiction', 
+      Cell: (row) => row.details?.jurisdiction || 'N/A'
+    },
     {
       Header: 'Status',
-      accessor: 'status',
+      accessor: 'status', 
       Cell: (row) => <StatusPill status={row.status} />,
     },
     {
       Header: 'Actions',
-      accessor: 'actions',
+      accessor: 'actions', 
       Cell: (row) => (
         <div className="flex space-x-2">
           <Button
-            onClick={() => handleAction(row.status === 'Active' ? 'Suspend' : 'Activate', row.id)}
+            onClick={(e) => { e.stopPropagation(); handleAction(row.status === 'Active' ? 'Suspend' : 'Activate', row._id, row.details?.station || row.username); }}
             variant={row.status === 'Active' ? 'secondary' : 'primary'}
             className="text-sm py-1 px-2"
           >
             {row.status === 'Active' ? 'Suspend' : 'Activate'}
           </Button>
           <Button
-            onClick={() => handleAction('Delete', row.id)}
+            onClick={(e) => { e.stopPropagation(); handleAction('Delete', row._id, row.details?.station || row.username); }}
             variant="danger"
             className="text-sm py-1 px-2"
           >
@@ -60,7 +68,6 @@ const ManagePolicePage = () => {
     },
   ];
 
-  // We need to render the table manually to add the onClick to the rows
   const renderTableBody = () => {
     if (loading) {
       return (
@@ -77,21 +84,24 @@ const ManagePolicePage = () => {
         </tbody>
       );
     }
+    // ... (loading skeleton remains the same)
     return (
       <tbody className="bg-white divide-y divide-gray-200">
-        {users.map((row) => (
+        {users.map((user) => ( 
           <tr
-            key={row.id}
+            key={user._id} 
             className="hover:bg-gray-50 cursor-pointer"
-            onClick={() => setSelectedUser(row)}
+            onClick={() => setSelectedUser(user)} 
           >
             {columns.map((col) => (
               <td
-                key={col.accessor}
+                key={col.accessor} 
                 className="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
+              
                 onClick={(e) => { if (col.accessor === 'actions') e.stopPropagation(); }}
               >
-                {col.Cell ? col.Cell(row) : row[col.accessor]}
+             
+                {col.Cell ? col.Cell(user) : (col.accessor.includes('.') ? user.details?.[col.accessor.split('.')[1]] : user[col.accessor]) || 'N/A'}
               </td>
             ))}
           </tr>

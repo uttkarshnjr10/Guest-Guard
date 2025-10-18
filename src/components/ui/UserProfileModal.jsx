@@ -26,11 +26,11 @@ const StatusPill = ({ status }) => {
 
 const UserProfileModal = ({ user, onClose }) => {
     if (!user) return null;
-
-    // Determine if it's a hotel or police profile based on available fields
-    // This logic is now more robust based on your useRegisterUser.js file
-    const isHotel = user.name && (user.license || user.address); // Hotels have a 'name'
-    const isPolice = user.station && user.jurisdiction; // Police have a 'station'
+    // Access nested details
+    const details = user.details || {}; // Use empty object as fallback
+    // Determine role based on top-level user.role
+    const isHotel = user.role === 'Hotel';
+    const isPolice = user.role === 'Police';
 
     return (
         <motion.div
@@ -46,47 +46,46 @@ const UserProfileModal = ({ user, onClose }) => {
                 exit={{ scale: 0.9, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden"
-                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+                onClick={(e) => e.stopPropagation()} 
             >
                 <div className="flex justify-between items-center p-5 bg-gray-50 border-b">
                     <h2 className="text-xl font-bold text-gray-800">
-                        {isHotel ? 'Hotel Profile' : isPolice ? 'Police Profile' : 'User Profile'}
+                       
+                        {user.role === 'Hotel' ? 'Hotel Profile' : user.role === 'Police' ? 'Police Profile' : 'User Profile'}
                     </h2>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
                         <FaTimes size={20} />
                     </button>
                 </div>
                 <div className="p-6 text-sm">
-                  
-                    <DetailRow label="Name" value={user.name || user.station} />
-                    
-                    <DetailRow label="Contact Email" value={user.contact || user.email} />
-                    
+                    <DetailRow label="Username" value={user.username} />
                     {isHotel && (
                         <>
-                            <DetailRow label="Address" value={user.address} />
-                            <DetailRow label="City" value={user.city} />
-                            <DetailRow label="License/GST" value={user.license} />
+                            <DetailRow label="Hotel Name" value={details.hotelName} />
+                            <DetailRow label="City" value={details.city} />
+                            <DetailRow label="Address" value={details.address} />
+                            <DetailRow label="License/GST" value={details.license} />
+                            <DetailRow label="Contact Email" value={details.contact || user.email} />
                         </>
                     )}
-                    
                     {isPolice && (
                         <>
-                            
-                            <DetailRow label="Registered Station" value={user.policeStation} /> 
-                            <DetailRow label="Jurisdiction" value={user.jurisdiction || user.location} />
-                     
-                            <DetailRow label="City" value={user.city} />
-                          
-                            <DetailRow label="Service ID" value={user.serviceId} />
-                            <DetailRow label="Rank" value={user.rank} />
+                            <DetailRow label="Station Name" value={details.station} />
+                            <DetailRow label="Jurisdiction" value={details.jurisdiction} />
+                            <DetailRow label="Registered Station ID" value={details.policeStation} /> {/* Assuming this is the ID */}
+                            <DetailRow label="City" value={details.city} />
+                            <DetailRow label="Contact Email" value={details.contact || user.email} />
+                           
                         </>
                     )}
                     
+                    {!details.contact && <DetailRow label="Email" value={user.email} /> }
                     <div className="py-2">
                         <span className="font-semibold text-gray-600">Status:</span>
                         <span className="ml-2"><StatusPill status={user.status} /></span>
                     </div>
+
+                    <DetailRow label="Member Since" value={user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'} />
                 </div>
                 <div className="p-4 bg-gray-50 border-t flex justify-end">
                     <Button onClick={onClose} variant="secondary">Close</Button>

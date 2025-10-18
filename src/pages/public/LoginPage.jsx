@@ -15,33 +15,49 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setResetInfo({ show: false, userId: null }); // Reset modal state
+
     try {
-      const user = await login(email, password);
+      // Call the updated login function from AuthContext
+      const loginResult = await login(email, password);
       toast.success('Login successful!');
-      
-      // Check if the user object exists and needs a password reset
-      if (user && user.needsPasswordReset) {
-          setResetInfo({ show: true, userId: user._id }); // Use user._id from backend
-          return; // Stop execution to show the modal
+
+      // Check if password reset is required using the new structure
+      if (loginResult && loginResult.needsPasswordReset === true) {
+        setResetInfo({ show: true, userId: loginResult._id }); // Use _id from loginResult
+        setIsLoading(false); // Stop loading indicator
+        return; // Show the modal
       }
 
-      // If no reset is needed, navigate to the dashboard
-      switch (user?.role) {
-        case 'Hotel': navigate('/hotel'); break;
-        case 'Police': navigate('/police'); break;
-        case 'Regional Admin': navigate('/regional-admin'); break;
-        default: navigate('/');
+      if (loginResult && loginResult.role) {
+         switch (loginResult.role) {
+           case 'Hotel':
+             navigate('/hotel');
+             break;
+           case 'Police':
+             navigate('/police');
+             break;
+           case 'Regional Admin':
+             navigate('/regional-admin');
+             break;
+           default:
+             console.error("Unknown user role:", loginResult.role);
+             navigate('/'); // Fallback
+         }
+      } else if (!loginResult?.needsPasswordReset) { 
+        console.error("User data or role missing after login, and password reset not required.");
+        navigate('/'); // Fallback
       }
+    
     } catch (error) {
-      toast.error(error.message || 'Login failed. Please check credentials.');
-    } finally {
-      setIsLoading(false);
+      toast.error(error.message || 'Login failed.');
+      setIsLoading(false); 
     }
   };
-
+  
   const handleResetSuccess = () => {
     setResetInfo({ show: false, userId: null });
     navigate('/login', { state: { message: "Password updated! Please log in with your new password." } });
@@ -62,7 +78,6 @@ const LoginPage = () => {
       </AnimatePresence>
 
       <div className="font-poppins min-h-screen w-screen bg-[#F8F7FF] flex items-center justify-center relative overflow-hidden">
-        {/* Background elements */}
         <div className="absolute w-[600px] h-[600px] bg-blue-200 rounded-full -top-40 -left-40 opacity-50 [filter:blur(150px)] animate-pulse" style={{ animationDelay: '2s' }}></div>
         <div className="absolute w-[500px] h-[500px] bg-purple-200 rounded-full -top-20 -right-40 opacity-50 [filter:blur(150px)] animate-pulse"></div>
         <div className="absolute w-[700px] h-[700px] bg-sky-200 rounded-full -bottom-60 left-1/4 opacity-40 [filter:blur(150px)] animate-pulse" style={{ animationDelay: '4s' }}></div>

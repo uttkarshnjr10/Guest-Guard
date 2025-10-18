@@ -1,4 +1,3 @@
-// src/features/admin/useRegisterUser.js
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import apiClient from '../../api/apiClient';
@@ -36,7 +35,7 @@ export const useRegisterUser = () => {
         // Fetch real police station data
         const { data } = await apiClient.get('/stations');
         const formattedStations = data.data.map(station => ({
-          value: station._id, // Assuming the backend sends _id
+          value: station._id, 
           label: station.name,
         }));
         setPoliceStations(formattedStations);
@@ -73,9 +72,8 @@ export const useRegisterUser = () => {
 
     try {
       const payload = { ...formData, role: userType };
-      // Call the register endpoint
       const response = await apiClient.post('/users/register', payload);
-      setSuccessData(response.data.data); // Expects { message, username, password }
+      setSuccessData(response.data.data); 
       toast.success(response.data.message || 'User registered!', { id: toastId });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Registration failed.', { id: toastId });

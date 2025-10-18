@@ -27,20 +27,36 @@ export const AuthProvider = ({ children }) => {
     loadUser();
   }, [loadUser]);
 
-  const login = async (email, password) => {
+ const login = async (email, password) => {
     try {
       const response = await apiClient.post('/auth/login', { email, password });
 
-      const { user: userData, token } = response.data;
+      // Handle successful login (status 200)
+      if (response.status === 200 && response.data?.data) {
+        const { _id, username, role, token } = response.data.data; // Extract from data property
 
-      if (userData && token) {
-        localStorage.setItem('authToken', token);
-        setUser(userData);
-        return userData;
+        if (_id && username && role && token) {
+          localStorage.setItem('authToken', token);
+          const userData = { _id, username, role, needsPasswordReset: false }; 
+          setUser(userData);
+          return userData; 
+        } else {
+          // Handle case where expected data is missing in 200 response
+          throw new Error('Login successful but user data is incomplete.');
+        }
       }
+     
     } catch (error) {
-      // The error message will come from the backend response
-      const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
+      if (error.response && error.response.status === 202) {
+         const userId = error.response.data?.data?.userId;
+         if (userId) {
+            return { needsPasswordReset: true, _id: userId };
+         } else {
+             throw new Error('Password reset required, but user ID is missing.');
+         }
+      }
+
+      const errorMessage = error.response?.data?.message || error.message || 'Login failed. Please try again.';
       throw new Error(errorMessage);
     }
   };
@@ -53,7 +69,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       localStorage.removeItem('authToken');
       setUser(null);
-      window.location.href = '/login'; // Redirect to login after logout
+      window.location.href = '/login'; 
     }
   };
 

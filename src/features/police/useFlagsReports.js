@@ -11,7 +11,6 @@ export const useFlagsReports = () => {
   const fetchAlerts = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch all alerts from the backend
       const { data } = await apiClient.get('/police/alerts');
       setAlerts(data.data || []);
     } catch (error) {

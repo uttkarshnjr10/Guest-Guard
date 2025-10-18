@@ -238,18 +238,14 @@ const GuestRegistrationForm = () => {
                 <FormField label="Full Name" name="name" value={adult.name} onChange={(e) => handleGuestChange('adults', index, 'name', e.target.value)} error={errors[`adults_${index}_name`]} />
                 <FormField label="Date of Birth" name="dob" type="date" value={adult.dob} onChange={(e) => handleDobChange(e, index, 'adults')} error={errors[`adults_${index}_dob`]} />
                 <FormField label="Age" name="age" type="number" value={adult.age} disabled className="bg-gray-100" />
-                {/* --- NEW FIELDS FOR ADULTS START --- */}
                 <FormField label="ID Type" name="idType" value={adult.idType || ''} onChange={(e) => handleGuestChange('adults', index, 'idType', e.target.value)} />
                 <FormField label="ID Number" name="idNumber" value={adult.idNumber || ''} onChange={(e) => handleGuestChange('adults', index, 'idNumber', e.target.value)} />
-                {/* --- NEW FIELDS FOR ADULTS END --- */}
               </div>
-              {/* --- NEW PHOTO UPLOADS FOR ADULTS START --- */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t">
                 <PhotoUpload label="ID Front" onCaptureClick={() => openWebcam('adult_idImageFront', index)} imageSrc={adult.idImageFront} />
                 <PhotoUpload label="ID Back" onCaptureClick={() => openWebcam('adult_idImageBack', index)} imageSrc={adult.idImageBack} />
                 <PhotoUpload label="Live Photo" onCaptureClick={() => openWebcam('adult_livePhoto', index)} imageSrc={adult.livePhoto} />
               </div>
-              {/* --- NEW PHOTO UPLOADS FOR ADULTS END --- */}
             </div>
           ))}
           <Button type="button" variant="secondary" onClick={() => addGuest('adults')} className="flex items-center gap-2"><FaPlus /> Add Adult</Button>
@@ -266,7 +262,6 @@ const GuestRegistrationForm = () => {
                 <FormField label="Date of Birth" name="dob" type="date" value={child.dob} onChange={(e) => handleDobChange(e, index, 'children')} error={errors[`children_${index}_dob`]} />
                 <FormField label="Age" name="age" type="number" value={child.age} disabled className="bg-gray-100" />
               </div>
-              {/* --- NEW FIELDS FOR CHILDREN START --- */}
               <div className="space-y-4 pt-4 border-t">
                 {parseInt(child.age) >= 10 && (
                   <>
@@ -282,7 +277,6 @@ const GuestRegistrationForm = () => {
                 )}
                 <PhotoUpload label="Live Photo *" onCaptureClick={() => openWebcam('child_livePhoto', index)} imageSrc={child.livePhoto} />
               </div>
-              {/* --- NEW FIELDS FOR CHILDREN END --- */}
             </div>
           ))}
           <Button type="button" variant="secondary" onClick={() => addGuest('children')} className="flex items-center gap-2"><FaPlus /> Add Child</Button>
