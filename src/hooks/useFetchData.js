@@ -13,7 +13,7 @@ export const useFetchData = (apiEndpoint) => {
       setError('');
       try {
         const response = await apiClient.get(apiEndpoint, { signal: controller.signal });
-        // This handles cases where your API returns data in a `data` property or as the root object.
+        // This handles cases where API returns data in a `data` property or as the root object.
         setData(response.data.data || response.data || []);
       } catch (err) {
         if (err.name !== 'CanceledError') {
