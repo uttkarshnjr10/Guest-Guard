@@ -31,13 +31,13 @@ const ManagePolicePage = () => {
   const columns = [
     {
       Header: 'Station Name',
-      accessor: 'details.station',
-      Cell: (row) => row.details?.station || row.username || 'N/A'
+      accessor: 'station',
+      Cell: (row) => row.station || row.username || 'N/A'
     },
     {
       Header: 'Jurisdiction',
-      accessor: 'details.jurisdiction', 
-      Cell: (row) => row.details?.jurisdiction || 'N/A'
+      accessor: 'jurisdiction', 
+      Cell: (row) => row.jurisdiction || 'N/A'
     },
     {
       Header: 'Status',
@@ -50,14 +50,14 @@ const ManagePolicePage = () => {
       Cell: (row) => (
         <div className="flex space-x-2">
           <Button
-            onClick={(e) => { e.stopPropagation(); handleAction(row.status === 'Active' ? 'Suspend' : 'Activate', row._id, row.details?.station || row.username); }}
+            onClick={(e) => { e.stopPropagation(); handleAction(row.status === 'Active' ? 'Suspend' : 'Activate', row._id, row.station || row.username); }}
             variant={row.status === 'Active' ? 'secondary' : 'primary'}
             className="text-sm py-1 px-2"
           >
             {row.status === 'Active' ? 'Suspend' : 'Activate'}
           </Button>
           <Button
-            onClick={(e) => { e.stopPropagation(); handleAction('Delete', row._id, row.details?.station || row.username); }}
+            onClick={(e) => { e.stopPropagation(); handleAction('Delete', row._id, row.station || row.username); }}
             variant="danger"
             className="text-sm py-1 px-2"
           >
@@ -84,7 +84,17 @@ const ManagePolicePage = () => {
         </tbody>
       );
     }
-    // ... (loading skeleton remains the same)
+    if (users.length === 0) {
+        return (
+            <tbody>
+                <tr>
+                    <td colSpan={columns.length} className="text-center py-10 text-gray-500">
+                        No police users found matching your criteria.
+                    </td>
+                </tr>
+            </tbody>
+        );
+    }
     return (
       <tbody className="bg-white divide-y divide-gray-200">
         {users.map((user) => ( 
@@ -95,13 +105,12 @@ const ManagePolicePage = () => {
           >
             {columns.map((col) => (
               <td
-                key={col.accessor} 
+                key={col.accessor || col.Header}
                 className="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
-              
-                onClick={(e) => { if (col.accessor === 'actions') e.stopPropagation(); }}
+                onClick={(e) => { if (col.Header === 'Actions') e.stopPropagation(); }}
               >
              
-                {col.Cell ? col.Cell(user) : (col.accessor.includes('.') ? user.details?.[col.accessor.split('.')[1]] : user[col.accessor]) || 'N/A'}
+                {col.Cell ? col.Cell(user) : user[col.accessor] || 'N/A'}
               </td>
             ))}
           </tr>
@@ -144,7 +153,7 @@ const ManagePolicePage = () => {
               <tr>
                 {columns.map((col) => (
                   <th
-                    key={col.accessor}
+                    key={col.accessor || col.Header}
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >

@@ -1,8 +1,6 @@
 // src/features/hotel/useReports.js
 import { useState } from 'react';
 import { format } from 'date-fns';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 import toast from 'react-hot-toast';
 import apiClient from '../../api/apiClient';
 
@@ -11,58 +9,46 @@ export const useReports = () => {
     start: format(new Date(Date.now() - 86400000 * 30), 'yyyy-MM-dd'),
     end: format(new Date(), 'yyyy-MM-dd'),
   });
-  const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(false);
-
   const handleDateChange = (e) => {
     const { name, value } = e.target;
     setDateRange(prev => ({ ...prev, [name]: value }));
   };
-
-  const generateReport = async () => {
+  const downloadCsvReport = async () => {
     setLoading(true);
-    setReportData(null);
+    const toastId = toast.loading('Generating CSV report...');
     try {
-      // Fetch report data from the backend with the selected date range
-      const response = await apiClient.get('/hotel/reports', {
-        params: dateRange,
+      const response = await apiClient.get('/guests/report', {
+        params: {
+            startDate: dateRange.start,
+            endDate: dateRange.end,
+        },
+        responseType: 'blob',
       });
-      setReportData(response.data.data);
-      toast.success('Report generated successfully!');
+      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `GuestReport_${dateRange.start}_to_${dateRange.end}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('Report downloaded successfully!', { id: toastId });
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to generate report.');
+       let errorMessage = 'Failed to generate report.';
+       if (error.response) {
+            try {
+                const errorJson = JSON.parse(await error.response.data.text());
+                errorMessage = errorJson.message || errorMessage;
+            } catch (parseError) {
+                 errorMessage = error.response?.statusText || errorMessage;
+            }
+       }
+      toast.error(errorMessage, { id: toastId });
     } finally {
       setLoading(false);
     }
   };
-
-  const downloadPdf = () => {
-    if (!reportData) return;
-    const doc = new jsPDF();
-    doc.text('Guest Report', 14, 20);
-    doc.setFontSize(12);
-    doc.text(`Period: ${dateRange.start} to ${dateRange.end}`, 14, 30);
-
-    doc.autoTable({
-        startY: 40,
-        head: [['Metric', 'Value']],
-        body: [
-            ['Total Guest Registrations', reportData.totalRegistrations],
-            ['Total Adults', reportData.totalAdults],
-            ['Total Children', reportData.totalChildren],
-        ],
-    });
-
-    if (reportData.guestList && reportData.guestList.length > 0) {
-      doc.autoTable({
-          startY: doc.lastAutoTable.finalY + 10,
-          head: [['Guest Name', 'Check-In Date', 'Room No.']],
-          body: reportData.guestList.map(g => [g.name, format(new Date(g.checkIn), 'yyyy-MM-dd'), g.room]),
-      });
-    }
-
-    doc.save(`Guest_Report_${dateRange.start}_to_${dateRange.end}.pdf`);
-  };
-
-  return { dateRange, reportData, loading, handleDateChange, generateReport, downloadPdf };
+  return { dateRange, loading, handleDateChange, downloadCsvReport };
 };

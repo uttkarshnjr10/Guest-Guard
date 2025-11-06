@@ -11,7 +11,7 @@ const initialFormState = {
 
 export const useHotelInquiryForm = () => {
   const [formData, setFormData] = useState(initialFormState);
-  const [files, setFiles] = useState({ ownerSignature: null, hotelStamp: null });
+  const [files, setFiles] = useState({ ownerSignature: null, hotelStamp: null, aadhaarCard: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
@@ -30,22 +30,22 @@ export const useHotelInquiryForm = () => {
       toast.error('Please upload both signature and stamp files.');
       return;
     }
-
     setIsSubmitting(true);
     const toastId = toast.loading('Submitting inquiry...');
-
     const submissionData = new FormData();
     for (const key in formData) {
       submissionData.append(key, formData[key]);
     }
     submissionData.append('ownerSignature', files.ownerSignature);
     submissionData.append('hotelStamp', files.hotelStamp);
-
+    if (files.aadhaarCard) {
+        submissionData.append('aadhaarCard', files.aadhaarCard);
+    }
     try {
       const response = await apiClient.post('/inquiries/hotel-registration', submissionData);
       toast.success(response.data.message || 'Inquiry submitted successfully!', { id: toastId });
       setFormData(initialFormState);
-      setFiles({ ownerSignature: null, hotelStamp: null });
+      setFiles({ ownerSignature: null, hotelStamp: null, aadhaarCard: null });
     } catch (err) {
       toast.error(err.response?.data?.message || 'Submission failed.', { id: toastId });
     } finally {

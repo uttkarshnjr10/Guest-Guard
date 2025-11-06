@@ -24,7 +24,7 @@ const HomePage = () => {
     visible: { opacity: 1, y: 0 },
   };
 
-  const titleText = "Welcome to ApnaManager a Centralized Data Management System";
+  const titleText = "Welcome to a Centralized Data Management System";
 
   return (
     <div className="font-poppins bg-gradient-to-br from-[#f5f7fa] to-[#c3cfe2] text-gray-800 overflow-hidden h-screen w-screen flex flex-col relative">
@@ -49,30 +49,23 @@ const HomePage = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        className="relative z-10 grid md:grid-cols-2 items-center max-w-6xl mx-auto h-full w-full p-4"
+        className="relative z-10 grid md:grid-cols-2 items-center max-w-6xl mx-auto h-full w-full p-4 min-h-screen"
       >
         {/* Text Content */}
-        <div className="flex flex-col text-center md:text-left items-center md:items-start">
+        <div className="flex flex-col text-center md:text-left items-center md:items-start md:pr-8 lg:pr-12 py-12 md:py-0">
+          <motion.div variants={wordVariants} key="logo" className="mb-4">
+            <img src="/logo.png" alt="ApnaManager Logo" className="h-12 w-auto mx-auto md:mx-0" />
+          </motion.div>
           <motion.h1
             variants={titleContainerVariants}
             initial="hidden"
             animate="visible"
-            className="text-5xl font-bold leading-tight text-gray-800 mb-4"
+            className="text-4xl lg:text-5xl font-bold leading-tight text-gray-800 mb-4"
           >
             {/* Mapping over words to animate them individually */}
             {titleText.split(' ').map((word, index) => (
               <motion.span variants={wordVariants} key={index} className="inline-block mr-3">
-                {word === 'ApnaManager' ? (
-                  <>
-                    <br />
-                    <span className="font-black text-[1.1em] bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent [text-shadow:0_2px_4px_rgba(0,0,0,0.1)]">
-                      {word}
-                    </span>
-                    <br />
-                  </>
-                ) : (
-                  word
-                )}
+                {word}
               </motion.span>
             ))}
           </motion.h1>
@@ -80,8 +73,8 @@ const HomePage = () => {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 2.2 }} // Increased delay
-            className="text-lg leading-relaxed max-w-md text-gray-600 mb-8"
+            transition={{ duration: 0.8, delay: 1.5 }}
+            className="text-lg leading-relaxed text-gray-600 mb-8"
           >
             We provide a unified platform for hotels and law enforcement to ensure guest safety through seamless digital verification and real-time data sharing.
           </motion.p>
@@ -89,7 +82,7 @@ const HomePage = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 2.5 }} // Increased delay
+            transition={{ duration: 0.8, delay: 1.8 }}
             className="flex flex-col sm:flex-row gap-5 mt-4 items-center"
           >
             <Link
@@ -114,9 +107,9 @@ const HomePage = () => {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
-          className="hidden md:flex items-center justify-center row-start-1 md:row-auto"
+          className="hidden md:flex items-center justify-center row-start-1 md:row-auto p-6 md:p-0"
         >
-          <Lottie animationData={signupAnimation} loop={true} className="max-w-md" />
+          <Lottie animationData={signupAnimation} loop={true} className="max-w-lg lg:max-w-xl w-full" />
         </motion.div>
       </motion.header>
     </div>

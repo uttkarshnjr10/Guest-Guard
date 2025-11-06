@@ -24,23 +24,23 @@ const GuestRegistrationForm = () => {
     removeGuest,
   } = useGuestForm();
 
-  const handleDobChange = (e, index = null, guestType = null) => {
+  const handleDobChange = (e, index = null) => {
     const { name, value } = e.target;
     if (index !== null) {
-      handleGuestChange(guestType, index, name, value);
+      handleGuestChange(index, name, value);
     } else {
       handleChange(e);
     }
     if (value) {
       const age = differenceInYears(new Date(), parseISO(value)).toString();
       if (index !== null) {
-        handleGuestChange(guestType, index, 'age', age);
+        handleGuestChange(index, 'age', age);
       } else {
         handleChange({ target: { name: 'age', value: age } });
       }
     } else {
-      if (index !== null) {
-        handleGuestChange(guestType, index, 'age', '');
+       if (index !== null) {
+        handleGuestChange(index, 'age', '');
       } else {
         handleChange({ target: { name: 'age', value: '' } });
       }
@@ -134,26 +134,26 @@ const GuestRegistrationForm = () => {
             error={errors['address.city']}
           />
           <FormField
-            label="Zip Code *"
+            label="Pin code *"
             name="address.zipCode"
             value={formState.address.zipCode}
             onChange={handleChange}
             error={errors['address.zipCode']}
           />
-          <FormField
+          {/* <FormField
             label="Country *"
             name="address.country"
             value={formState.address.country}
             onChange={handleChange}
             error={errors['address.country']}
-          />
-          <FormField
+          /> */}
+           <FormField
             label="Nationality *"
             name="nationality"
             value={formState.nationality}
             onChange={handleChange}
             error={errors.nationality}
-          />
+          /> 
         </FormSection>
 
         <FormSection title="Stay Details">
@@ -228,58 +228,26 @@ const GuestRegistrationForm = () => {
           </div>
         </fieldset>
 
-        {/* Accompanying Adults Section */}
         <fieldset className="border border-gray-300 p-6 rounded-lg space-y-6">
-          <legend className="text-lg font-semibold text-gray-800 px-2">Accompanying Adults</legend>
-          {formState.guests.adults.map((adult, index) => (
+          <legend className="text-lg font-semibold text-gray-800 px-2">Accompanying Guests</legend>
+          {formState.accompanyingGuests.map((guest, index) => (
             <div key={index} className="bg-gray-50 p-4 rounded-md border relative space-y-4">
-              <button type="button" onClick={() => removeGuest('adults', index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700"><FaTrash /></button>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <FormField label="Full Name" name="name" value={adult.name} onChange={(e) => handleGuestChange('adults', index, 'name', e.target.value)} error={errors[`adults_${index}_name`]} />
-                <FormField label="Date of Birth" name="dob" type="date" value={adult.dob} onChange={(e) => handleDobChange(e, index, 'adults')} error={errors[`adults_${index}_dob`]} />
-                <FormField label="Age" name="age" type="number" value={adult.age} disabled className="bg-gray-100" />
-                <FormField label="ID Type" name="idType" value={adult.idType || ''} onChange={(e) => handleGuestChange('adults', index, 'idType', e.target.value)} />
-                <FormField label="ID Number" name="idNumber" value={adult.idNumber || ''} onChange={(e) => handleGuestChange('adults', index, 'idNumber', e.target.value)} />
+              <button type="button" onClick={() => removeGuest(index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700"><FaTrash /></button>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                 <FormField label={`Guest ${index + 1} Name *`} name="name" value={guest.name} onChange={(e) => handleGuestChange(index, 'name', e.target.value)} error={errors[`accompanying_${index}_name`]} />
+                 <FormField label="Date of Birth *" name="dob" type="date" value={guest.dob} onChange={(e) => handleDobChange(e, index)} error={errors[`accompanying_${index}_dob`]} />
+                 <FormField label="Age" name="age" type="number" value={guest.age} disabled className="bg-gray-100" />
+                 <FormField label="ID Type" name="idType" value={guest.idType || ''} onChange={(e) => handleGuestChange(index, 'idType', e.target.value)} />
+                 <FormField label="ID Number" name="idNumber" value={guest.idNumber || ''} onChange={(e) => handleGuestChange(index, 'idNumber', e.target.value)} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t">
-                <PhotoUpload label="ID Front" onCaptureClick={() => openWebcam('adult_idImageFront', index)} imageSrc={adult.idImageFront} />
-                <PhotoUpload label="ID Back" onCaptureClick={() => openWebcam('adult_idImageBack', index)} imageSrc={adult.idImageBack} />
-                <PhotoUpload label="Live Photo" onCaptureClick={() => openWebcam('adult_livePhoto', index)} imageSrc={adult.livePhoto} />
+                <PhotoUpload label="ID Front (Optional)" onCaptureClick={() => openWebcam('accompanying_idImageFront', index)} imageSrc={guest.idImageFront} />
+                <PhotoUpload label="ID Back (Optional)" onCaptureClick={() => openWebcam('accompanying_idImageBack', index)} imageSrc={guest.idImageBack} />
+                <PhotoUpload label="Live Photo (Optional)" onCaptureClick={() => openWebcam('accompanying_livePhoto', index)} imageSrc={guest.livePhoto} />
               </div>
             </div>
           ))}
-          <Button type="button" variant="secondary" onClick={() => addGuest('adults')} className="flex items-center gap-2"><FaPlus /> Add Adult</Button>
-        </fieldset>
-
-        {/* Accompanying Children Section */}
-        <fieldset className="border border-gray-300 p-6 rounded-lg space-y-6">
-          <legend className="text-lg font-semibold text-gray-800 px-2">Accompanying Children</legend>
-          {formState.guests.children.map((child, index) => (
-            <div key={index} className="bg-gray-50 p-4 rounded-md border relative space-y-4">
-              <button type="button" onClick={() => removeGuest('children', index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700"><FaTrash /></button>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <FormField label="Full Name" name="name" value={child.name} onChange={(e) => handleGuestChange('children', index, 'name', e.target.value)} error={errors[`children_${index}_name`]} />
-                <FormField label="Date of Birth" name="dob" type="date" value={child.dob} onChange={(e) => handleDobChange(e, index, 'children')} error={errors[`children_${index}_dob`]} />
-                <FormField label="Age" name="age" type="number" value={child.age} disabled className="bg-gray-100" />
-              </div>
-              <div className="space-y-4 pt-4 border-t">
-                {parseInt(child.age) >= 10 && (
-                  <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField label="ID Type" name="idType" value={child.idType || ''} onChange={(e) => handleGuestChange('children', index, 'idType', e.target.value)} />
-                        <FormField label="ID Number" name="idNumber" value={child.idNumber || ''} onChange={(e) => handleGuestChange('children', index, 'idNumber', e.target.value)} />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <PhotoUpload label="ID Front" onCaptureClick={() => openWebcam('child_idImageFront', index)} imageSrc={child.idImageFront} />
-                        <PhotoUpload label="ID Back" onCaptureClick={() => openWebcam('child_idImageBack', index)} imageSrc={child.idImageBack} />
-                    </div>
-                  </>
-                )}
-                <PhotoUpload label="Live Photo *" onCaptureClick={() => openWebcam('child_livePhoto', index)} imageSrc={child.livePhoto} />
-              </div>
-            </div>
-          ))}
-          <Button type="button" variant="secondary" onClick={() => addGuest('children')} className="flex items-center gap-2"><FaPlus /> Add Child</Button>
+          <Button type="button" variant="secondary" onClick={addGuest} className="flex items-center gap-2"><FaPlus /> Add Guest</Button>
         </fieldset>
 
         <div className="flex justify-end pt-4">

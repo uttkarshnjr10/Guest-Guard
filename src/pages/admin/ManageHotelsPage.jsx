@@ -37,13 +37,13 @@ const ManageHotelsPage = () => {
   const columns = [
     {
       Header: 'Hotel Name',
-      accessor: 'details.hotelName',
-      Cell: (row) => row.details?.hotelName || row.username || 'N/A'
+      accessor: 'hotelName',
+      Cell: (row) => row.hotelName || row.username || 'N/A'
     },
     {
       Header: 'City',
-      accessor: 'details.city',
-      Cell: (row) => row.details?.city || 'N/A'
+      accessor: 'city',
+      Cell: (row) => row.city || 'N/A'
     },
     {
       Header: 'Status',
@@ -67,7 +67,7 @@ const ManageHotelsPage = () => {
           {/* Conditional Action Buttons */}
           {row.status === 'Pending' && (
             <Button
-              onClick={(e) => { e.stopPropagation(); handleAction('Approve', row._id, row.details?.hotelName || row.username); }}
+              onClick={(e) => { e.stopPropagation(); handleAction('Approve', row._id, row.hotelName || row.username); }}
               className="text-sm py-1 px-2 bg-green-500 hover:bg-green-600" // Green for Approve
             >
               Approve
@@ -75,7 +75,7 @@ const ManageHotelsPage = () => {
           )}
           {row.status === 'Active' && ( // Changed from 'Approved'
             <Button
-              onClick={(e) => { e.stopPropagation(); handleAction('Suspend', row._id, row.details?.hotelName || row.username); }}
+              onClick={(e) => { e.stopPropagation(); handleAction('Suspend', row._id, row.hotelName || row.username); }}
               variant="secondary" // Or maybe a warning color
               className="text-sm py-1 px-2"
             >
@@ -84,7 +84,7 @@ const ManageHotelsPage = () => {
           )}
           {row.status === 'Suspended' && (
             <Button
-              onClick={(e) => { e.stopPropagation(); handleAction('Activate', row._id, row.details?.hotelName || row.username); }}
+              onClick={(e) => { e.stopPropagation(); handleAction('Activate', row._id, row.hotelName || row.username); }}
               variant="primary" // Or green
               className="text-sm py-1 px-2"
             >
@@ -93,7 +93,7 @@ const ManageHotelsPage = () => {
           )}
          
           <Button
-            onClick={(e) => { e.stopPropagation(); handleAction('Delete', row._id, row.details?.hotelName || row.username); }}
+            onClick={(e) => { e.stopPropagation(); handleAction('Delete', row._id, row.hotelName || row.username); }}
             variant="danger"
             className="text-sm py-1 px-2"
           >
@@ -143,10 +143,10 @@ const ManageHotelsPage = () => {
               <td
                 key={col.accessor || col.Header} // Use Header as fallback key for 'actions'
                 className="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
-                onClick={(e) => { if (col.accessor === 'actions') e.stopPropagation(); }}
+                onClick={(e) => { if (col.Header === 'Actions') e.stopPropagation(); }}
               >
               
-                 {col.Cell ? col.Cell(hotel) : (col.accessor.includes('.') ? hotel.details?.[col.accessor.split('.')[1]] : hotel[col.accessor]) || 'N/A'}
+                 {col.Cell ? col.Cell(hotel) : hotel[col.accessor] || 'N/A'}
               </td>
             ))}
           </tr>

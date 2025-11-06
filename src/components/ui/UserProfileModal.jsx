@@ -26,9 +26,6 @@ const StatusPill = ({ status }) => {
 
 const UserProfileModal = ({ user, onClose }) => {
     if (!user) return null;
-    // Access nested details
-    const details = user.details || {}; // Use empty object as fallback
-    // Determine role based on top-level user.role
     const isHotel = user.role === 'Hotel';
     const isPolice = user.role === 'Police';
 
@@ -59,27 +56,24 @@ const UserProfileModal = ({ user, onClose }) => {
                 </div>
                 <div className="p-6 text-sm">
                     <DetailRow label="Username" value={user.username} />
+                    <DetailRow label="Email" value={user.email} />
                     {isHotel && (
                         <>
-                            <DetailRow label="Hotel Name" value={details.hotelName} />
-                            <DetailRow label="City" value={details.city} />
-                            <DetailRow label="Address" value={details.address} />
-                            <DetailRow label="License/GST" value={details.license} />
-                            <DetailRow label="Contact Email" value={details.contact || user.email} />
+                            <DetailRow label="Hotel Name" value={user.hotelName} />
+                            <DetailRow label="City" value={user.city} />
+                            <DetailRow label="Address" value={user.address} />
+                            <DetailRow label="Phone" value={user.phone} />
                         </>
                     )}
                     {isPolice && (
                         <>
-                            <DetailRow label="Station Name" value={details.station} />
-                            <DetailRow label="Jurisdiction" value={details.jurisdiction} />
-                            <DetailRow label="Registered Station ID" value={details.policeStation} /> {/* Assuming this is the ID */}
-                            <DetailRow label="City" value={details.city} />
-                            <DetailRow label="Contact Email" value={details.contact || user.email} />
-                           
+                            <DetailRow label="Station" value={user.station} />
+                            <DetailRow label="Jurisdiction" value={user.jurisdiction} />
+                            <DetailRow label="Service ID" value={user.serviceId} />
+                            <DetailRow label="Rank" value={user.rank} />
+                            <DetailRow label="Assigned Station ID" value={user.policeStation} />
                         </>
                     )}
-                    
-                    {!details.contact && <DetailRow label="Email" value={user.email} /> }
                     <div className="py-2">
                         <span className="font-semibold text-gray-600">Status:</span>
                         <span className="ml-2"><StatusPill status={user.status} /></span>
