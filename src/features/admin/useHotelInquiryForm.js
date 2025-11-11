@@ -4,9 +4,17 @@ import toast from 'react-hot-toast';
 import apiClient from '../../api/apiClient';
 
 const initialFormState = {
-  hotelName: '', gstNumber: '', ownerName: '', email: '',
-  mobileNumber: '', state: '', district: '', pinCode: '',
+  hotelName: '',
+  gstNumber: '',
+  ownerName: '', 
+  email: '',
+  mobileNumber: '',
+  state: '',
+  district: '',
+  pinCode: '',
   fullAddress: '',
+  postOffice: '', 
+  localThana: '',
 };
 
 export const useHotelInquiryForm = () => {
@@ -42,7 +50,15 @@ export const useHotelInquiryForm = () => {
         submissionData.append('aadhaarCard', files.aadhaarCard);
     }
     try {
-      const response = await apiClient.post('/inquiries/hotel-registration', submissionData);
+      const response = await apiClient.post(
+        '/inquiries/hotel-registration',
+        submissionData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
       toast.success(response.data.message || 'Inquiry submitted successfully!', { id: toastId });
       setFormData(initialFormState);
       setFiles({ ownerSignature: null, hotelStamp: null, aadhaarCard: null });

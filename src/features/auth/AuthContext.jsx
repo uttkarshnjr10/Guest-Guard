@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
 
       // Handle successful login (status 200)
       if (response.status === 200 && response.data?.data) {
-        const { _id, username, role, token } = response.data.data; // Extract from data property
+        const { _id, username, role, token } = response.data.data; 
 
         if (_id && username && role && token) {
           localStorage.setItem('authToken', token);
@@ -41,14 +41,12 @@ export const AuthProvider = ({ children }) => {
           setUser(userData);
           return userData; 
         } else {
-          // Handle case where expected data is missing in 200 response
           throw new Error('Login successful but user data is incomplete.');
         }
       }
-     
-    } catch (error) {
-      if (error.response && error.response.status === 202) {
-         const userId = error.response.data?.data?.userId;
+  
+      if (response.status === 202) {
+         const userId = response.data?.data?.userId;
          if (userId) {
             return { needsPasswordReset: true, _id: userId };
          } else {
@@ -56,6 +54,11 @@ export const AuthProvider = ({ children }) => {
          }
       }
 
+      // Handle any other unexpected 2xx success status
+      throw new Error(`Unexpected server response: ${response.status}`);
+
+    } catch (error) {
+      // The catch block will now only handle 4xx/5xx errors or logic errors
       const errorMessage = error.response?.data?.message || error.message || 'Login failed. Please try again.';
       throw new Error(errorMessage);
     }

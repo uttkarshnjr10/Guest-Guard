@@ -3,8 +3,26 @@ import { useLocation } from 'react-router-dom';
 import apiClient from '../../api/apiClient';
 import toast from 'react-hot-toast';
 
-const initialHotelState = { username: '', name: '', city: '', address: '', license: '', contact: '' };
-const initialPoliceState = { username: '', station: '', jurisdiction: '', city: '', contact: '', policeStation: '' };
+const initialHotelState = {
+  username: '',
+  email: '', 
+  hotelName: '', 
+  ownerName: '',
+  gstNumber: '',
+  phone: '', 
+  address: '',
+  city: '',
+  state: '',
+  pinCode: '',
+  nationality: 'Indian', 
+  postOffice: '',
+  localThana: '',
+  ownerSignature: null,
+  hotelStamp: null,
+  aadhaarCard: null,
+};
+
+const initialPoliceState = { username: '', station: '', jurisdiction: '', city: '', email: '', policeStation: '' };
 
 export const useRegisterUser = () => {
   const location = useLocation();
@@ -17,17 +35,29 @@ export const useRegisterUser = () => {
   const [successData, setSuccessData] = useState(null);
 
   useEffect(() => {
+ 
     if (inquiryData) {
       setUserType('Hotel');
       
       const generatedUsername = inquiryData.email ? inquiryData.email.split('@')[0] : '';
+      
       setFormData({
         username: generatedUsername,
-        name: inquiryData.hotelName || '',
-        city: inquiryData.district || '',
+        email: inquiryData.email || '',
+        hotelName: inquiryData.hotelName || '',
+        ownerName: inquiryData.ownerName || '',
+        gstNumber: inquiryData.gstNumber || '',
+        phone: inquiryData.mobileNumber || '',
         address: inquiryData.fullAddress || '',
-        license: inquiryData.gstNumber || '',
-        contact: inquiryData.email || '',
+        city: inquiryData.district || '', 
+        state: inquiryData.state || '',
+        pinCode: inquiryData.pinCode || '',
+        nationality: inquiryData.nationality || 'Indian',
+        postOffice: inquiryData.postOffice || '',
+        localThana: inquiryData.localThana || '',
+        ownerSignature: inquiryData.ownerSignature || null,
+        hotelStamp: inquiryData.hotelStamp || null,
+        aadhaarCard: inquiryData.aadhaarCard || null,
       });
     }
   }, [inquiryData]);
@@ -35,7 +65,6 @@ export const useRegisterUser = () => {
   useEffect(() => {
     const fetchPoliceStations = async () => {
       try {
-        // Fetch real police station data
         const { data } = await apiClient.get('/stations');
         const formattedStations = data.data.map(station => ({
           value: station._id, 
@@ -76,32 +105,32 @@ export const useRegisterUser = () => {
       
       let payload;
      
+      
       if (userType === 'Hotel') {
+     
+        const { username, email, ...details } = formData;
         payload = {
           role: userType,
-          username: formData.username,
-          email: formData.contact, 
-          details: {
-            hotelName: formData.name, 
-            city: formData.city,
-            address: formData.address,
-            phone: formData.license 
-          }
+          username,
+          email, 
+          details: { ...details } // Send all other form fields in 'details'
         };
       } else { 
+        const { username, email, policeStation, station, jurisdiction, city } = formData;
         payload = {
           role: userType,
-          username: formData.username,
-          email: formData.contact,
-          policeStation: formData.policeStation, 
+          username,
+          email,
+          policeStation, 
           details: {
-            station: formData.station,
-            jurisdiction: formData.jurisdiction
-            // 'city' is on your form but not in the PoliceUser model
+            station,
+            jurisdiction,
+            city, 
           }
         };
       }
-      const response = await apiClient.post('/users/register', payload); // Send the new payload
+
+      const response = await apiClient.post('/users/register', payload); 
       setSuccessData(response.data.data);
       toast.success(response.data.message || 'User registered!', { id: toastId });
     } catch (error) {

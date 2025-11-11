@@ -23,17 +23,15 @@ const LoginPage = () => {
     setResetInfo({ show: false, userId: null });
 
     try {
-      // Call the updated login function from AuthContext
-      const loginResult = await login(email, password); //
-      toast.success('Login successful!');
+      const loginResult = await login(email, password);
 
       if (loginResult && loginResult.needsPasswordReset === true) {
-        setResetInfo({ show: true, userId: loginResult._id }); 
-        setIsLoading(false); 
-        return; 
+        setResetInfo({ show: true, userId: loginResult._id });
+        setIsLoading(false);
+        return;
       }
-
       if (loginResult && loginResult.role) {
+         toast.success('Login successful!');
          switch (loginResult.role) {
            case 'Hotel':
              navigate('/hotel');

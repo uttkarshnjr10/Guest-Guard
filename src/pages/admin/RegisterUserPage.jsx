@@ -6,6 +6,7 @@ import Button from '../../components/ui/Button';
 import { FaCopy } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
+// SuccessDisplay component remains the same
 const SuccessDisplay = ({ username, password, onReset }) => {
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
@@ -36,6 +37,7 @@ const SuccessDisplay = ({ username, password, onReset }) => {
     </div>
   );
 };
+
 
 const RegisterUserPage = () => {
   const { userType, formData, policeStations, loading, successData, inquiryData, handleTypeChange, handleChange, handleSelectChange, handleSubmit, resetForm } = useRegisterUser();
@@ -74,18 +76,105 @@ const RegisterUserPage = () => {
             onChange={handleChange}
             required
           />
+          <FormField 
+            label="Contact Email *" 
+            name="email" // Changed from 'contact'
+            type="email" 
+            value={formData.email} 
+            onChange={handleChange} 
+            required 
+          />
 
           {userType === 'Hotel' ? (
             <>
-              <FormField label="Hotel Name *" name="name" value={formData.name} onChange={handleChange} required />
-              <FormField label="Official Address *" name="address" value={formData.address} onChange={handleChange} required />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField label="City *" name="city" value={formData.city} onChange={handleChange} required />
-                <FormField label="License Number *" name="license" value={formData.license} onChange={handleChange} required />
+                <FormField 
+                  label="Hotel Name *" 
+                  name="hotelName" // Changed from 'name'
+                  value={formData.hotelName} 
+                  onChange={handleChange} 
+                  required 
+                />
+                <FormField 
+                  label="Owner Name *" 
+                  name="ownerName" 
+                  value={formData.ownerName} 
+                  onChange={handleChange} 
+                  required 
+                />
               </div>
-              <FormField label="Contact Email *" name="contact" type="email" value={formData.contact} onChange={handleChange} required />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <FormField 
+                  label="GST Number *" 
+                  name="gstNumber" // Changed from 'license'
+                  value={formData.gstNumber} 
+                  onChange={handleChange} 
+                  required 
+                />
+                <FormField 
+                  label="Mobile Number *" 
+                  name="phone" // Changed from 'license'
+                  type="tel"
+                  value={formData.phone} 
+                  onChange={handleChange} 
+                  required 
+                />
+              </div>
+              
+              <FormField 
+                label="Full Address *" 
+                name="address" 
+                value={formData.address} 
+                onChange={handleChange} 
+                required 
+              />
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <FormField 
+                  label="District/City *" 
+                  name="city" 
+                  value={formData.city} 
+                  onChange={handleChange} 
+                  required 
+                />
+                <FormField 
+                  label="State *" 
+                  name="state" 
+                  value={formData.state} 
+                  onChange={handleChange} 
+                  required 
+                />
+                <FormField 
+                  label="Pin Code *" 
+                  name="pinCode" 
+                  value={formData.pinCode} 
+                  onChange={handleChange} 
+                  required 
+                />
+              </div>
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <FormField 
+                  label="Post Office" 
+                  name="postOffice" 
+                  value={formData.postOffice} 
+                  onChange={handleChange} 
+                />
+                <FormField 
+                  label="Local Thana" 
+                  name="localThana" 
+                  value={formData.localThana} 
+                  onChange={handleChange} 
+                />
+                 <FormField 
+                  label="Nationality" 
+                  name="nationality" 
+                  value={formData.nationality} 
+                  onChange={handleChange} 
+                />
+              </div>
             </>
           ) : (
+            
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField label="Station Name *" name="station" value={formData.station} onChange={handleChange} required />
@@ -97,7 +186,7 @@ const RegisterUserPage = () => {
               </div>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <FormField label="City *" name="city" value={formData.city} onChange={handleChange} required />
-                 <FormField label="Contact Email *" name="contact" type="email" value={formData.contact} onChange={handleChange} required />
+                 
                </div>
             </>
           )}

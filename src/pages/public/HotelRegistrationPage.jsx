@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useHotelInquiryForm } from '../../features/admin/useHotelInquiryForm'; //
 import FormField from '../../components/ui/FormField'; //
 import Button from '../../components/ui/Button'; //
-import Navbar from '../../components/layout/Navbar'; // <-- Import the Navbar
+import Navbar from '../../components/layout/Navbar'; 
 
 const FileInputField = ({ label, name, file, onChange, required = false }) => (
   <div>
@@ -23,12 +23,9 @@ const HotelRegistrationPage = () => {
   const { formData, files, isSubmitting, handleInputChange, handleFileChange, handleSubmit } = useHotelInquiryForm(); //
 
   return (
-    <div className="font-poppins bg-gray-50 min-h-screen"> {/* */}
-      {/* --- MODIFIED: Use Navbar component --- */}
-      <Navbar isPublic={true} /> {/* Pass isPublic prop */}
+    <div className="font-poppins bg-gray-50 min-h-screen"> 
+      <Navbar isPublic={true} /> 
 
-      {/* --- REMOVED: Old header block --- */}
-      {/* <header className="bg-white shadow-sm"> ... </header> */} {/* */}
 
       <main className="container mx-auto px-6 py-12"> {/* */}
         <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg"> {/* */}
@@ -54,6 +51,20 @@ const HotelRegistrationPage = () => {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> {/* */}
                  <FormField label="State" name="state" value={formData.state} onChange={handleInputChange} required /> {/* */}
                  <FormField label="District" name="district" value={formData.district} onChange={handleInputChange} required /> {/* */}
+                 <FormField
+                    label="Post Office"
+                    name="postOffice"
+                    value={formData.postOffice}
+                    onChange={handleInputChange}
+                    required
+                  />
+                 <FormField
+                    label="Local Thana (Police Station)"
+                    name="localThana"
+                    value={formData.localThana}
+                    onChange={handleInputChange}
+                    required
+                  />
                  <FormField label="Pin Code" name="pinCode" value={formData.pinCode} onChange={handleInputChange} required /> {/* */}
                  <FormField label="Full Address" name="fullAddress" value={formData.fullAddress} onChange={handleInputChange} required className="md:col-span-2" /> {/* */}
                </div>
@@ -77,8 +88,7 @@ const HotelRegistrationPage = () => {
           </form>
         </div>
       </main>
-      {/* Optional: Add the same Footer component here if desired */}
-      {/* <Footer /> */}
+      
     </div>
   );
 };
