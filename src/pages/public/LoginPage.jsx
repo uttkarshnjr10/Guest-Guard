@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import ForcePasswordResetModal from '../../components/ui/ForcePasswordResetModal'; 
+import ForgotPasswordModal from '../../components/ui/ForgotPasswordModal';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [resetInfo, setResetInfo] = useState({ show: false, userId: null });
+  const [showForgotModal, setShowForgotModal] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth(); //
 
@@ -75,7 +77,11 @@ const LoginPage = () => {
           /> //
         )}
       </AnimatePresence>
-
+      <AnimatePresence>
+        {showForgotModal && (
+          <ForgotPasswordModal onClose={() => setShowForgotModal(false)} />
+        )}
+      </AnimatePresence>
       <div className="font-poppins min-h-screen w-screen bg-[#F8F7FF] flex items-center justify-center relative overflow-hidden"> 
 
         <motion.div
@@ -95,10 +101,7 @@ const LoginPage = () => {
           </motion.div>
 
           <form onSubmit={handleSubmit} className="space-y-6"> {/* */}
-            {/* ... Email input ... */}
-            {/* ... Password input ... */}
-            {/* ... Sign In button ... */}
-             <motion.div variants={itemVariants} className="relative"> {/* */}
+            <motion.div variants={itemVariants} className="relative"> {/* */}
               <FiMail className="absolute top-1/2 -translate-y-1/2 left-4 text-gray-400" />
               <input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-lg border-2 border-transparent focus:outline-none focus:border-blue-500 transition-colors" /> {/* */}
             </motion.div>
@@ -113,9 +116,16 @@ const LoginPage = () => {
               {isLoading ? "Signing In..." : "Sign In"}
             </motion.button>
           </form>
-          <motion.button variants={itemVariants} onClick={() => navigate('/')} className="mt-6 text-sm text-gray-600 hover:text-blue-600 w-full text-center"> {/* */}
-            ← Back to Home
-          </motion.button>
+          <motion.div variants={itemVariants} className="flex justify-between items-center mt-6">
+            <button
+              onClick={() => setShowForgotModal(true)}
+              className="text-sm text-gray-600 hover:text-blue-600">
+              Forgot Password?
+            </button>
+            <button onClick={() => navigate('/')} className="text-sm text-gray-600 hover:text-blue-600">
+              ← Back to Home
+            </button>
+          </motion.div>
         </motion.div>
       </div>
     </>

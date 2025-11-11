@@ -4,7 +4,7 @@ import { Toaster } from 'react-hot-toast';
 
 // Public Pages
 import HomePage from './pages/public/HomePage';
-import ForcePasswordResetPage from './pages/public/ForcePasswordResetPage';
+import ResetPasswordPage from './pages/public/ResetPasswordPage';
 import LoginPage from './pages/public/LoginPage';
 import WhyUsPage from './pages/public/WhyUsPage';
 import HotelRegistrationPage from './pages/public/HotelRegistrationPage';
@@ -44,7 +44,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
-        <Route path="/reset-password" element={<ForcePasswordResetPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/why-us" element={<WhyUsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/hotel-registration" element={<HotelRegistrationPage />} />
