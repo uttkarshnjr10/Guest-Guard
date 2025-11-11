@@ -67,6 +67,14 @@ const RegisterUserPage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <FormField
+            label="Username *"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            required
+          />
+
           {userType === 'Hotel' ? (
             <>
               <FormField label="Hotel Name *" name="name" value={formData.name} onChange={handleChange} required />

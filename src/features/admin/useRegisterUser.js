@@ -3,8 +3,8 @@ import { useLocation } from 'react-router-dom';
 import apiClient from '../../api/apiClient';
 import toast from 'react-hot-toast';
 
-const initialHotelState = { name: '', city: '', address: '', license: '', contact: '' };
-const initialPoliceState = { station: '', jurisdiction: '', city: '', contact: '', policeStation: '' };
+const initialHotelState = { username: '', name: '', city: '', address: '', license: '', contact: '' };
+const initialPoliceState = { username: '', station: '', jurisdiction: '', city: '', contact: '', policeStation: '' };
 
 export const useRegisterUser = () => {
   const location = useLocation();
@@ -19,7 +19,10 @@ export const useRegisterUser = () => {
   useEffect(() => {
     if (inquiryData) {
       setUserType('Hotel');
+      
+      const generatedUsername = inquiryData.email ? inquiryData.email.split('@')[0] : '';
       setFormData({
+        username: generatedUsername,
         name: inquiryData.hotelName || '',
         city: inquiryData.district || '',
         address: inquiryData.fullAddress || '',
@@ -69,11 +72,37 @@ export const useRegisterUser = () => {
     e.preventDefault();
     setLoading(true);
     const toastId = toast.loading('Registering user...');
-
     try {
-      const payload = { ...formData, role: userType };
-      const response = await apiClient.post('/users/register', payload);
-      setSuccessData(response.data.data); 
+      
+      let payload;
+     
+      if (userType === 'Hotel') {
+        payload = {
+          role: userType,
+          username: formData.username,
+          email: formData.contact, 
+          details: {
+            hotelName: formData.name, 
+            city: formData.city,
+            address: formData.address,
+            phone: formData.license 
+          }
+        };
+      } else { 
+        payload = {
+          role: userType,
+          username: formData.username,
+          email: formData.contact,
+          policeStation: formData.policeStation, 
+          details: {
+            station: formData.station,
+            jurisdiction: formData.jurisdiction
+            // 'city' is on your form but not in the PoliceUser model
+          }
+        };
+      }
+      const response = await apiClient.post('/users/register', payload); // Send the new payload
+      setSuccessData(response.data.data);
       toast.success(response.data.message || 'User registered!', { id: toastId });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Registration failed.', { id: toastId });
