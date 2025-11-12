@@ -9,6 +9,8 @@ import LoginPage from './pages/public/LoginPage';
 import WhyUsPage from './pages/public/WhyUsPage';
 import HotelRegistrationPage from './pages/public/HotelRegistrationPage';
 
+
+
 // Layouts & Protected Routes
 import AppLayout from './components/layout/AppLayout';
 import ProtectedRoute from './features/auth/ProtectedRoute';
@@ -21,6 +23,8 @@ import DashboardDispatcherPage from './pages/shared/DashboardDispatcherPage';
 import GuestRegistrationPage from './pages/hotel/GuestRegistrationPage';
 import GuestListPage from './pages/hotel/GuestListPage';
 import ReportsPage from './pages/hotel/ReportsPage';
+import SubscriptionPage from './pages/hotel/SubscriptionPage';
+import SubscriptionSuccessPage from './pages/hotel/SubscriptionSuccessPage';
 
 // Police Pages
 import SearchGuestPage from './pages/police/SearchGuestPage';
@@ -48,7 +52,7 @@ function App() {
         <Route path="/why-us" element={<WhyUsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/hotel-registration" element={<HotelRegistrationPage />} />
-
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         {/* Protected Routes Wrapper */}
         <Route element={<ProtectedRoute />}>
           {/* Hotel Routes */}
@@ -58,6 +62,8 @@ function App() {
             <Route path="register-guest" element={<GuestRegistrationPage />} />
             <Route path="guests" element={<GuestListPage />} />
             <Route path="reports" element={<ReportsPage />} />
+            <Route path="subscription" element={<SubscriptionPage />} />
+            <Route path="subscription-success" element={<SubscriptionSuccessPage />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>
 
