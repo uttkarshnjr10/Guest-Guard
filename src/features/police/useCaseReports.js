@@ -11,7 +11,6 @@ export const useCaseReports = () => {
   const fetchReports = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch all existing case reports
       const { data } = await apiClient.get('/police/reports');
       setReports(data.data || []);
     } catch (error) {
@@ -32,11 +31,10 @@ export const useCaseReports = () => {
   const handleCreateReport = async (newReportData) => {
     const toastId = toast.loading('Filing new case report...');
     try {
-      // Create a new case report
       await apiClient.post('/police/reports', newReportData);
       toast.success('Case report filed successfully!', { id: toastId });
       setIsModalOpen(false);
-      fetchReports(); // Refresh the list of reports
+      fetchReports();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to file report.', { id: toastId });
     }

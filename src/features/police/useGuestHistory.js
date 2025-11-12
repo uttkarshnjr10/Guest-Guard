@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import apiClient from '../../api/apiClient';
 import toast from 'react-hot-toast';
+import { generateGuestHistoryPDF } from '../../lib/pdfGenerator';
 
 export const useGuestHistory = () => {
   const { guestId } = useParams();
@@ -32,11 +33,21 @@ export const useGuestHistory = () => {
     try {
       await apiClient.post(`/police/guests/${guestId}/remarks`, { text: newRemark });
       toast.success('Remark added.', { id: toastId });
-      fetchHistory(); // Refresh the history to show the new remark
+      fetchHistory();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to add remark.', { id: toastId });
     }
   };
 
-  return { history, loading, error, addRemark };
+  const exportPDF = () => {
+    if (history) {
+      try {
+        generateGuestHistoryPDF(history);
+      } catch (error) {
+        toast.error('Failed to generate PDF.');
+      }
+    }
+  };
+
+  return { history, loading, error, addRemark, exportPDF };
 };

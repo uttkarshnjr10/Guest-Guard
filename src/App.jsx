@@ -31,6 +31,7 @@ import SearchGuestPage from './pages/police/SearchGuestPage';
 import FlagsReportsPage from './pages/police/FlagsReportsPage';
 import CaseReportsPage from './pages/police/CaseReportsPage';
 import GuestHistoryPage from './pages/police/GuestHistoryPage';
+import AnalyticsPage from './pages/police/AnalyticsPage';
 
 // Admin Pages
 import ManageHotelsPage from './pages/admin/ManageHotelsPage';
@@ -40,6 +41,7 @@ import ManageStationsPage from './pages/admin/ManageStationsPage';
 import RegisterUserPage from './pages/admin/RegisterUserPage';
 import AccessLogsPage from './pages/admin/AccessLogsPage';
 import ManageRoomsPage from './pages/hotel/ManageRoomsPage';
+import WatchlistPage from './pages/admin/WatchlistPage';
 
 function App() {
   return (
@@ -74,6 +76,7 @@ function App() {
             <Route path="dashboard" element={<DashboardDispatcherPage />} />
             <Route path="guest/:guestId" element={<GuestHistoryPage />} />
             <Route path="search" element={<SearchGuestPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="flags" element={<FlagsReportsPage />} />
             <Route path="reports" element={<CaseReportsPage />} />
             <Route path="profile" element={<ProfilePage />} />
@@ -90,6 +93,7 @@ function App() {
             <Route path="register" element={<RegisterUserPage />} />
             <Route path="access-logs" element={<AccessLogsPage />} />
             <Route path="profile" element={<ProfilePage />} />
+            <Route path="watchlist" element={<WatchlistPage />} />
           </Route>
         </Route>
 

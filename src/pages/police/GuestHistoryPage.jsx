@@ -2,12 +2,12 @@
 import { useState } from 'react';
 import { useGuestHistory } from '../../features/police/useGuestHistory';
 import Button from '../../components/ui/Button';
-import { FaMapMarkerAlt, FaPhone, FaIdCard, FaBuilding, FaExclamationTriangle, FaCommentDots } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaPhone, FaIdCard, FaBuilding, FaExclamationTriangle, FaCommentDots, FaFilePdf } from 'react-icons/fa';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
 const GuestHistoryPage = () => {
-  const { history, loading, error, addRemark } = useGuestHistory();
+  const { history, loading, error, addRemark, exportPDF } = useGuestHistory();
   const [newRemark, setNewRemark] = useState('');
 
   const handleAddRemark = (e) => {
@@ -32,35 +32,47 @@ const GuestHistoryPage = () => {
 
   return (
     <div className="space-y-8">
-      {/* Profile Header */}
-      <header className="bg-white p-6 rounded-xl shadow-md flex flex-col sm:flex-row items-center gap-6">
-        <img src={primaryGuest.livePhotoURL} alt="Guest" className="w-24 h-24 rounded-full border-4 border-blue-200 object-cover" />
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">{name}</h1>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2 text-sm text-gray-600">
-            <p className="flex items-center gap-2"><FaIdCard /> {primaryGuest.idType}: {primaryGuest.idNumber}</p>
-            <p className="flex items-center gap-2"><FaPhone /> {phone}</p>
-            <p className="flex items-center gap-2"><FaMapMarkerAlt /> {`${address.street}, ${address.city}`}</p>
+      <header className="bg-white p-6 rounded-xl shadow-md">
+        <div className="flex flex-col sm:flex-row items-center gap-6">
+          <img
+            src={primaryGuest.livePhotoURL}
+            alt="Guest"
+            className="w-24 h-24 rounded-full border-4 border-blue-200 object-cover"
+          />
+          <div className="flex-1 text-center sm:text-left">
+            <h1 className="text-3xl font-bold text-gray-800">{name}</h1>
+            <div className="flex flex-col sm:flex-row flex-wrap gap-x-6 gap-y-2 mt-2 text-sm text-gray-600 justify-center sm:justify-start">
+              <p className="flex items-center gap-2"><FaIdCard /> {primaryGuest.idType}: {primaryGuest.idNumber}</p>
+              <p className="flex items-center gap-2"><FaPhone /> {phone}</p>
+              <p className="flex items-center gap-2"><FaMapMarkerAlt /> {`${address.city}, ${address.state}`}</p>
+            </div>
+          </div>
+          <div className="flex-shrink-0">
+            <Button
+              onClick={exportPDF}
+              variant="secondary"
+              className="flex items-center gap-2"
+            >
+              <FaFilePdf /> Export as PDF
+            </Button>
           </div>
         </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Stay History */}
         <div className="lg:col-span-1 bg-white p-6 rounded-xl shadow-md">
           <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2"><FaBuilding /> Stay History</h2>
           <div className="space-y-4">
             {stayHistory.map(stay => (
               <div key={stay._id} className="border-l-4 border-blue-200 pl-4">
-                <p className="font-semibold text-gray-800">{stay.hotel.username}</p>
-                <p className="text-sm text-gray-500">{stay.hotel.details.city}</p>
+                <p className="font-semibold text-gray-800">{stay.hotel.hotelName || stay.hotel.username}</p>
+                <p className="text-sm text-gray-500">{stay.hotel.city}</p>
                 <p className="text-xs text-gray-500">{`${new Date(stay.stayDetails.checkIn).toLocaleDateString()} - ${new Date(stay.stayDetails.expectedCheckout).toLocaleDateString()}`}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Alerts & Remarks */}
         <div className="lg:col-span-2 space-y-8">
           <div className="bg-white p-6 rounded-xl shadow-md">
             <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2"><FaExclamationTriangle className="text-yellow-500" /> Alerts</h2>
@@ -74,9 +86,14 @@ const GuestHistoryPage = () => {
 
           <div className="bg-white p-6 rounded-xl shadow-md">
             <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2"><FaCommentDots /> Officer Remarks</h2>
-            <form onSubmit={handleAddRemark} className="flex gap-2 mb-4">
-              <textarea value={newRemark} onChange={(e) => setNewRemark(e.target.value)} placeholder="Add a new investigative remark..." className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
-              <Button type="submit">Add</Button>
+            <form onSubmit={handleAddRemark} className="flex flex-col sm:flex-row gap-2 mb-4">
+              <textarea
+                value={newRemark}
+                onChange={(e) => setNewRemark(e.target.value)}
+                placeholder="Add a new investigative remark..."
+                className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500 min-h-[80px] sm:min-h-0"
+              ></textarea>
+              <Button type="submit" className="w-full sm:w-auto">Add</Button>
             </form>
             <div className="space-y-3">
               {remarks.map(remark => (

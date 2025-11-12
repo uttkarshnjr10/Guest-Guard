@@ -70,7 +70,7 @@ const ProfilePage = () => {
         <div className="space-y-4 text-gray-700">
           <p><strong>Contact Email:</strong> {profile.email}</p>
           {renderRoleSpecificDetails()}
-          <p><strong>Member Since:</strong> {new Date(profile.memberSince).toLocaleDateString()}</p>
+          <p><strong>Member Since:</strong> {new Date(profile.createdAt).toLocaleDateString()}</p>
         </div>
         <div className="flex justify-end gap-4 mt-8 pt-4 border-t">
           {isEditing ? (
