@@ -1,7 +1,7 @@
 // src/components/ui/FormField.jsx
 import Input from './Input';
 
-const FormField = ({ label, name, value, onChange, error, ...props }) => {
+const FormField = ({ label, name, value, onChange, error, required = false, ...props }) => {
   return (
     <div>
       <label
@@ -9,8 +9,9 @@ const FormField = ({ label, name, value, onChange, error, ...props }) => {
         className="block text-sm font-medium text-gray-700 mb-1"
       >
         {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      <Input id={name} name={name} value={value} onChange={onChange} {...props} />
+      <Input id={name} name={name} value={value} onChange={onChange} required={required} {...props} />
       {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
     </div>
   );

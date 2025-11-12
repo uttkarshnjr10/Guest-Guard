@@ -26,17 +26,24 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response, 
   (error) => {
+    
+    // Get the URL that caused the error
+    const originalRequestUrl = error.config.url;
 
-    if (error.response && error.response.status === 401) {
-      // Remove the bad token
+    // Check if the error is a 401 AND if it did NOT come from the login route
+    if (error.response && 
+        error.response.status === 401 && 
+        originalRequestUrl !== '/auth/login'
+    ) {
+      // This is an expired token on a protected route
       localStorage.removeItem('authToken');
-      // Redirect to login page
       window.location.href = '/login';
       toast.error('Session expired. Please log in again.');
     }
+    
     return Promise.reject(error);
   }
 );
-
+// ------------------------------------
 
 export default apiClient;

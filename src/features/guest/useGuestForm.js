@@ -1,11 +1,10 @@
 // src/features/guest/useGuestForm.js
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format, differenceInYears, parseISO } from 'date-fns';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../api/apiClient';
 import { dataURLtoFile } from '../../lib/utils'; 
-
 
 const getInitialFormState = () => ({
   name: '',
@@ -33,14 +32,30 @@ const initialGuestState = {
     idType: '', idNumber: '', idImageFront: null, idImageBack: null, livePhoto: null
 };
 
-
 export const useGuestForm = () => {
   const [formState, setFormState] = useState(getInitialFormState());
   const [errors, setErrors] = useState({});
   const [isWebcamOpen, setIsWebcamOpen] = useState(false);
   const [captureFor, setCaptureFor] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [vacantRooms, setVacantRooms] = useState([]);
+  const [isRoomsLoading, setIsRoomsLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchVacantRooms = async () => {
+      setIsRoomsLoading(true);
+      try {
+        const { data } = await apiClient.get('/rooms/dashboard');
+        setVacantRooms(data.data.vacantRooms || []);
+      } catch (error) {
+        toast.error('Could not fetch vacant rooms list.');
+      } finally {
+        setIsRoomsLoading(false);
+      }
+    };
+    fetchVacantRooms();
+  }, []);
 
   const setFormValue = (name, value) => {
     setFormState((prev) => ({ ...prev, [name]: value }));
@@ -130,7 +145,7 @@ export const useGuestForm = () => {
     if (!formState.purpose.trim()) errs.purpose = 'Purpose of visit is required';
     if (!formState.checkIn) errs.checkIn = 'Check-in time is required';
     if (!formState.expectedCheckout) errs.expectedCheckout = 'Expected checkout is required';
-    if (!formState.roomNumber.trim()) errs.roomNumber = 'Room number is required';
+    if (!formState.roomNumber) errs.roomNumber = 'Please select a vacant room';
     if (!formState.idType) errs.idType = 'ID type is required';
     if (!formState.idNumber.trim()) errs.idNumber = 'ID number is required';
     if (!formState.idImageFront) errs.idImageFront = 'ID proof front is required';
@@ -249,5 +264,7 @@ export const useGuestForm = () => {
     addGuest, 
     removeGuest, 
     isSubmitting,
+    vacantRooms,
+    isRoomsLoading,
   };
 };

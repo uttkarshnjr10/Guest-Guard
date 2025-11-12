@@ -22,6 +22,8 @@ const GuestRegistrationForm = () => {
     handleCapture,
     addGuest,
     removeGuest,
+    vacantRooms,
+    isRoomsLoading,
   } = useGuestForm();
 
   const handleDobChange = (e, index = null) => {
@@ -183,13 +185,33 @@ const GuestRegistrationForm = () => {
             min={formState.checkIn}
             error={errors.expectedCheckout}
           />
-          <FormField
-            label="Allocated Room Number *"
-            name="roomNumber"
-            value={formState.roomNumber}
-            onChange={handleChange}
-            error={errors.roomNumber}
-          />
+          <div>
+            <label htmlFor="roomNumber" className="block text-sm font-medium text-gray-700 mb-1">
+              Allocated Room Number *
+            </label>
+            <select
+              id="roomNumber"
+              name="roomNumber"
+              value={formState.roomNumber}
+              onChange={handleChange}
+              disabled={isRoomsLoading || vacantRooms.length === 0}
+              className={`mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md ${isRoomsLoading ? 'bg-gray-100' : ''}`}
+            >
+              <option value="">
+                {isRoomsLoading
+                  ? "Loading vacant rooms..."
+                  : vacantRooms.length === 0
+                    ? "No vacant rooms available"
+                    : "Select a vacant room..."}
+              </option>
+              {vacantRooms.map(roomNum => (
+                <option key={roomNum} value={roomNum}>
+                  {roomNum}
+                </option>
+              ))}
+            </select>
+            {errors.roomNumber && <p className="text-red-500 text-sm mt-1">{errors.roomNumber}</p>}
+          </div>
         </FormSection>
 
         <fieldset className="border border-gray-300 p-6 rounded-lg">

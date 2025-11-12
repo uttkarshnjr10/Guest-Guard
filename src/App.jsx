@@ -39,7 +39,7 @@ import ManagePolicePage from './pages/admin/ManagePolicePage';
 import ManageStationsPage from './pages/admin/ManageStationsPage';
 import RegisterUserPage from './pages/admin/RegisterUserPage';
 import AccessLogsPage from './pages/admin/AccessLogsPage';
-
+import ManageRoomsPage from './pages/hotel/ManageRoomsPage';
 
 function App() {
   return (
@@ -61,6 +61,7 @@ function App() {
             <Route path="dashboard" element={<DashboardDispatcherPage />} />
             <Route path="register-guest" element={<GuestRegistrationPage />} />
             <Route path="guests" element={<GuestListPage />} />
+            <Route path="manage-rooms" element={<ManageRoomsPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="subscription" element={<SubscriptionPage />} />
             <Route path="subscription-success" element={<SubscriptionSuccessPage />} />

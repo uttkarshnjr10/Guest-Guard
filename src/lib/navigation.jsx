@@ -2,7 +2,7 @@
 import {
   FaTachometerAlt, FaUsers, FaFileAlt, FaUserShield, FaSearch,
   FaFlag, FaBriefcase, FaBuilding, FaUserPlus, FaHistory, FaEnvelopeOpenText,
-  FaUniversity,FaCreditCard
+  FaUniversity,FaCreditCard,FaDoorOpen
 } from 'react-icons/fa';
 
 export const navigationConfig = {
@@ -10,6 +10,7 @@ export const navigationConfig = {
     { to: '/hotel/dashboard', label: 'Dashboard', icon: <FaTachometerAlt /> },
     { to: '/hotel/register-guest', label: 'Register Guest', icon: <FaUserPlus /> },
     { to: '/hotel/guests', label: 'Guest List', icon: <FaUsers /> },
+    { to: '/hotel/manage-rooms', label: 'Manage Rooms', icon: <FaDoorOpen /> },
     { to: '/hotel/reports', label: 'Reports', icon: <FaFileAlt /> },
     { to: '/hotel/subscription', label: 'Subscription', icon: <FaCreditCard /> },
     { to: '/hotel/profile', label: 'My Profile', icon: <FaUserShield /> },
