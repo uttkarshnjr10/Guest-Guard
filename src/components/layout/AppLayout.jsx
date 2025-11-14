@@ -30,8 +30,8 @@ const AppLayout = () => {
         isCollapsed={isCollapsed}
         onToggle={() => setIsCollapsed(!isCollapsed)}
       />
-      <div 
-  className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${ isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+     <div 
+  className="flex-1 flex flex-col overflow-hidden transition-all duration-300" style={{ marginLeft: isCollapsed ? '80px' : '256px' }}>
  
         <Navbar username={user.username} onLogout={handleLogout} />
 
