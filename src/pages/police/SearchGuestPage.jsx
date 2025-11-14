@@ -7,6 +7,7 @@ import Input from '../../components/ui/Input';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
+
 const GuestResultCard = ({ guest, onFlagClick }) => {
   return (
     <div className="bg-white p-4 rounded-xl shadow-md flex flex-col sm:flex-row gap-4">
@@ -14,22 +15,22 @@ const GuestResultCard = ({ guest, onFlagClick }) => {
       <div className="flex-shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden mx-auto sm:mx-0">
         <img
           src={guest.livePhotoURL}
-          alt={guest.primaryGuest.name}
+          alt={guest.primaryGuest?.name || 'Guest'} 
           className="w-full h-full object-cover"
         />
       </div>
 
       {/* Guest Details */}
       <div className="flex-1 text-center sm:text-left">
-        <h3 className="text-xl font-bold text-gray-800">{guest.primaryGuest.name}</h3>
+        <h3 className="text-xl font-bold text-gray-800">{guest.primaryGuest?.name || 'Unnamed Guest'}</h3> {/* <-- FIX */}
         <p className="text-sm text-gray-600">
           {guest.idType}: <span className="font-medium text-gray-700">{guest.idNumber}</span>
         </p>
         <p className="text-sm text-gray-600">
-          Phone: <span className="font-medium text-gray-700">{guest.primaryGuest.phone}</span>
+          Phone: <span className="font-medium text-gray-700">{guest.primaryGuest?.phone || 'N/A'}</span> {/* <-- FIX */}
         </p>
         <p className="text-sm text-gray-600">
-          Last Hotel: <span className="font-medium text-gray-700">{guest.hotel.hotelName || guest.hotel.username}</span>
+          Last Hotel: <span className="font-medium text-gray-700">{guest.hotel?.hotelName || guest.hotel?.username || 'Hotel Not Found'}</span> {/* <-- THE MAIN FIX */}
         </p>
         <p className="text-sm text-gray-600">
           Check-In: <span className="font-medium text-gray-700">{new Date(guest.stayDetails.checkIn).toLocaleDateString()}</span>

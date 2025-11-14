@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         const response = await apiClient.get('/users/profile'); 
-        setUser(response.data.user);
+        setUser(response.data.data);
       } catch (error) {
         // If the token is invalid or expired, the interceptor will handle it,
         localStorage.removeItem('authToken');
@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }) => {
     }
     setLoading(false);
   }, []);
+
 
   useEffect(() => {
     loadUser();
