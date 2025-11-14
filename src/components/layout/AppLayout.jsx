@@ -14,7 +14,7 @@ const AppLayout = () => {
 
   const handleLogout = async () => {
     await logout(); // Wait for the API call and state to clear
-    navigate('/login'); // THEN, navigate using react-router
+    navigate('/login'); 
   };
 
   const links = user ? navigationConfig[user.role] : [];
@@ -30,7 +30,8 @@ const AppLayout = () => {
         isCollapsed={isCollapsed}
         onToggle={() => setIsCollapsed(!isCollapsed)}
       />
-      <div className="flex-1 flex flex-col overflow-hidden transition-all duration-300" style={{ marginLeft: isCollapsed ? '80px' : '256px' }}>
+      <div 
+  className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${ isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
  
         <Navbar username={user.username} onLogout={handleLogout} />
 

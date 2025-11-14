@@ -12,16 +12,15 @@ const Sidebar = ({ links, isCollapsed, onToggle }) => {
 
   return (
     <aside
-      className={`fixed top-0 left-0 h-screen bg-slate-800 text-gray-200 border-r border-slate-700 flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`} //
-    >
+       className={`fixed top-0 left-0 h-screen bg-slate-800 ... ${isCollapsed ? 'w-20' : 'w-64'} hidden lg:flex`}>
       {/* Header (unchanged) */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-700 h-16"> {/* */}
-        {!isCollapsed && <span className="text-xl font-bold text-white">✿More</span>} {/* */}
+      <div className="flex items-center justify-between p-4 border-b border-slate-700 h-16"> 
+        {!isCollapsed && <span className="text-xl font-bold text-white">✿More</span>} 
         <button
           onClick={onToggle}
-          className="p-2 rounded-md hover:bg-slate-700 text-gray-400 hover:text-white" //
+          className="p-2 rounded-md hover:bg-slate-700 text-gray-400 hover:text-white" 
         >
-          {isCollapsed ? <FaChevronRight /> : <FaChevronLeft />} {/* */}
+          {isCollapsed ? <FaChevronRight /> : <FaChevronLeft />} 
         </button>
       </div>
 
@@ -32,20 +31,16 @@ const Sidebar = ({ links, isCollapsed, onToggle }) => {
             <li key={link.to}>
               <NavLink
                 to={link.to}
-                // --- MODIFIED: Added hoverClasses ---
                 className={({ isActive }) =>
-                  `${baseLinkClasses} ${isActive ? activeLinkClasses : hoverClasses}` // Apply hover styles to non-active links
+                  `${baseLinkClasses} ${isActive ? activeLinkClasses : hoverClasses}` 
                 }
                 title={isCollapsed ? link.label : ''} //
               >
                 {({ isActive }) => (
                   <>
-                    {/* --- MODIFIED: Added hover effect for icon color --- */}
-                    {/* The group class allows the hover on the parent NavLink to affect the icon */}
-                    <div className={`text-lg ${isActive ? 'text-indigo-400' : 'text-gray-400 group-hover:text-indigo-400'}`}> {/* Change icon color on hover */} {/* */}
+                    <div className={`text-lg ${isActive ? 'text-indigo-400' : 'text-gray-400 group-hover:text-indigo-400'}`}> 
                       {link.icon}
                     </div>
-                     {/* Text color changes automatically due to hoverClasses */}
                     {!isCollapsed && <span className="ml-4">{link.label}</span>} {/* */}
                   </>
                 )}
