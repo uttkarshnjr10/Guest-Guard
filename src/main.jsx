@@ -16,9 +16,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
     <AuthProvider>
     <Elements stripe={stripePromise}>
-    <App />
+        <App />
     </Elements>
     </AuthProvider>
     </BrowserRouter>
-    
- );
+    );
